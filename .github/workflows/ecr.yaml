@@ -8,4 +8,5 @@ jobs:
         uses: unfor19/install-aws-cli-action@v1
       - name: Docker login
         run: |
-          aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password ${{secrets.AWS_ECR}}
+          aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${{secrets.AWS_ECR}}
+        
