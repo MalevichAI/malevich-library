@@ -4,10 +4,11 @@ jobs:
   build_push:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4.1.0
       - name: Install AWS CLI
         uses: unfor19/install-aws-cli-action@v1
       - name: Docker login
-        id: login
         run: |
           AWS_ACCESS_KEY_ID=${{secrets.AWS_ACCESS_KEY_ID}} \
           AWS_SECRET_ACCESS_KEY=${{secrets.AWS_SECRET_ACCESS_KEY}} \
