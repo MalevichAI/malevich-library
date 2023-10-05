@@ -30,7 +30,7 @@ jobs:
             docker build -t ${{secrets.AWS_ECR}}/malevich/$dir:${{github.sha}} \
                           -t ${{secrets.AWS_ECR}}/malevich/$dir:latest $dir
             echo "Trying to create repo"
-            aws ecr-public create-repository --repository-name malevich/$dir > /dev/null
+            aws ecr describe-repositories --repository-names malevich/$dir || aws ecr create-repository --repository-name malevich/$dir
             echo "Pushing to AWS ECR"
             docker push --all-tags ${{secrets.AWS_ECR}}/malevich/$dir
            fi
