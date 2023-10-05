@@ -26,7 +26,7 @@ jobs:
            if [[ -e $dir ]] && [[ $dir != .* ]];
            then
             echo "Make image from $dir/Dockerfile"
-            docker build -t $AWS_ECR/malevich/$dir:${{GITHUB_SHA}} \
+            docker build -t $AWS_ECR/malevich/$dir:${{github.sha}} \
                           -t $AWS_ECR/malevich/$dir:latest $dir
             echo "Trying to create repo"
             aws ecr-public create-repository --repository-name malevich/$dir > /dev/null
