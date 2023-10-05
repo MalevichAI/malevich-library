@@ -17,7 +17,7 @@ jobs:
       - name: Build and push apps
         run: |
           ls -a 
-          dirs=$(git log --name-only --diff-filter=d -4 | grep "/" | cut -d '/' -f1 | sort -u)
+          dirs=$(git log --name-only --diff-filter=d -1 | grep "/" | cut -d '/' -f1 | sort -u)
           if [[ ${dirs[0]} == "" ]];
           then
            echo "No changed directories, exiting..."
@@ -28,12 +28,12 @@ jobs:
            if [[ -e $dir ]] && [[ $dir != .* ]];
            then
             echo "Make image from $dir/Dockerfile"
-            docker build -t $AWS_ECR/malevich/$dir:${{github.sha}} \
-                          -t $AWS_ECR/malevich/$dir:latest $dir
+            docker build -t ${{secrets.AWS_ECR}}/malevich/$dir:${{github.sha}} \
+                          -t ${{secrets.AWS_ECR}}/malevich/$dir:latest $dir
             echo "Trying to create repo"
             aws ecr-public create-repository --repository-name malevich/$dir > /dev/null
             echo "Pushing to AWS ECR"
-            docker push --all-tags $AWS_ECR/malevich/$dir
+            docker push --all-tags ${{secrets.AWS_ECR}}/malevich/$dir
            fi
           done
 
