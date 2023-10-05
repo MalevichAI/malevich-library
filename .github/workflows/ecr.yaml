@@ -26,7 +26,7 @@ jobs:
           fi
           for dir in $dirs
           do
-           if [[ -e $dir ]] && [[ $dir != .* ]];
+           if [[ -e $dir ]] && [[ $dir != .* ]] && [[ -f $dir/Dockerfile ]];
            then
             echo "Make image from $dir/Dockerfile"
             docker build -t ${{secrets.AWS_ECR}}/malevich/$dir:${{github.sha}} \
