@@ -9,11 +9,32 @@ jobs:
       - name: Docker login
         id: login
         run: |
-          AWS_ACCESS_KEY_ID=${{secrets.AWS_ACCESS_KEY_ID}} AWS_SECRET_ACCESS_KEY=${{secrets.AWS_SECRET_ACCESS_KEY}} aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${{secrets.AWS_ECR}}
+          AWS_ACCESS_KEY_ID=${{secrets.AWS_ACCESS_KEY_ID}} \
+          AWS_SECRET_ACCESS_KEY=${{secrets.AWS_SECRET_ACCESS_KEY}} \
+          aws ecr-public get-login-password --region us-east-1 | \
+          docker login --username AWS --password-stdin public.ecr.aws
       - name: Build and push apps
         run: |
-          chmod 777 build.sh
-          ./build.sh
+          dirs=$(git log --name-only --diff-filter=d -1 | grep "/" | cut -d '/' -f1 | sor>
+          if [[ ${dirs[0]} == "" ]];
+          then
+           echo "No changed directories, exiting..."
+           exit 0
+          fi
+          for dir in $dirs
+          do
+           if [[ -e $dir ]] && [[ $dir != .* ]];
+           then
+            echo "Make image from $dir/Dockerfile"
+            docker build -t $AWS_ECR/malevich/$dir:${{GITHUB_SHA}} \
+                          -t $AWS_ECR/malevich/$dir:latest $dir
+            echo "Trying to create repo"
+            aws ecr-public create-repository --repository-name malevich/$dir > /dev/null
+            echo "Pushing to AWS ECR"
+            docker push --all-tags $AWS_ECR/malevich/$dir
+           fi
+          done
+
       - name: Docker logout
         if: always()
         run: docker logout
