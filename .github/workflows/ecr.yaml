@@ -1,0 +1,11 @@
+name: ECR build push
+on: [push, workflow_dispatch]
+jobs:
+  build_push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install AWS CLI
+        uses: unfor19/install-aws-cli-action@v1
+      - name: Docker login
+        run: |
+          aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password ${{secrets.AWS_ECR}}
