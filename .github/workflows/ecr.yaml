@@ -20,7 +20,7 @@ jobs:
         run: |
           git log --name-only --diff-filter=d -1
           dirs=$(git log --name-only --diff-filter=d -1 | grep "/" | cut -d '/' -f1 | sort -u)
-          echo "Changed folders: ${dirs[@]}
+          echo "Changed folders: ${dirs[@]}"
           echo "Changed directories: $dirs"
           if [[ ${dirs[0]} == "" ]];
           then
