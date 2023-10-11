@@ -1,9 +1,5 @@
 name: ECR build push
-on: 
-  push:
-    branches: 
-      - ramprin-ecr
-  workflow_dispatch:
+on: [ push, workflow_dispatch ]
 jobs:
   build_push:
     runs-on: ubuntu-latest
