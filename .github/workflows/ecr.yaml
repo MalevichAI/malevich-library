@@ -8,37 +8,12 @@ jobs:
         uses: actions/checkout@v4.1.0
         with: 
           fetch-depth: 0
-      - name: Install AWS CLI
-        uses: unfor19/install-aws-cli-action@v1
-      - name: Set AWS cfg
-        run: |
-          aws configure set aws_access_key_id ${{secrets.AWS_ACCESS_KEY_ID}}
-          aws configure set aws_secret_access_key ${{secrets.AWS_SECRET_ACCESS_KEY}}
-      - name: Docker login
-        run: |
-          aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
-      - name: Build and push apps
-        run: |
-          dirs=$(git log --name-only --diff-filter=d -1 | grep "/" | cut -d '/' -f1 | sort -u)
-          if [[ ${dirs[0]} == "" ]];
-          then
-           echo "No changed directories, exiting..."
-           exit 0
-          fi
-          for dir in $dirs
-          do
-           if [[ -e $dir ]] && [[ $dir != .* ]] && [[ -f $dir/Dockerfile ]];
-           then
-            echo "Make image from $dir/Dockerfile"
-            docker build -t ${{secrets.AWS_ECR}}/malevich/$dir:${{github.sha}} \
-                          -t ${{secrets.AWS_ECR}}/malevich/$dir:latest $dir
-            echo "Trying to create repo"
-            aws ecr-public describe-repositories --repository-names malevich/$dir --region us-east-1 || aws ecr-public create-repository --repository-name malevich/$dir --region us-east-1
-            echo "Pushing to AWS ECR"
-            docker push --all-tags ${{secrets.AWS_ECR}}/malevich/$dir
-           fi
-          done
-
-      - name: Docker logout
-        if: always()
-        run: docker logout
+      - name: Malevich Actions
+        uses: RamPrin/push_folders@v0.1.0
+        with:
+          registry: "ecr"
+          registry_url: "public.ecr.aws"
+          registry_id: "u6e1k0c7/malevich"
+          username: "${{secrets.ACCESS_KEY_ID}}"
+          password: "${{secrets.SECRET_ACCESS_KEY}}"
+        
