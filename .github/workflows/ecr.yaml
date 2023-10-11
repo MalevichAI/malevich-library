@@ -17,7 +17,7 @@ jobs:
         with:
           registry: "ecr"
           registry_url: "public.ecr.aws"
-          registry_id: "u6e1k0c7/malevich"
+          registry_id: "u6e1k0c7"
           username: ${{ secrets.AWS_ACCESS_KEY_ID }}
           password: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         
