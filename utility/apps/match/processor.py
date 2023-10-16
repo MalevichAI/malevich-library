@@ -5,10 +5,10 @@ This is an implementation of the 1.2 proposal as explained in the following docu
 https://www.craft.me/s/NmXjF6pbB5m0BG (might require logging in with email...)
 """
 
-import pandas as pd
 import re
 
-from jls import jls, Context, DF
+import pandas as pd
+from jls import DF, Context, jls
 
 __PATTERN_MATCH_ID = 'pattern_match_processor'
 __MP_FIELDS = ['pattern', 'join_char']

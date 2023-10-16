@@ -1,4 +1,4 @@
-from jls import jls, Context
+from jls import Context, jls
 
 
 @jls.input_true(id='download_from_collection', collection_from='download_filename_s3')

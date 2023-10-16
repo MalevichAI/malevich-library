@@ -1,46 +1,50 @@
-from jls import jls, Context
 import pandas as pd
+from jls import Context, jls
 
 
 @jls.processor(id='locs')
 def locs(df, context: Context):
-    """(Loc)ate (s)tatically extracts a subset of the dataframe
+    """ Locate Statically - Extracts a subset of the dataframe
 
-    This function highly depends on the app configuration and 
-    thus claimed to be static. It is used to extract a subset of
-    the dataframe for further processing.
+    Input:
+        A DataFrame to be processed.
+
+    Configuration:
+        The app configuration should contain at least one of the following fields:
+
+        - column (str): The column to be extracted.
+        - columns (list[str]): The columns to be extracted.
+        - column_idx (int): The column index to be extracted.
+        - column_idxs (list[int]): The column indexes to be extracted.
+        - row (int): The row to be extracted.
+        - rows (list[int]): The rows to be extracted.
+        - row_idx (int): The row index to be extracted.
+        - row_idxs (list[int]): The row indexes to be extracted.
+
+        Multiple fields may be provided and in such case,
+        the function will extract the intersection of the fields.
+
+    Notes:
+        At least one of the above fields should be provided for the function to work.
+
+        Moreover, the dataframe is processed in column first then row order.
+        Queries are executed from the most specific to the least within each category.
+        If both specific and general conditions are given, the function prioritizes
+        the specific ones to maintain consistency.  
 
     Args:
-        df (pd.DataFrame): The dataframe to be processed
-        context (Context): 
-            The context object. 
-
-            The app_cfg attribute of the context object should 
-            contain at least one of the following fields:
-                - column: str - The column to be extracted
-                - columns: list[str] - The columns to be extracted
-                - column_idx: int - The column index to be extracted
-                - column_idxs: list[int] - The column indexes to be extracted
-                - row: int - The row to be extracted
-                - rows: list[int] - The rows to be extracted
-                - row_idx: int - The row index to be extracted
-                - row_idxs: list[int] - The row indexes to be extracted
-
-            In case of multiple fields are provided, the function
-            will extract the intersection of the fields. 
-
+        df (pd.DataFrame): The DataFrame to be processed.
 
     Returns:
-        pd.DataFrame: The extracted dataframe
-            
+        The extracted subset from the DataFrame.
     """
     should_have = ['column', 'columns', 'column_idx', 'column_idxs',
                      'row', 'rows', 'row_idx', 'row_idxs']
-    
-    
+
+
     if not any([field in context.app_cfg for field in should_have]):
         raise ValueError(f'At least one of the following fields should be provided: {should_have}')
-    
+
 
     # Extract the fields from the context object
     # to make the code more readable and avoid
@@ -67,14 +71,14 @@ def locs(df, context: Context):
     if column_idx is not None and len(result.columns) > column_idx:
         result = pd.DataFrame(result.iloc[:, column_idx])
     elif column_idxs is not None:
-        # Multiple indices are only processed if 
-        # column_id is not provided to keep 
+        # Multiple indices are only processed if
+        # column_id is not provided to keep
         # indices consistent
 
         # Filter only those indices that are in the dataframe
         # to tolerate missing columns
         column_idxs = [
-            idx for idx in column_idxs 
+            idx for idx in column_idxs
             if len(result.columns) > idx
         ]
 
@@ -83,25 +87,25 @@ def locs(df, context: Context):
 
     # ________________________________________________
 
-        
+
     if column is not None and column in result.columns:
         result = pd.DataFrame(result[column])
 
     if columns is not None:
-        # Multiple columns are only processed if 
-        # column is not provided to keep 
+        # Multiple columns are only processed if
+        # column is not provided to keep
         # indices consistent
 
         # Filter only those columns that are in the dataframe
         # to tolerate missing columns
         columns = [
-            col for col in columns 
+            col for col in columns
             if col in result.columns
         ]
 
         result = pd.DataFrame(result[columns])
 
-    
+
     # ________________________________________________
 
     # We continue with row id as it is the most specific
@@ -110,14 +114,14 @@ def locs(df, context: Context):
     if row_idx is not None and len(result) > row_idx:
         result = pd.DataFrame(result.iloc[[row_idx], :])
     elif row_idxs is not None:
-        # Multiple indices are only processed if 
-        # row_id is not provided to keep 
+        # Multiple indices are only processed if
+        # row_id is not provided to keep
         # indices consistent
 
         # Filter only those indices that are in the dataframe
         # to tolerate missing rows
         row_idxs = [
-            idx for idx in row_idxs 
+            idx for idx in row_idxs
             if len(result) > idx
         ]
 
@@ -130,14 +134,14 @@ def locs(df, context: Context):
         result = pd.DataFrame(result.loc[[row]])
 
     if rows is not None:
-        # Multiple rows are only processed if 
-        # row is not provided to keep 
+        # Multiple rows are only processed if
+        # row is not provided to keep
         # indices consistent
 
         # Filter only those rows that are in the dataframe
         # to tolerate missing rows
         rows = [
-            row for row in rows 
+            row for row in rows
             if row in result.index
         ]
 

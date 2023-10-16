@@ -1,18 +1,36 @@
-from jls import jls, Context, DF
 from typing import Any
+
+from jls import DF, Context, jls
 
 
 @jls.processor()
-def rename_column(df: DF[Any], context: Context):
-    """Rename column in dataframe.
-    
-    To control the behavior of the processor, you should put mapping 
-    into a context with original names as keys and desired names as values.
-    
-    For example:
-        context.app_cfg = {
-            "old_name": "new_name",
-            "another_old_name": "another_new_name"
+def rename(df: DF[Any], context: Context):
+    """Renames columns in a dataframe.
+
+    Input:
+        - DataFrame with the columns to be renamed.
+
+    Configuration:
+        - Provides mapping of old column names to their new names.
+
+        For example, if the dataframe has columns 'a', 'b', 'c' and we want to rename
+        'a' to 'A', 'b' to 'B', and 'c' to 'C', the configuration should be:
+
+        {
+            'a': 'A',
+            'b': 'B',
+            'c': 'C'
         }
+
+    Details:
+        This processor renames columns in the dataframe based on provided mappings.
+        User needs to provide a dictionary in the configuration hat specifies old
+        column names as keys and new column names as values.
+
+    Args:
+        df: DataFrame in which to rename columns.
+
+    Returns:
+        DataFrame with renamed columns.
     """
     return df.rename(columns=context.app_cfg)

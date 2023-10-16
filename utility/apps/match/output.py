@@ -1,5 +1,6 @@
-from jls import jls, DF
 from typing import Any
+
+from jls import DF, jls
 
 
 @jls.output(collection_name='saved_output')
