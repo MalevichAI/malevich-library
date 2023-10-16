@@ -1,6 +1,6 @@
-from jls import jls
+from malevich.square import input_true
 
 
-@jls.input_true(collection_from='match_pattern_collection')
+@input_true(collection_from='match_pattern_collection')
 def match_pattern_input():
     pass

@@ -1,7 +1,7 @@
-from jls import DF, Any, Context, jls
+from malevich.square import DF, Any, Context, processor
 
 
-@jls.processor()
+@processor()
 def add_column(df: DF[Any], context: Context):
     """Inserts a new column into a dataframe.
 

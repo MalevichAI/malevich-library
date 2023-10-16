@@ -1,7 +1,7 @@
 from typing import Any, List
 
 import pandas as pd
-from jls import DF, DFS, Context, M, jls
+from malevich.square import DF, DFS, Context, M, processor
 
 
 def merge_dfs(dfs: List[DF[Any]], context: Context):
@@ -43,7 +43,7 @@ def merge_dfs(dfs: List[DF[Any]], context: Context):
     return result
 
 
-@jls.processor()
+@processor()
 def merge(dfs: DFS[M[Any]], context: Context):
     """Merges multiple dataframes into one
 
@@ -107,7 +107,7 @@ def merge(dfs: DFS[M[Any]], context: Context):
 
 
 
-@jls.processor()
+@processor()
 def merge_two(df_1: DF[Any], df_2: DF[Any], context: Context):
     """Merges multiple dataframes into one
 
@@ -171,7 +171,7 @@ def merge_two(df_1: DF[Any], df_2: DF[Any], context: Context):
     return merge_dfs([(df_1,), (df_2,)], context)
 
 
-@jls.processor()
+@processor()
 def merge_three(df_1: DF[Any], df_2: DF[Any], df_3: DF[Any], context: Context):
     """Merges multiple dataframes into one
 

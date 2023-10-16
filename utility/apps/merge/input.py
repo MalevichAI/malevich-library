@@ -1,6 +1,6 @@
-from jls import jls
+from malevich.square import input_true
 
 
-@jls.input_true(extra_collection_from='merge_2_from_extra')
+@input_true(extra_collection_from='merge_2_from_extra')
 def merge_2_from_extra():
     pass

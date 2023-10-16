@@ -2,22 +2,22 @@ import os
 from typing import Any
 
 import pandas as pd
-from jls import APP_DIR, DF, DFS, Context, M, S3Helper, jls
+from malevich.square import APP_DIR, DF, DFS, Context, M, S3Helper, processor, scheme
 from pydantic import BaseModel
 
 
-@jls.scheme()
+@scheme()
 class FilenameS3Key(BaseModel):
     filename: str
     s3key: str
 
 
-@jls.scheme()
+@scheme()
 class Filename(BaseModel):
     filename: str
 
 
-@jls.processor()
+@processor()
 def s3_save(dfs: DFS[M[Any]], context: Context):
     """Saves dataframes to S3.
 
@@ -128,7 +128,7 @@ def s3_save(dfs: DFS[M[Any]], context: Context):
     return dfs
 
 
-@jls.processor()
+@processor()
 def s3_save_files_auto(files: DF['Filename'], context: Context):
     """Saves files from local file system to S3 preserving the original names.
 
@@ -195,7 +195,7 @@ def s3_save_files_auto(files: DF['Filename'], context: Context):
     return files
 
 
-@jls.processor()
+@processor()
 def s3_save_files(files: DF['FilenameS3Key'], context: Context):
     """Saves files from local file system to S3.
 
@@ -265,7 +265,7 @@ def s3_save_files(files: DF['FilenameS3Key'], context: Context):
     return files
 
 
-@jls.processor()
+@processor()
 def s3_download_files(files: DF['FilenameS3Key'], context: Context):
     """Downloads files from S3 to local file system.
 

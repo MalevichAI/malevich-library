@@ -1,10 +1,10 @@
 import re
 from typing import Any
 
-from jls import DFS, Context, M, jls
+from malevich.square import DFS, Context, M, processor
 
 
-@jls.processor(id='subset')
+@processor(id='subset')
 def subset(dfs: DFS[M[Any]], context: Context):
     """Select a subset of dataframes from the list of dataframes.
 

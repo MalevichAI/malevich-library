@@ -1,9 +1,9 @@
 from typing import Any
 
-from jls import DF, Context, jls
+from malevich.square import DF, Context, processor
 
 
-@jls.processor()
+@processor()
 def rename(df: DF[Any], context: Context):
     """Renames columns in a dataframe.
 

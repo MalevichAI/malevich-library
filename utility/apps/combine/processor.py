@@ -5,7 +5,7 @@ the outputs of different applications saved as Dataframe objects.
 """
 
 import pandas as pd
-from jls import Context, jls
+from malevich.square import Context, processor
 
 # This list represents the expected arguments in the configuration of `combine_vertical` 
 # processor
@@ -17,7 +17,7 @@ __COMBINE_V_ID = 'combine_vertical_id'
 __DEFAULT_DEFAULT_NAME = 'col'
 
 
-@jls.processor(id=__COMBINE_V_ID)
+@processor(id=__COMBINE_V_ID)
 def combine_vertical(
     dataframe1: pd.DataFrame, dataframe2: pd.DataFrame, context: Context):
     """Concatenates two dataframes vertically.

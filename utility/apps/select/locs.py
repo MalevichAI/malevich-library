@@ -1,8 +1,8 @@
 import pandas as pd
-from jls import Context, jls
+from malevich.square import Context, processor
 
 
-@jls.processor(id='locs')
+@processor(id='locs')
 def locs(df, context: Context):
     """ Locate Statically - Extracts a subset of the dataframe
 

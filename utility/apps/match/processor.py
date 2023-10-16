@@ -8,7 +8,7 @@ https://www.craft.me/s/NmXjF6pbB5m0BG (might require logging in with email...)
 import re
 
 import pandas as pd
-from jls import DF, Context, jls
+from malevich.square import DF, Context, processor
 
 __PATTERN_MATCH_ID = 'pattern_match_processor'
 __MP_FIELDS = ['pattern', 'join_char']
@@ -24,7 +24,7 @@ def _find_all_matches(text: str,
     return join_str.join(matches)
 
 
-@jls.processor(id=__PATTERN_MATCH_ID)
+@processor(id=__PATTERN_MATCH_ID)
 def match_pattern(dataframe: DF, context: Context) -> pd.DataFrame:
     """
     This processor finds all the fragments that match a certain pattern within each cell.
