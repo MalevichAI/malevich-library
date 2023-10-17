@@ -7,5 +7,3 @@ media:
     container_ref: public.ecr.aws/u6e1k0c7/media:latest
     container_user: null
     container_token: null
-  version:
-    readable_name: "0.0.1"
