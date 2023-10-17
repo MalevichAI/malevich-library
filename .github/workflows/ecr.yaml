@@ -9,7 +9,7 @@ jobs:
         with: 
           fetch-depth: 0
       - name: Malevich Actions
-        uses: RamPrin/push_folders@v0.1.0
+        uses: MalevichAI/auto-ci@v0.1.0
         with:
           registry: "ecr"
           registry_url: "public.ecr.aws"
