@@ -6,7 +6,7 @@ from malevich.square import DFS, Context, M, processor
 
 @processor(id='subset')
 def subset(dfs: DFS[M[Any]], context: Context):
-    """Select a subset of dataframes from the list of dataframes.
+    r"""Select a subset of dataframes from the list of dataframes.
 
     Input:
         A number of dataframes.
