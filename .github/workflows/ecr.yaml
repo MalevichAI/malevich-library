@@ -1,8 +1,13 @@
 name: ECR build push
-on: [ push, workflow_dispatch ]
+on:  
+  push:
+    branches:
+      - main
+  workflow_dispatch:
 jobs:
   build_push:
     runs-on: ubuntu-latest
+    if: ${{ github.ref_type == 'branch' }} && ${{ github.ref == 'refs/heads/main' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4.1.0
