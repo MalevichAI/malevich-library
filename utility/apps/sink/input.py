@@ -1,6 +1,6 @@
-from jls import jls
+from malevich.square import input_true
 
 
-@jls.input_true(extra_collection_from="sink2_extra_collection")
+@input_true(extra_collection_from="sink2_extra_collection")
 def sink2_from_extra():
     pass

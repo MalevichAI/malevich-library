@@ -2,22 +2,22 @@ import os
 from typing import Any
 
 import pandas as pd
-from jls import APP_DIR, DF, DFS, Context, M, S3Helper, jls
+from malevich.square import APP_DIR, DF, DFS, Context, M, S3Helper, processor, scheme
 from pydantic import BaseModel
 
 
-@jls.scheme()
+@scheme()
 class FilenameS3Key(BaseModel):
     filename: str
     s3key: str
 
 
-@jls.scheme()
+@scheme()
 class Filename(BaseModel):
     filename: str
 
 
-@jls.processor()
+@processor()
 def s3_save(dfs: DFS[M[Any]], context: Context):
     """Saves dataframes to S3.
 
@@ -128,7 +128,7 @@ def s3_save(dfs: DFS[M[Any]], context: Context):
     return dfs
 
 
-@jls.processor()
+@processor()
 def s3_save_files_auto(files: DF['Filename'], context: Context):
     """Saves files from local file system to S3 preserving the original names.
 
@@ -182,11 +182,14 @@ def s3_save_files_auto(files: DF['Filename'], context: Context):
     s3_helper: S3Helper = context.app_cfg['s3_helper']
     s3_keys = []
     for file in files['filename']:
-        extra_str = f'{context.app_cfg["extra_str"]}/' if 'extra_str' in context.app_cfg else ''
-        run_id = f'{context.run_id}/' if context.app_cfg.get('append_run_id', False) else ''
+        extra_str = \
+            f'{context.app_cfg["extra_str"]}/' if 'extra_str' in context.app_cfg else ''
+        run_id = \
+            f'{context.run_id}/' if context.app_cfg.get('append_run_id', False) else ''
         # Get share path with default prefix (APP_DIR)
         key = f'{extra_str}{run_id}{file}'
-        # key = f'{context.run_id}/{file}' if context.app_cfg.get('append_run_id', False) else file
+        # key = f'{context.run_id}/{file}'
+        # if context.app_cfg.get('append_run_id', False) else file
         with open(context.get_share_path(file), 'rb') as f:
             s3_helper.save_object(f, key=key)
             s3_keys.append(key)
@@ -195,7 +198,7 @@ def s3_save_files_auto(files: DF['Filename'], context: Context):
     return files
 
 
-@jls.processor()
+@processor()
 def s3_save_files(files: DF['FilenameS3Key'], context: Context):
     """Saves files from local file system to S3.
 
@@ -265,15 +268,15 @@ def s3_save_files(files: DF['FilenameS3Key'], context: Context):
     return files
 
 
-@jls.processor()
+@processor()
 def s3_download_files(files: DF['FilenameS3Key'], context: Context):
     """Downloads files from S3 to local file system.
 
     Input:
         files:
             A dataframe with two columns: 'filename' and 's3key'. 'filename' contains
-            the names of the files to be downloaded. 's3key' contains the S3 key for each
-            file.
+            the names of the files to be downloaded. 's3key'
+            contains the S3 key for each file.
 
     Configuration:
 

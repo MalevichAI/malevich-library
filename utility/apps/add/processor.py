@@ -1,7 +1,7 @@
-from jls import DF, Any, Context, jls
+from malevich.square import DF, Any, Context, processor
 
 
-@jls.processor()
+@processor()
 def add_column(df: DF[Any], context: Context):
     """Inserts a new column into a dataframe.
 
@@ -16,11 +16,11 @@ def add_column(df: DF[Any], context: Context):
         The input dataframe with the new column inserted at the specified position.
 
     Details:
-        The function takes in a dataframe as an input and adds a new column 
-        at the specified position. The new column has a constant value provided 
+        The function takes in a dataframe as an input and adds a new column
+        at the specified position. The new column has a constant value provided
         by the user in the application configuration.
 
-        If the position is negative, the new column will be inserted from the 
+        If the position is negative, the new column will be inserted from the
         end of the dataframe. For example, a position of -1 will insert the
         new column as the last column in the dataframe.
 

@@ -1,0 +1,9 @@
+ultralytics:
+  name: Ultralytics
+  description: Integrates with Ultralytics platform providing SAM and YOLOv8 models
+  visibility:
+    - public
+  app:
+    container_ref: public.ecr.aws/u6e1k0c7/ultralytics:latest
+    container_user: null
+    container_token: null

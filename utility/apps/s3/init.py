@@ -1,8 +1,8 @@
 import boto3
-from jls import Context, S3Helper, jls
+from malevich.square import Context, S3Helper, init
 
 
-@jls.init()
+@init()
 def connect_to_s3(context: Context):
     if not all([
         'aws_access_key_id' in context.app_cfg,
