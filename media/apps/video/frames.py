@@ -1,41 +1,43 @@
 import os
+
 import cv2
-from jls import jls, Context, DF, APP_DIR
 import pandas as pd
+from malevich.square import APP_DIR, DF, Context, processor, scheme
 from pydantic import BaseModel
 
-@jls.scheme()
+
+@scheme()
 class Videos(BaseModel):
     video: str
 
 
-@jls.processor()
+@processor()
 def split_on_frames(videos: DF['Videos'], context: Context):
     """Splits videos on frames
-    
+
     Input:
         An arbitrary dataframe with the following columns:
             - videos: the path to the input video in the shared storage
-            
+
     Output:
         The same dataframe with the following columns:
             - videos: the path to the output video in the shared storage
             - frames: the path to the output frames in the shared storage
-            
+
     Details:
-        The video is split into frames using OpenCV. By default, produced frames 
-        are saved as PNG images in the folder with the same name as 
-        the video file with `.d `extension. 
-        
-        For example, the frames of the video /videos/video.mp4 will be 
+        The video is split into frames using OpenCV. By default, produced frames
+        are saved as PNG images in the folder with the same name as
+        the video file with `.d `extension.
+
+        For example, the frames of the video /videos/video.mp4 will be
         saved in the folder /videos/video.mp4.d
-        
+
         All the columns of the input dataframe are copied to the output dataframe.
         The value in the that columns are copied as is and duplicated for each
         frame of the video.
-        
+
     Configuration:
-        - fps (int or float) [optional, default is 1]: 
+        - fps (int or float) [optional, default is 1]:
             Frames per second. If float is used then it is
             used as a percentage of the original fps.
 
@@ -50,9 +52,9 @@ def split_on_frames(videos: DF['Videos'], context: Context):
             - *: the same columns as in the input dataframe
     """
     # Convert the 'video' column of the input dataframe to a list
-    try: 
+    try:
         video_list = videos.video.tolist()
-    except AttributeError: 
+    except AttributeError:
         return AttributeError('Input dataframe should have a column "video"')
 
     # Get the value of 'fps' from the application configuration dictionary
@@ -60,7 +62,7 @@ def split_on_frames(videos: DF['Videos'], context: Context):
 
     # Check if the value of 'fps' is either an integer or a float
     if not isinstance(config_fps, (int, float)):
-        raise TypeError(f'fps should be int or float, but got {type(config_fps)}')    
+        raise TypeError(f'fps should be int or float, but got {type(config_fps)}')
 
     # Initialize an empty list called 'outputs'
     outputs = []
@@ -75,7 +77,7 @@ def split_on_frames(videos: DF['Videos'], context: Context):
 
         # Check if the value of 'fps' is a float
         if isinstance(config_fps, float):
-            # Calculate the new fps value by multiplying the original fps value of the 
+            # Calculate the new fps value by multiplying the original fps value of the
             # video with the value of 'fps'
             fps = cap.get(cv2.CAP_PROP_FPS) * config_fps
         else:
@@ -104,11 +106,11 @@ def split_on_frames(videos: DF['Videos'], context: Context):
                 shared_path = os.path.join(video + '.d', frame_name)
                 cv2.imwrite(frame_path, frame)
 
-                # Share the path of the saved frame using the 'share' method of the 
+                # Share the path of the saved frame using the 'share' method of the
                 # 'context' object
                 context.share(shared_path)
 
-                # Append a tuple containing the index of the video and the path of the 
+                # Append a tuple containing the index of the video and the path of the
                 # saved frame to the 'outputs' list
                 outputs.append(
                     (i, shared_path)
@@ -117,12 +119,12 @@ def split_on_frames(videos: DF['Videos'], context: Context):
                 j += 1
         # Release the 'cv2.VideoCapture' object
         cap.release()
-        
-    # Create a new dataframe called 'output_df' with columns 'video', 'frame', 
+
+    # Create a new dataframe called 'output_df' with columns 'video', 'frame',
     # and any other columns present in the 'videos' dataframe
     output_df = pd.DataFrame(columns=[*videos.columns, 'frame'])
 
-    # Iterate over the 'outputs' list and create a new row in the 'output_df' 
+    # Iterate over the 'outputs' list and create a new row in the 'output_df'
     # dataframe for each tuple in the list
     for i, frame in outputs:
         output_df = pd.concat([

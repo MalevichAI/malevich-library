@@ -27,7 +27,9 @@ def _find_all_matches(text: str,
 @processor(id=__PATTERN_MATCH_ID)
 def match_pattern(dataframe: DF, context: Context) -> pd.DataFrame:
     """
-    This processor finds all the fragments that match a certain pattern within each cell.
+    This processor finds all the fragments
+    that match a certain pattern within each cell.
+
     They are later joined with a certain symbol and saved in an analogue cell
 
     Args:
@@ -44,9 +46,11 @@ def match_pattern(dataframe: DF, context: Context) -> pd.DataFrame:
     join_char = config.get(__MP_FIELDS[1], __DEFAULT_JOIN_CHAR)
 
     # first determine which types can be inferred as string types
-    str_columns = [c for c in dataframe.columns if pd.api.types.is_string_dtype(dataframe[c])]
+    str_columns = [
+        c for c in dataframe.columns if pd.api.types.is_string_dtype(dataframe[c])
+    ]
 
-    def match_pattern_map_function(row):
+    def match_pattern_map_function(row):  # noqa: ANN202, ANN001
         for c in str_columns:
             row[c] = _find_all_matches(text=row[c],
                                        pattern=pattern,

@@ -182,11 +182,14 @@ def s3_save_files_auto(files: DF['Filename'], context: Context):
     s3_helper: S3Helper = context.app_cfg['s3_helper']
     s3_keys = []
     for file in files['filename']:
-        extra_str = f'{context.app_cfg["extra_str"]}/' if 'extra_str' in context.app_cfg else ''
-        run_id = f'{context.run_id}/' if context.app_cfg.get('append_run_id', False) else ''
+        extra_str = \
+            f'{context.app_cfg["extra_str"]}/' if 'extra_str' in context.app_cfg else ''
+        run_id = \
+            f'{context.run_id}/' if context.app_cfg.get('append_run_id', False) else ''
         # Get share path with default prefix (APP_DIR)
         key = f'{extra_str}{run_id}{file}'
-        # key = f'{context.run_id}/{file}' if context.app_cfg.get('append_run_id', False) else file
+        # key = f'{context.run_id}/{file}'
+        # if context.app_cfg.get('append_run_id', False) else file
         with open(context.get_share_path(file), 'rb') as f:
             s3_helper.save_object(f, key=key)
             s3_keys.append(key)
@@ -272,8 +275,8 @@ def s3_download_files(files: DF['FilenameS3Key'], context: Context):
     Input:
         files:
             A dataframe with two columns: 'filename' and 's3key'. 'filename' contains
-            the names of the files to be downloaded. 's3key' contains the S3 key for each
-            file.
+            the names of the files to be downloaded. 's3key'
+            contains the S3 key for each file.
 
     Configuration:
 

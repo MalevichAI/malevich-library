@@ -1,9 +1,11 @@
+from typing import Any
+
 import pandas as pd
-from malevich.square import Context, processor
+from malevich.square import DF, Context, processor
 
 
 @processor(id='locs')
-def locs(df, context: Context):
+def locs(df: DF[Any], context: Context):
     """ Locate Statically - Extracts a subset of the dataframe
 
     Input:
@@ -30,7 +32,7 @@ def locs(df, context: Context):
         Moreover, the dataframe is processed in column first then row order.
         Queries are executed from the most specific to the least within each category.
         If both specific and general conditions are given, the function prioritizes
-        the specific ones to maintain consistency.  
+        the specific ones to maintain consistency.
 
     Args:
         df (pd.DataFrame): The DataFrame to be processed.
@@ -43,7 +45,9 @@ def locs(df, context: Context):
 
 
     if not any([field in context.app_cfg for field in should_have]):
-        raise ValueError(f'At least one of the following fields should be provided: {should_have}')
+        raise ValueError(
+            f'At least one of the following fields should be provided: {should_have}'
+        )
 
 
     # Extract the fields from the context object
