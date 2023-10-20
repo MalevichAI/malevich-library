@@ -8,12 +8,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4.1.0
-        with:
-          fetch-depth: 0
       - name: Malevich Actions
         uses: MalevichAI/auto-ci@v0.2.0
         with:
-          directories: '*/'
           registry: ${{ secrets.REGISTRY_TYPE }}
           registry_url: ${{ secrets.REGISTRY_URL }}
           registry_id: ${{ secrets.REGISTRY_ID }}
