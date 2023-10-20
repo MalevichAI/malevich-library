@@ -7,3 +7,4 @@ ultralytics:
     container_ref: public.ecr.aws/u6e1k0c7/ultralytics:latest
     container_user: null
     container_token: null
+   
