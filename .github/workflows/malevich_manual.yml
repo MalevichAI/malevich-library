@@ -1,4 +1,4 @@
-name: Malevich Auto CI at main
+name: Manual Malevich Auto CI at main
 on:
   workflow_dispatch:
 jobs:
