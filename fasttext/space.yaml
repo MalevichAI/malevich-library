@@ -1,0 +1,9 @@
+fasttext:
+  name: Facebook fastText
+  description: Integration with Facebook fastText model
+  visibility:
+    - public
+  app:
+    container_ref: public.ecr.aws/u6e1k0c7/fasttext:latest
+    container_user: null
+    container_token: null
