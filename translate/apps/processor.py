@@ -63,5 +63,7 @@ def translate_texts(
             executor.map(process_row, text_with_lang_pairs.to_dict(orient='records')))
 
     output_df = text_with_lang_pairs.copy()
-    output_df.insert(len(text_with_lang_pairs.columns), 'translation', translations)
+    output_df.insert(
+        len(text_with_lang_pairs.columns), 'translation', translations
+    )
     return output_df
