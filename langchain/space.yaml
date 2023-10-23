@@ -1,5 +1,5 @@
 langchain:
-  name: Integration with Language
+  name: Large Language Models
   description: Provides popular LLM APIs for chatting, embeddings, and more
   visibility:
     - public

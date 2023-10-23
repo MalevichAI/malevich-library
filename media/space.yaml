@@ -1,5 +1,5 @@
 media:
-  name: Media
+  name: Video and Audio Media Operations
   description: Allows to perform operations with images or videos
   visibility:
     - public

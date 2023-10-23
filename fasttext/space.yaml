@@ -1,6 +1,6 @@
 fasttext:
-  name: Facebook fastText
-  description: Integration with Facebook fastText model
+  name: Facebook fastText Integration
+  description: Language identification, text classification, and more powered by Facebook fastText
   visibility:
     - public
   app:

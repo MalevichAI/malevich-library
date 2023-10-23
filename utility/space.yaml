@@ -1,5 +1,5 @@
 utility:
-  name: Utility
+  name: Data Manipulation Utilities
   description: Enables you to perform basic data manipulations within the flow
   visibility:
     - public

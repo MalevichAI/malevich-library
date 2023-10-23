@@ -1,5 +1,5 @@
 drives:
-  name: Drives
+  name: Cloud Drives Operations
   description: Allows you to perform operations with cloud drives (Google Drive, Dropbox, etc.)
   visibility:
     - public

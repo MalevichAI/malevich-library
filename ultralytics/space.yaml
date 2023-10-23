@@ -1,5 +1,5 @@
 ultralytics:
-  name: Ultralytics
+  name: Ultralytics Service Integration (YOLOv8, SAM)
   description: Integrates with Ultralytics platform providing SAM and YOLOv8 models
   visibility:
     - public

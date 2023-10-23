@@ -1,5 +1,5 @@
 translate:
-  name: Tranlsate
+  name: Translation Services Operations
   description: A simple text translator built on popular translation services
   visibility:
     - public
