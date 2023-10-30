@@ -5,6 +5,7 @@ on:
   workflow_dispatch:
 jobs:
   build_push:
+    environment: main
     runs-on: ubuntu-latest
     if: ${{ github.ref_type == 'branch' }} && ${{ github.ref == 'refs/heads/main' }}
     steps:
@@ -12,7 +13,7 @@ jobs:
         uses: actions/checkout@v4.1.0
         with:
           fetch-depth: 0
-      - name: Malevich Actions
+      - name: Malevich CI Actions
         uses: MalevichAI/auto-ci@v0.2.0
         with:
           registry: ${{ secrets.REGISTRY_TYPE }}
@@ -23,3 +24,4 @@ jobs:
           space_username: ${{ secrets.SPACE_USERNAME }}
           space_password: ${{ secrets.SPACE_PASSWORD }}
           api_url: ${{ secrets.API_URL }}
+          org_id: ${{ secrets.SPACE_ORGANIZATION_ID }}
