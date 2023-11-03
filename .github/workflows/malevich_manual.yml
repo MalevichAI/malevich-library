@@ -15,6 +15,7 @@ jobs:
         uses: actions/checkout@v4.1.0
         with:
           ref: ${{ inputs.branch }} 
+      - run: echo "Runs in ${{ vars.ENV_NAME }}"
       - name: Malevich CI Actions
         uses: MalevichAI/auto-ci@v0.2.0
         with:
