@@ -1,29 +1,18 @@
-name: Malevich Manual CI
+name: Malevich Auto CI at main
 on:  
+  push:
+    branches: main
   workflow_dispatch:
-    inputs:
-      branch:
-        description: 'On which branch to run'
-        required: true
-      build:
-        description: 'Build images'
-        required: false
-        default: true
-        type: choice
-        options:
-        - true
-        - false
 jobs:
   build_push:
-    environment: ${{ inputs.branch }} 
+    environment: main
     runs-on: ubuntu-latest
-    if: ${{ github.ref_type == 'branch' }}
+    if: ${{ github.ref_type == 'branch' }} && ${{ github.ref == 'refs/heads/main' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4.1.0
         with:
-          ref: ${{ inputs.branch }} 
-      - run: echo "Runs in ${{ vars.ENV_NAME }}"
+          fetch-depth: 0
       - name: Malevich CI Actions
         uses: MalevichAI/auto-ci@v0.2.0
         with:
@@ -36,4 +25,3 @@ jobs:
           space_password: ${{ secrets.SPACE_PASSWORD }}
           api_url: ${{ secrets.API_URL }}
           org_id: ${{ secrets.SPACE_ORGANIZATION_ID }}
-          build: ${{ inputs.build }}
