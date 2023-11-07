@@ -95,6 +95,7 @@ def send_messages_with_dynamic_prompt(
         DF[str]: A dataframe with the following columns:
             - result: AI Chatbot response to the input message
     """ # noqa: E501
+
     if len(prompt_template) > 1 or len(prompt_template.columns) > 1:
         raise ValueError(
             "The processor expects a prompt saved in a one-cell dataframe\n"

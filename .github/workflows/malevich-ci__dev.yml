@@ -1,13 +1,13 @@
-name: Malevich Auto CI at main
+name: Malevich Auto CI at dev
 on:  
   push:
-    branches: main
+    branches: dev
   workflow_dispatch:
 jobs:
   build_push:
-    environment: main
+    environment: dev
     runs-on: ubuntu-latest
-    if: ${{ github.ref_type == 'branch' }} && ${{ github.ref == 'refs/heads/main' }}
+    if: ${{ github.ref_type == 'branch' }} && ${{ github.ref == 'refs/heads/dev' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4.1.0

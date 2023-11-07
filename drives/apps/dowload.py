@@ -54,6 +54,7 @@ def dowload_from_google_drive(links: DF[GoogleDriveLink], context: Context):
                     basename
                 )
             )
+            print(os.listdir(APP_DIR))
 
             context.share(
                 basename

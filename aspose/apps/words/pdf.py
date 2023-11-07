@@ -20,7 +20,9 @@ def convert_pdf_to_markdown(files: DF[Filename], context: Context):
         A dataframe with a column named `filename` containing PDF files.
 
     Configuration:
-        The app is not configurable.
+        - write_contents (bool):
+            If true, contents of the file will be produced in the
+            output rather than just the path to the file.
 
     Output:
         The same dataframe with a column named `markdown` attached to the
@@ -49,10 +51,20 @@ def convert_pdf_to_markdown(files: DF[Filename], context: Context):
         )
 
         context.share(result_path)
-
-        outputs.append(
-            result_path
-        )
+        if context.app_cfg.get("write_contents", False):
+            with open(
+                os.path.join(
+                    APP_DIR,
+                    result_path
+                )
+            ) as f:
+                outputs.append(
+                    f.read()
+                )
+        else:
+            outputs.append(
+                result_path
+            )
 
     files.insert(
         len(files.columns),

@@ -1,6 +1,6 @@
 aspose:
   name: Aspose Service Integration
-  description: Allows you to perform operations with cloud drives (Google Drive, Dropbox, etc.)
+  description: Helps you to transform documents to different formats
   visibility:
     - public
   app:
