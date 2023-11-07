@@ -102,7 +102,7 @@ def scrape_with(
         allowed_domains=context.app_cfg.get('allowed_domains', []),
         **context.app_cfg.get('spider_cfg', {})
     )
-    process.start()
+    process.start(stop_after_crawl=True)
 
     with open('output.json') as f:
         results = [
