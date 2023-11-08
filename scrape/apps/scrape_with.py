@@ -113,6 +113,8 @@ def scrape_with(
             )
         ]
 
+    process.stop()
+
     if context.app_cfg.get('squash_results', False):
         return pd.DataFrame({
             'result': [
