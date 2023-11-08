@@ -3,7 +3,8 @@ from itertools import islice
 import pandas as pd
 from malevich.square import DF, Context, processor, scheme
 from pydantic import BaseModel
-from scrapy.crawler import CrawlerProcess
+from scrapy.crawler import CrawlerRunner
+from twisted.internet import reactor
 
 from .spiders import SPIDERS
 
@@ -88,7 +89,7 @@ def scrape_with(
 
     timeout = context.app_cfg.get('timeout', 15)
 
-    process = CrawlerProcess(settings={
+    process = CrawlerRunner(settings={
         'CLOSESPIDER_TIMEOUT': timeout,
         'CLOSESPIDER_ITEMCOUNT': context.app_cfg.get('max_results', 1000),
         'DEPTH_LIMIT': context.app_cfg.get('max_depth', None) or 0,
@@ -96,14 +97,15 @@ def scrape_with(
         'FEED_URI': 'output.json'
     })
 
-    process.crawl(
+    d = process.crawl(
         spider_cls,
         start_urls=scrape_links.link.to_list(),
         allowed_domains=context.app_cfg.get('allowed_domains', []),
         **context.app_cfg.get('spider_cfg', {})
     )
 
-    process.start(stop_after_crawl=True)
+    d.addBoth(lambda _: reactor.stop())
+    reactor.run()
 
     with open('output.json') as f:
         results = [
@@ -113,8 +115,6 @@ def scrape_with(
                 context.app_cfg.get('max_results', 1000)
             )
         ]
-
-    process.stop()
 
     if context.app_cfg.get('squash_results', False):
         return pd.DataFrame({
