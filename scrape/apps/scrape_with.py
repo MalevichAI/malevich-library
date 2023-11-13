@@ -1,12 +1,36 @@
+import multiprocessing
+import traceback
+import uuid
 from itertools import islice
 
 import pandas as pd
 from malevich.square import DF, Context, processor, scheme
 from pydantic import BaseModel
-from scrapy.crawler import CrawlerRunner
-from twisted.internet import reactor
 
+from .lib.crawl import crawl
 from .spiders import SPIDERS
+
+
+class Process(multiprocessing.Process):
+    def __init__(self, *args, **kwargs) -> None:
+        multiprocessing.Process.__init__(self, *args, **kwargs)
+        self._pconn, self._cconn = multiprocessing.Pipe()
+        self._exception = None
+
+    def run(self):
+        try:
+            multiprocessing.Process.run(self)
+            self._cconn.send(None)
+        except Exception as e:
+            tb = traceback.format_exc()
+            self._cconn.send((e, tb))
+            raise e
+
+    @property
+    def exception(self):
+        if self._pconn.poll():
+            self._exception = self._pconn.recv()
+        return self._exception
 
 
 @scheme()
@@ -87,27 +111,37 @@ def scrape_with(
     spider_cls = SPIDERS.get(context.app_cfg.get('spider', 'text'))
     assert spider_cls, 'Spider not found.'
 
+    _id = uuid.uuid4().hex
     timeout = context.app_cfg.get('timeout', 15)
 
-    process = CrawlerRunner(settings={
-        'CLOSESPIDER_TIMEOUT': timeout,
-        'CLOSESPIDER_ITEMCOUNT': context.app_cfg.get('max_results', 1000),
-        'DEPTH_LIMIT': context.app_cfg.get('max_depth', None) or 0,
-        'FEED_FORMAT': 'json',
-        'FEED_URI': 'output.json'
-    })
-
-    d = process.crawl(
-        spider_cls,
-        start_urls=scrape_links.link.to_list(),
-        allowed_domains=context.app_cfg.get('allowed_domains', []),
-        **context.app_cfg.get('spider_cfg', {})
+    proc = Process(
+        target=crawl,
+        kwargs={
+            'settings': {
+                'CLOSESPIDER_TIMEOUT': timeout,
+                'CLOSESPIDER_ITEMCOUNT': context.app_cfg.get('max_results', 1000),
+                'DEPTH_LIMIT': context.app_cfg.get('max_depth', None) or 0,
+                'FEED_FORMAT': 'json',
+                'FEED_URI': f'output-{_id}.json'
+            },
+            'spider_cls': spider_cls,
+            'start_urls': scrape_links.link.to_list(),
+            'allowed_domains': context.app_cfg.get('allowed_domains', []),
+            **context.app_cfg.get('spider_cfg', {})
+        }
     )
 
-    d.addBoth(lambda _: reactor.stop())
-    reactor.run()
+    proc.start()
+    # Wait for the process to finish
+    proc.join(timeout=2 * timeout)
 
-    with open('output.json') as f:
+    # Raise if proc failed
+    if proc.exitcode != 0:
+        #print exception in proc
+        proc.terminate()
+        raise Exception(f'Scraping failed. {proc.exception}')
+
+    with open(f'output-{_id}.json') as f:
         results = [
             item['text']
             for item in islice(
