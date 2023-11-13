@@ -1,5 +1,5 @@
 scrape:
-  name: Web Scrapper
+  name: Scraper
   description: Retrieve data from web pages
   visibility:
     - public
