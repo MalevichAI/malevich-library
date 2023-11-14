@@ -21,3 +21,7 @@ class Configuration(BaseModel):
     best_of: int = 1
     response_format: Optional[str] = None
     output_history: bool = False
+    keep_index: bool = False
+    keep_chat_index: bool = False
+    keep_role: bool = False
+
