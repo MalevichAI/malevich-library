@@ -4,6 +4,6 @@ scrape:
   visibility:
     - public
   app:
-    container_ref: public.ecr.aws/u6e1k0c7/scrape
+    container_ref: public.ecr.aws/u6e1k0c7/scrape@sha256:da95676a8bc347e7bebdf08e5e4db11f217cbc25a729fd61e7b1ceda0e537846
     container_user: null
     container_token: null

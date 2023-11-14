@@ -8,7 +8,7 @@ class TextSpider(scrapy.Spider):
     def __init__(
         self,
         start_urls=None,
-        allowed_domains=[],
+        allowed_domains=None,
         min_text_length=0,
         max_text_length=65536,
         *args,
@@ -16,7 +16,7 @@ class TextSpider(scrapy.Spider):
     ) -> None:
         super().__init__()
         self.start_urls = start_urls or []
-        self.allowed_domains = allowed_domains or []
+        self.allowed_domains = allowed_domains
         self.min_text_length = min_text_length
         self.max_text_length = max_text_length
 
