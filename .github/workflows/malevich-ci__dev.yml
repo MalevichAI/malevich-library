@@ -3,6 +3,18 @@ on:
   push:
     branches: dev
   workflow_dispatch:
+    inputs:
+      branch:
+        description: 'On which branch to run'
+        required: true
+      build:
+        description: 'Build images'
+        required: false
+        default: true
+        type: choice
+        options:
+        - true
+        - false
 jobs:
   build_push:
     environment: dev
@@ -25,3 +37,4 @@ jobs:
           space_password: ${{ secrets.SPACE_PASSWORD }}
           api_url: ${{ secrets.API_URL }}
           org_id: ${{ secrets.SPACE_ORGANIZATION_ID }}
+          build: ${{ inputs.build }}
