@@ -1,37 +1,16 @@
 import multiprocessing
 import os
-import traceback
 import uuid
 from itertools import islice
 
+import numpy as np
 import pandas as pd
 from malevich.square import DF, Context, processor, scheme
 from pydantic import BaseModel
 
 from .lib.crawl import crawl
+from .lib.proc import Process
 from .spiders import SPIDERS
-
-
-class Process(multiprocessing.Process):
-    def __init__(self, *args, **kwargs) -> None:
-        multiprocessing.Process.__init__(self, *args, **kwargs)
-        self._pconn, self._cconn = multiprocessing.Pipe()
-        self._exception = None
-
-    def run(self):
-        try:
-            multiprocessing.Process.run(self)
-            self._cconn.send(None)
-        except Exception as e:
-            tb = traceback.format_exc()
-            self._cconn.send((e, tb))
-            raise e
-
-    @property
-    def exception(self):
-        if self._pconn.poll():
-            self._exception = self._pconn.recv()
-        return self._exception
 
 
 @scheme()
@@ -62,7 +41,6 @@ def scrape_web(
         results or is exactly one if `squash_results` option is set.
 
     [Available Options]
-
         - allowed_domains (a list of strings)
 
             A list of allowed domains to scrape. If not provided, all domains
@@ -218,15 +196,22 @@ def scrape_web(
                 |   c    |
 
 
-        - squash_delimiter (str):
+        - delimiter (str):
 
-            The delimiter to use when squashing the results. See
-            `squash_results` option for more information.
+            The delimiter to use when squashing the results or when using independent crawl.
+            See `squash_results` and `links_are_independent` option for more information.
 
             Default:
 
                 By default, the app will use the newline character as the
                 delimiter.
+
+        - links_are_independent (bool):
+
+            If set, the app will crawl each link independently. Otherwise, the app
+            will assume all links comprise a single corpus and will crawl them
+            together.
+
 
     [Available Spiders]
 
@@ -293,57 +278,65 @@ def scrape_web(
     spider_cls = SPIDERS.get(context.app_cfg.get('spider', 'text'))
     assert spider_cls, 'Spider not found.'
 
-    _id = uuid.uuid4().hex
     timeout = context.app_cfg.get('timeout', 15)
 
-    proc = Process(
-        target=crawl,
-        kwargs={
-            'settings': {
-                'CLOSESPIDER_TIMEOUT': timeout,
-                'CLOSESPIDER_ITEMCOUNT': context.app_cfg.get('max_results', 0),
-                'DEPTH_LIMIT': context.app_cfg.get('max_depth', 1),
-                'FEED_FORMAT': 'json',
-                'FEED_URI': f'output-{_id}.json'
-            },
-            'spider_cls': spider_cls,
-            'start_urls': scrape_links.link.to_list(),
-            'allowed_domains': context.app_cfg.get('allowed_domains', []),
-            **context.app_cfg.get('spider_cfg', {})
-        }
-    )
+    links_are_independent = context.app_cfg.get('links_are_independent', False)
 
-    proc.start()
-    # Wait for the process to finish
-    proc.join(timeout=2 * timeout)
-
-    # Raise if proc failed
-    if proc.exitcode != 0:
-        #print exception in proc
-        proc.terminate()
-        raise Exception(f'Scraping failed. {proc.exception}')
-
-    assert os.path.exists(f'output-{_id}.json'), \
-        "Scraper failed to save the results. Try descresing `max_results` or `timeout` options"  # noqa: E501
-
-    with open(f'output-{_id}.json') as f:
-        max_results = context.app_cfg.get('max_results', 0)
-        df = pd.read_json(f).to_dict('records'),
-        if max_results == 0:
-            max_results = len(df)
-
-        results = [
-            item['text']
-            for item in islice(df, max_results)
-        ]
-
-    if context.app_cfg.get('squash_results', False):
-        return pd.DataFrame({
-            'result': [
-                context.app_cfg.get('squash_delimiter', '\n').join(results)
-            ]
-        })
+    if links_are_independent:
+        links = [[x] for x in scrape_links.link.to_list()]
     else:
-        return pd.DataFrame({
-            'result': list(set(results))
-        })
+        links = [scrape_links.link.to_list()]
+
+    results = []
+    procs: list[Process] = []
+    ids = []
+    for links_batch in links:
+        _id = uuid.uuid4().hex
+        proc = Process(
+            target=crawl,
+            kwargs={
+                'settings': {
+                    'CLOSESPIDER_TIMEOUT': timeout,
+                    'CLOSESPIDER_ITEMCOUNT': context.app_cfg.get('max_results', 0),
+                    'DEPTH_LIMIT': context.app_cfg.get('max_depth', 1),
+                    'FEED_FORMAT': 'json',
+                    'FEED_URI': f'output-{_id}.json'
+                },
+                'spider_cls': spider_cls,
+                'start_urls': links_batch,
+                'allowed_domains': context.app_cfg.get('allowed_domains', []),
+                **context.app_cfg.get('spider_cfg', {})
+            }
+        )
+
+        proc.start()
+        procs.append(proc)
+        ids.append(_id)
+
+
+    for proc_, _id in zip(procs, ids):
+        proc_.join()
+        # Raise if proc failed
+        if proc_.exitcode != 0:
+            #print exception in proc
+            proc_.terminate()
+            raise Exception(f'Scraping failed. {proc_.exception}')
+
+        assert os.path.exists(f'output-{_id}.json'), \
+            "Scraper failed to save the results. Try descresing `max_results` or `timeout` options"  # noqa: E501
+
+        with open(f'output-{_id}.json') as f:
+            max_results = context.app_cfg.get('max_results', 0)
+            df = pd.read_json(f).to_dict('records')
+            if max_results == 0:
+                max_results = len(df)
+
+            results_ = [item['text'] for item in islice(df, max_results)]
+            if context.app_cfg.get('squash_results', True) or links_are_independent:
+                results.append(
+                    context.app_cfg.get('squash_delimiter', '\n').join(results_)
+                )
+            else:
+                results.extend(results_)
+
+    return pd.DataFrame({'result': results})
