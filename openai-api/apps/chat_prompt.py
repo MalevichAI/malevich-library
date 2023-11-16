@@ -9,7 +9,7 @@ from ..lib.chat import exec_chat
 
 
 @processor()
-async def prompt_completion(
+def prompt_completion(
     variables: DF[Any],
     ctx:  Context
 ):

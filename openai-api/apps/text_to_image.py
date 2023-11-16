@@ -8,7 +8,7 @@ from ..lib.image import exec_image
 
 
 @processor()
-def image_to_text(
+def text_to_image(
     variables: DF[Any],
     ctx: Context
 ):

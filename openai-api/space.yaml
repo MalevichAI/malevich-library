@@ -4,6 +4,6 @@ openai:
   visibility:
     - public
   app:
-    container_ref: public.ecr.aws/u6e1k0c7/openai-api:54ac6b85f99c48d8464336fe40495589a02642c3
+    container_ref: public.ecr.aws/u6e1k0c7/openai-api:latest
     container_user: null
     container_token: null
