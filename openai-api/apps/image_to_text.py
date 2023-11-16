@@ -56,12 +56,17 @@ def image_to_text(
         for __vars in variables.to_dict(orient='records')
     ]
 
-    with ProcessPoolExecutor() as executor:
-        outputs = executor.map(
-            exec_image,
-            inputs,
-            [conf] * len(inputs)
-        )
+    # with ProcessPoolExecutor() as executor:
+    #     outputs = executor.map(
+    #         exec_image,
+    #         inputs,
+    #         [conf] * len(inputs)
+    #     )
+
+    outputs = [
+        await exec_image(x, conf)
+        for x in inputs
+    ]
 
     return pd.DataFrame({
         'links': outputs

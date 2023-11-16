@@ -103,18 +103,19 @@ async def prompt_completion(
          }] for _vars in variables.to_dict(orient='records')
     ]
 
+    # with ProcessPoolExecutor() as executor:
+    #     response = list(
+    #         executor.map(
+    #             exec_chat,
+    #             messages,
+    #             [conf] * len(messages),
+    #         )
+    #     )
 
-
-
-    with ProcessPoolExecutor() as executor:
-        response = list(
-            executor.map(
-                exec_chat,
-                messages,
-                [conf] * len(messages),
-            )
-        )
-
+    response = [
+        await exec_chat(x, conf)
+        for x in messages
+    ]
 
     df = {
         'index': [],

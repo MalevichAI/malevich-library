@@ -111,15 +111,23 @@ def structured_prompt_completion(
     ]
 
 
-    with ProcessPoolExecutor() as executor:
-        response = list(
-            executor.map(
-                exec_structured_chat,
-                messages,
-                [conf] * len(messages),
-                [schema] * len(messages),
-            )
-        )
+    # with ProcessPoolExecutor() as executor:
+    #     response = list(
+    #         executor.map(
+    #             exec_structured_chat,
+    #             messages,
+    #             [conf] * len(messages),
+    #             [schema] * len(messages),
+    #         )
+    #     )
+
+    response = [
+        exec_structured_chat(
+            message,
+            conf,
+            schema
+        ) for message in messages
+    ]
 
     df = defaultdict(lambda: [])
 
