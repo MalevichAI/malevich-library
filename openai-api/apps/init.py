@@ -25,7 +25,7 @@ def init_models(ctx: Context):
         except Exception as e:
             raise Exception(
                 "Found `openai_api_key` in app config, "
-                "but failed to initialize OpenAI client."
+                "but failed to initialize OpenAI client. Incorrect or empty key"
             ) from e
     else:
         raise Exception(

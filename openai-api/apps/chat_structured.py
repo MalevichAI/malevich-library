@@ -1,15 +1,18 @@
-
+from collections import defaultdict
 from concurrent.futures import ProcessPoolExecutor
 from typing import Any
 
 import pandas as pd
 from malevich.square import DF, Context, processor
 
-from ..lib.chat import exec_chat
+from langchain.output_parsers import ResponseSchema
+
+from ..lib.broadcast import broadcast
+from ..lib.chat import exec_structured_chat
 
 
-@processor()
-async def prompt_completion(
+@processor(id="structured_prompt_completion")
+def structured_prompt_completion(
     variables: DF[Any],
     ctx:  Context
 ):
@@ -42,7 +45,6 @@ async def prompt_completion(
 
         - openai_api_key (str, required): your OpenAI API key
         - user_prompt (str, required): the prompt for the user
-        - system_prompt (str, optional): the prompt for the system
         - model (str, default: 'gpt-3.5-turbo'): the model to use
         - organization (str, default: None): the organization to use
         - max_retries (int, default: 3): the maximum number of retries
@@ -56,6 +58,9 @@ async def prompt_completion(
         - n (int, default: 1): the number of completions to generate
         - response_format (str, default: None): the response format
         - output_history (bool, default: False): whether to output the history
+        - fields (list of dict, default: empty): a list of fields to parse the output.
+            Each field is a dict that contains fields name, description and type
+        - include_index (bool, default: False): whether to include the index in the output
 
     Notes:
         If `response_format` is set to 'json_object', the system prompt should
@@ -76,7 +81,7 @@ async def prompt_completion(
 
     Returns:
         DF[Any]: the chat messages
-    """
+    """  # noqa: E501
 
     try:
         conf = ctx.app_cfg['conf']
@@ -89,39 +94,34 @@ async def prompt_completion(
     assert 'user_prompt' in ctx.app_cfg, \
         "Missing `user_prompt` in app config."
 
-    system_prompt = ctx.app_cfg.get('system_prompt', '')
+    # system_prompt = ctx.app_cfg.get('system_prompt', '')
     user_prompt = ctx.app_cfg['user_prompt']
 
     messages = [
-        [{
-            "role": "system",
-            "content": system_prompt.format(**_vars)
-        },
-        {
-            "role": "user",
-            "content": user_prompt.format(**_vars)
-         }] for _vars in variables.to_dict(orient='records')
+        user_prompt.format(**_vars)
+        for _vars in variables.to_dict(orient='records')
     ]
 
-
+    schema = [
+        ResponseSchema(
+            name=field['name'],
+            description=field['description'],
+            type=field.get('type', 'str')
+        ) for field in ctx.app_cfg.get('fields', [{}])
+    ]
 
 
     with ProcessPoolExecutor() as executor:
         response = list(
             executor.map(
-                exec_chat,
+                exec_structured_chat,
                 messages,
                 [conf] * len(messages),
+                [schema] * len(messages),
             )
         )
 
-
-    df = {
-        'index': [],
-        #'chat_index': [],
-        #'role': [],
-        'content': [],
-    }
+    df = defaultdict(lambda: [])
 
     if conf.output_history:
         for i, message in enumerate(messages):
@@ -131,12 +131,13 @@ async def prompt_completion(
                 #df['role'].append(_message['role'])
                 df['content'].append(_message['content'])
 
-    for i, _response in enumerate(response):
-        for _message in _response:
-            df['index'].append(variables.index[i])
-            #df['chat_index'].append(3)
-            #df['role'].append(_message.role)
-            df['content'].append(_message.content)
+    for i, message in enumerate(response):
+        ln = 0
+        for key in broadcast(message):
+            df[key].extend(message[key])
+            ln = len(message[key])
+        df['index'].extend([variables.index[i]] * ln)
+
 
     return pd.DataFrame(
         df

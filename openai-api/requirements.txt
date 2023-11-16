@@ -1,2 +1,3 @@
 openai>=1
 pydantic
+langchain>=0.0.336
