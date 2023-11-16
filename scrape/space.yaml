@@ -1,6 +1,6 @@
 scrape:
   name: Scraper
-  description: Retrieve data from web pages
+  description: Retrieve data from Web Pages
   visibility:
     - public
   app:
