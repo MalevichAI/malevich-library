@@ -64,7 +64,7 @@ def text_to_image(
     #     )
 
     outputs = [
-        await exec_image(x, conf)
+        exec_image(x, conf)
         for x in inputs
     ]
 

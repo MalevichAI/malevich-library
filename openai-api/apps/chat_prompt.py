@@ -113,7 +113,7 @@ def prompt_completion(
     #     )
 
     response = [
-        await exec_chat(x, conf)
+        exec_chat(x, conf)
         for x in messages
     ]
 
