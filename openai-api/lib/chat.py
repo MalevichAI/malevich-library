@@ -7,13 +7,12 @@ from langchain.chat_models import ChatOpenAI as LLMOpenAI
 from langchain.output_parsers import ResponseSchema, StructuredOutputParser
 from langchain.prompts import ChatPromptTemplate, HumanMessagePromptTemplate
 
-# from langchain.schema.messages import ChatMessage
-from ..models.configuration import Configuration
+from ..models.configuration.text import TextConfiguration
 
 
 def exec_chat(
     messages: List[dict[str, str]],
-    conf: Configuration
+    conf: TextConfiguration
 ) -> List[ChatCompletionMessage]:
     client = OpenAI(
         api_key=conf.api_key,
@@ -40,7 +39,7 @@ def exec_chat(
 
 def exec_structured_chat(
     message: str,
-    conf: Configuration,
+    conf: TextConfiguration,
     schemas: List[ResponseSchema]
 ) -> List[dict[str, str]]:
 

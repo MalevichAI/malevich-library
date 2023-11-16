@@ -1,13 +1,9 @@
 from typing import Optional
 
-from pydantic import BaseModel
+from .base import Configuration
 
 
-class Configuration(BaseModel):
-    api_key: str
-    model: str = 'gpt-3.5-turbo'
-    organization: Optional[str] = None
-    max_retries: int = 3
+class TextConfiguration(Configuration):
     temperature: float = 0.9
     max_tokens: int = 512
     top_p: float = 1.0
