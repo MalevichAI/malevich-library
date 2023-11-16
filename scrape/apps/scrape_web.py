@@ -1,9 +1,7 @@
-import multiprocessing
 import os
 import uuid
 from itertools import islice
 
-import numpy as np
 import pandas as pd
 from malevich.square import DF, Context, processor, scheme
 from pydantic import BaseModel
@@ -17,9 +15,11 @@ from .spiders import SPIDERS
 class ScrapeLinks(BaseModel):
     link: str
 
+
 @scheme()
 class ScrapeResult(BaseModel):
     result: str
+
 
 @processor()
 def scrape_web(
@@ -244,6 +244,26 @@ def scrape_web(
 
                     - spider_cfg: { max_text_length: 100 }
 
+        Google Spider
+
+            The google spider extracts links from google search results.
+            It traverses all links in the search results.
+
+            To use the google spider, set the `spider` option to `google`.
+
+            < Spider Configuration >
+
+            The google spider accepts the following configuration options:
+
+                - scrape_api_key (string): your Scrape API Key.
+                    You can get it here: https://dashboard.scraperapi.com/
+
+                - allow_same_domain (bool): whether to allow links from the same domain
+                    Default: false
+
+                - cut_to_domain (bool): whether to cut the links to the domain
+                    Default: false
+
 
     [Suggestions]
 
@@ -274,7 +294,6 @@ def scrape_web(
     Returns:
         A dataframe with a textual column named `result`
     """  # noqa: E501
-
     spider_cls = SPIDERS.get(context.app_cfg.get('spider', 'text'))
     assert spider_cls, 'Spider not found.'
 
@@ -313,12 +332,11 @@ def scrape_web(
         procs.append(proc)
         ids.append(_id)
 
-
     for proc_, _id in zip(procs, ids):
         proc_.join()
         # Raise if proc failed
         if proc_.exitcode != 0:
-            #print exception in proc
+            # print exception in proc
             proc_.terminate()
             raise Exception(f'Scraping failed. {proc_.exception}')
 
@@ -332,9 +350,10 @@ def scrape_web(
                 max_results = len(df)
 
             results_ = [item['text'] for item in islice(df, max_results)]
-            if context.app_cfg.get('squash_results', True) or links_are_independent:
+            if context.app_cfg.get('squash_results', False) or links_are_independent:
                 results.append(
-                    context.app_cfg.get('squash_delimiter', '\n').join(results_)
+                    context.app_cfg.get('squash_delimiter',
+                                        '\n').join(results_)
                 )
             else:
                 results.extend(results_)

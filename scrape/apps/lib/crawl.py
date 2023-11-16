@@ -12,4 +12,3 @@ def crawl(settings, spider_cls, *args, **kwargs):
 
     d.addBoth(lambda _: reactor.stop())
     reactor.run()
-

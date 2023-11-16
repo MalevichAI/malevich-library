@@ -16,11 +16,12 @@ class LinkedInPeopleSpider(scrapy.Spider):
         item['name'] = summary_box.css("h1::text").get().strip()
         item['description'] = summary_box.css("h2::text").get().strip()
 
-        ## Location
+        # Location
         try:
-            item['location'] = summary_box.css('div.top-card__subline-item::text').get()
+            item['location'] = summary_box.css(
+                'div.top-card__subline-item::text').get()
         except Exception:
-            item['location'] = summary_box.css( \
+            item['location'] = summary_box.css(
                 'span.top-card__subline-item::text').get().strip()
             if 'followers' in item['location'] or 'connections' in item['location']:
                 item['location'] = ''
@@ -32,13 +33,14 @@ class LinkedInPeopleSpider(scrapy.Spider):
             if 'followers' in span_text:
                 item['followers'] = span_text.replace(' followers', '').strip()
             if 'connections' in span_text:
-                item['connections'] = span_text.replace(' connections', '').strip()
+                item['connections'] = span_text.replace(
+                    ' connections', '').strip()
         """
             ABOUT SECTION
         """
         item['about'] = \
             response.css('section.summary div.core-section-container__content p::text')\
-                    .get()
+            .get()
         """
             EXPERIENCE SECTION
         """
@@ -46,33 +48,35 @@ class LinkedInPeopleSpider(scrapy.Spider):
         experience_blocks = response.css('li.experience-item')
         for block in experience_blocks:
             experience = {}
-            ## organisation profile url
+            # organisation profile url
             try:
                 experience['organisation_profile'] = \
                     block.css('h4 a::attr(href)').get().split('?')[0]
             except Exception as e:
                 print('experience --> organisation_profile', e)
                 experience['organisation_profile'] = ''
-            ## location
+            # location
             try:
                 experience['location'] = \
                     block.css('p.experience-item__location::text').get().strip()
             except Exception as e:
                 print('experience --> location', e)
                 experience['location'] = ''
-            ## description
+            # description
             try:
                 experience['description'] = \
-                    block.css('p.show-more-less-text__text--more::text').get().strip()
+                    block.css(
+                        'p.show-more-less-text__text--more::text').get().strip()
             except Exception as e:
                 print('experience --> description', e)
                 try:
                     experience['description'] = \
-                        block.css('p.show-more-less-text__text--less::text').get().strip()
+                        block.css(
+                            'p.show-more-less-text__text--less::text').get().strip()
                 except Exception as e:
                     print('experience --> description', e)
                     experience['description'] = ''
-            ## time range
+            # time range
             try:
                 date_ranges = block.css('span.date-range time::text').getall()
                 if len(date_ranges) == 2:
@@ -99,15 +103,14 @@ class LinkedInPeopleSpider(scrapy.Spider):
         for block in education_blocks:
             education = {}
 
-            ## organisation
+            # organisation
             try:
                 education['organisation'] = block.css('h3::text').get().strip()
             except Exception as e:
                 print("education --> organisation", e)
                 education['organisation'] = ''
 
-
-            ## organisation profile url
+            # organisation profile url
             try:
                 education['organisation_profile'] = \
                     block.css('a::attr(href)').get().split('?')[0]
@@ -115,7 +118,7 @@ class LinkedInPeopleSpider(scrapy.Spider):
                 print("education --> organisation_profile", e)
                 education['organisation_profile'] = ''
 
-            ## course details
+            # course details
             try:
                 education['course_details'] = ''
                 for text in block.css('h4 span::text').getall():
@@ -126,14 +129,15 @@ class LinkedInPeopleSpider(scrapy.Spider):
                 print("education --> course_details", e)
                 education['course_details'] = ''
 
-            ## description
+            # description
             try:
                 education['description'] = \
-                    block.css('div.education__item--details p::text').get().strip()
+                    block.css(
+                        'div.education__item--details p::text').get().strip()
             except Exception as e:
                 print("education --> description", e)
                 education['description'] = ''
-            ## time range
+            # time range
             try:
                 date_ranges = block.css('span.date-range time::text').getall()
                 if len(date_ranges) == 2:

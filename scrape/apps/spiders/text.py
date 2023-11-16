@@ -14,12 +14,11 @@ class TextSpider(scrapy.Spider):
         *args,
         **kwargs
     ) -> None:
-        super().__init__()
+        super().__init__(self.name)
         self.start_urls = start_urls or []
         self.allowed_domains = allowed_domains
         self.min_text_length = min_text_length
         self.max_text_length = max_text_length
-
 
     def parse(self, response: scrapy.http.Response):
         # Extract text using CSS selectors
