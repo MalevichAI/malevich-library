@@ -11,8 +11,10 @@ async def exec_image(prompt: str, conf: ImageConfiguration) -> ImagesResponse:
         organization=conf.organization,
     )
 
-    return await client.images.generate(
+    return await client.audio.speech.create(
         prompt=prompt,
         model=conf.model,
+        # quality=conf.quality,
+        # style=conf.style,
         timeout=60,
     )

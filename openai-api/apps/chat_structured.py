@@ -1,3 +1,4 @@
+import asyncio
 from collections import defaultdict
 from concurrent.futures import ProcessPoolExecutor
 from typing import Any
@@ -12,10 +13,7 @@ from ..lib.chat import exec_structured_chat
 
 
 @processor(id="structured_prompt_completion")
-def structured_prompt_completion(
-    variables: DF[Any],
-    ctx:  Context
-):
+async def structured_prompt_completion(variables: DF[Any], ctx: Context):
     """Use Chat Completions feature from OpenAI
 
     Chat completions enable you to chat with OpenAI
@@ -84,32 +82,27 @@ def structured_prompt_completion(
     """  # noqa: E501
 
     try:
-        conf = ctx.app_cfg['conf']
+        conf = ctx.app_cfg["conf"]
     except KeyError:
-        raise Exception(
-           "OpenAI client not initialized."
-        )
+        raise Exception("OpenAI client not initialized.")
 
-
-    assert 'user_prompt' in ctx.app_cfg, \
-        "Missing `user_prompt` in app config."
+    assert "user_prompt" in ctx.app_cfg, "Missing `user_prompt` in app config."
 
     # system_prompt = ctx.app_cfg.get('system_prompt', '')
-    user_prompt = ctx.app_cfg['user_prompt']
+    user_prompt = ctx.app_cfg["user_prompt"]
 
     messages = [
-        user_prompt.format(**_vars)
-        for _vars in variables.to_dict(orient='records')
+        user_prompt.format(**_vars) for _vars in variables.to_dict(orient="records")
     ]
 
     schema = [
         ResponseSchema(
-            name=field['name'],
-            description=field['description'],
-            type=field.get('type', 'str')
-        ) for field in ctx.app_cfg.get('fields', [{}])
+            name=field["name"],
+            description=field["description"],
+            type=field.get("type", "string"),
+        )
+        for field in ctx.app_cfg.get("fields", [{}])
     ]
-
 
     # with ProcessPoolExecutor() as executor:
     #     response = list(
@@ -121,32 +114,33 @@ def structured_prompt_completion(
     #         )
     #     )
 
-    response = [
-        exec_structured_chat(
-            message,
-            conf,
-            schema
-        ) for message in messages
-    ]
+    # response = [
+    #     exec_structured_chat(
+    #         message,
+    #         conf,
+    #         schema
+    #     ) for message in messages
+    # ]
+
+    response = await asyncio.gather(
+        *[exec_structured_chat(message, conf, schema) for message in messages]
+    )
 
     df = defaultdict(lambda: [])
-
     if conf.output_history:
         for i, message in enumerate(messages):
             for j, _message in enumerate(message, start=1):
-                df['index'].append(variables.index[i])
-                #df['chat_index'].append(j)
-                #df['role'].append(_message['role'])
-                df['content'].append(_message['content'])
+                df["index"].append(variables.index[i])
+                # df['chat_index'].append(j)
+                # df['role'].append(_message['role'])
+                df["content"].append(_message["content"])
 
     for i, message in enumerate(response):
         ln = 0
-        for key in broadcast(message):
-            df[key].extend(message[key])
-            ln = len(message[key])
-        df['index'].extend([variables.index[i]] * ln)
+        for key, value in broadcast(message).items():
+            df[key].extend(value)
+            ln = len(value)
+        if conf.include_index:
+            df["index"].extend([variables.index[i]] * ln)
 
-
-    return pd.DataFrame(
-        df
-    )
+    return pd.DataFrame(df)

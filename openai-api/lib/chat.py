@@ -1,6 +1,8 @@
+import json
+import re
 from typing import List
 
-from openai import OpenAI
+from openai import AsyncOpenAI
 from openai.types.chat import ChatCompletion, ChatCompletionMessage
 
 from langchain.chat_models import ChatOpenAI as LLMOpenAI
@@ -10,17 +12,16 @@ from langchain.prompts import ChatPromptTemplate, HumanMessagePromptTemplate
 from ..models.configuration.text import TextConfiguration
 
 
-def exec_chat(
-    messages: List[dict[str, str]],
-    conf: TextConfiguration
+async def exec_chat(
+    messages: List[dict[str, str]], conf: TextConfiguration
 ) -> List[ChatCompletionMessage]:
-    client = OpenAI(
+    client = AsyncOpenAI(
         api_key=conf.api_key,
         max_retries=conf.max_retries,
-        organization=conf.organization
+        organization=conf.organization,
     )
 
-    response: ChatCompletion = client.chat.completions.create(
+    response: ChatCompletion = await client.chat.completions.create(
         messages=messages,
         model=conf.model,
         temperature=conf.temperature,
@@ -31,18 +32,15 @@ def exec_chat(
         stop=conf.stop,
         stream=conf.stream,
         n=conf.n,
-        response_format={ "type": conf.response_format or "text" }
+        response_format={"type": conf.response_format or "text"},
     )
 
     return [choice.message for choice in response.choices]
 
 
-def exec_structured_chat(
-    message: str,
-    conf: TextConfiguration,
-    schemas: List[ResponseSchema]
+async def exec_structured_chat(
+    message: str, conf: TextConfiguration, schemas: List[ResponseSchema]
 ) -> List[dict[str, str]]:
-
     client = LLMOpenAI(
         model=conf.model,
         api_key=conf.api_key,
@@ -52,26 +50,27 @@ def exec_structured_chat(
         top_p=conf.top_p,
         frequency_penalty=conf.frequency_penalty,
         presence_penalty=conf.presence_penalty,
-        n=conf.n
+        n=conf.n,
     )
 
     # print(schemas)
     output_parser = StructuredOutputParser.from_response_schemas(schemas)
 
-
     prompt = ChatPromptTemplate(
         messages=[
             HumanMessagePromptTemplate.from_template(
-                message + '\n{format_instructions}',
+                message + "\n{format_instructions}",
             )
             # for message in messages if message
         ],
         partial_variables={
-            'format_instructions': output_parser.get_format_instructions()
-        }
+            "format_instructions": output_parser.get_format_instructions()
+        },
     )
 
-    output = client(prompt.format_prompt().to_messages())
-    # print('OUTPUT', output)
-    # return output
-    return output_parser.parse(output.content)
+
+    output = await client.ainvoke(
+        prompt.format_prompt().to_messages()
+    )
+
+    return output_parser.parse(output.content.replace('\n', ''))

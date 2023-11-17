@@ -17,4 +17,4 @@ def broadcast(x: dict):
         if len(s[key]) == 1:
             s[key] = s[key] * ln
 
-    return x
+    return s

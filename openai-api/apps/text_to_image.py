@@ -1,6 +1,6 @@
 from concurrent.futures import ProcessPoolExecutor
 from typing import Any
-
+import asyncio
 import pandas as pd
 from malevich.square import DF, Context, processor
 
@@ -8,7 +8,7 @@ from ..lib.image import exec_image
 
 
 @processor()
-def text_to_image(
+async def text_to_image(
     variables: DF[Any],
     ctx: Context
 ):
@@ -28,10 +28,8 @@ def text_to_image(
     Configuration:
 
         - openai_api_key (str, required): your OpenAI API key
+        - model (str, default: 'dall-e-3'): the model to use
         - user_prompt (str, required): the prompt for the user
-        - quality (str, default: 'standard'): the quality of the image
-        - size (str, default: '512x512'): the size of the image
-        - style (str, default: 'natural'): the style of the image
 
     Args:
         variables (DF[ImageLinks]): Dataframe with variables
@@ -56,20 +54,12 @@ def text_to_image(
         for __vars in variables.to_dict(orient='records')
     ]
 
-    # with ProcessPoolExecutor() as executor:
-    #     outputs = executor.map(
-    #         exec_image,
-    #         inputs,
-    #         [conf] * len(inputs)
-    #     )
-
-    outputs = [
-        exec_image(x, conf)
-        for x in inputs
-    ]
+    outputs = await asyncio.gather(
+        *[exec_image(x, conf) for x in inputs],
+    )
 
     return pd.DataFrame({
-        'links': outputs
+        'links': [x.data[0].url for x in outputs]
     })
 
 

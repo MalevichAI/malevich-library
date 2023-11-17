@@ -1,4 +1,5 @@
 
+import asyncio
 from concurrent.futures import ProcessPoolExecutor
 from typing import Any
 
@@ -9,7 +10,7 @@ from ..lib.chat import exec_chat
 
 
 @processor()
-def prompt_completion(
+async def prompt_completion(
     variables: DF[Any],
     ctx:  Context
 ):
@@ -112,10 +113,10 @@ def prompt_completion(
     #         )
     #     )
 
-    response = [
-        exec_chat(x, conf)
-        for x in messages
-    ]
+
+    response = await asyncio.gather(
+        *[exec_chat(x, conf) for x in messages]
+    )
 
     df = {
         'index': [],
