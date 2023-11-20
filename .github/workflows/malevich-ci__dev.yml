@@ -3,10 +3,10 @@ on:
     branches: dev
 jobs:
   build_push:
-  environment: ${{ inputs.branch }}
+  environment: dev
   if: ${{ github.ref_type == 'branch' }} && ${{ github.ref == 'refs/heads/dev' }}
   runs-on: ubuntu-latest
-    steps:
+  steps:
     - name: "Install aws cli"
       if: ${{ secrets.REGISTRY_TYPE == 'ecr*' }}
       uses: unfor19/install-aws-cli-action@v1
