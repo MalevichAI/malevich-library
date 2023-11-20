@@ -1,0 +1,10 @@
+ultralytics:
+  name: Ultralytics
+  description: Integrates with Ultralytics platform providing object detection and segmentation models 
+  visibility:
+    - public
+  app:
+    container_ref: public.ecr.aws/u6e1k0c7/ultralytics
+    container_user: null
+    container_token: null
+   

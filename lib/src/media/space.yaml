@@ -1,0 +1,9 @@
+media:
+  name: Video and Audio Media Operations
+  description: Allows to perform operations with images or videos
+  visibility:
+    - public
+  app:
+    container_ref: public.ecr.aws/u6e1k0c7/media
+    container_user: null
+    container_token: null
