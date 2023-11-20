@@ -8,6 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: "Install aws cli"
+      if: '${{ secrets.REGISTRY_TYPE }}' == 'ecr*' 
       uses: unfor19/install-aws-cli-action@v1
     
     - name: Checkout
@@ -15,7 +16,6 @@ jobs:
     
     - name: Docker Login
       run: |
-        echo ${{ vars.ENV_NAME }}
         if [[ ${{ secrets.REGISTRY_TYPE }} == ecr* ]];
         then
           if [[ ${{ secrets.REGISTRY_TYPE}} == 'ecr-private' ]];
@@ -77,7 +77,7 @@ jobs:
         do
           dir=lib/src/$dir
           name=$(basename $dir)
-          if [[ -e $dir ]] && [[ $name != .* ]] && [[ -f $name/Dockerfile ]];
+          if [[ -e $dir ]] && [[ $dir != .* ]] && [[ -f $dir/Dockerfile ]];
           then
             if [[ ${{ inputs.build }} == true ]];
             then
