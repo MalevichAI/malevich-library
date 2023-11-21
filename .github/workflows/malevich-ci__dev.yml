@@ -97,7 +97,7 @@ jobs:
             
             if [[ -f .github/workflows/app.py ]];
             then
-              python3 .github/workflows/app.py --path "lib/src/${name}/space.yml" --url "$image_url/$name:$commit_sha"
+              python3 .github/workflows/app.py --path "lib/src/${name}/space.yaml" --url "$image_url/$name:$commit_sha"
             fi
 
             echo -n "Testing ${name} "  
