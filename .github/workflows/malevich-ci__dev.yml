@@ -75,7 +75,8 @@ jobs:
         echo "::notice::Dirs: ${dirs}"
         for dir in $dirs
         do
-          dir=lib/src/${dir}
+          dir=lib/src/$dir
+          echo '::notice::Dir_path: ${dir}'
           if [[ -e $dir ]] && [[ $dir != .* ]] && [[ -f $dir/Dockerfile ]];
           then
             if [[ ${{ inputs.build }} == true ]];
