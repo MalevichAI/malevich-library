@@ -72,10 +72,10 @@ jobs:
         else
           image_url=${{ secrets.REGISTRY_URL }}/${{ secrets.REGISTRY_ID }}
         fi
+        echo "::notice::Dirs: ${dirs}"
         for dir in $dirs
         do
-          dir=lib/src/$dir
-          name=$(basename $dir)
+          dir=lib/src/${dir}
           if [[ -e $dir ]] && [[ $dir != .* ]] && [[ -f $dir/Dockerfile ]];
           then
             if [[ ${{ inputs.build }} == true ]];
