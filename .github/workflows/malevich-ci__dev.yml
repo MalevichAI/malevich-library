@@ -95,12 +95,15 @@ jobs:
             echo "Pushing ${name}"
             docker push -q --all-tags $image_url/$name || { echo "::warning::Failed to push ${name}" ; errors+=("${name}") ; continue ;}
             
-            if [[ -f .github/workflows/app.py ]];
+            if [[ -f .github/workflows/app.py ]] && [[ -f $lib/src/$name/space.yaml ]];
             then
               python3 .github/workflows/app.py --path "lib/src/${name}/space.yaml" --url "$image_url/$name:$commit_sha"
+              cat lib/src/$name/space.yaml
+            else
+              echo "::warning::${name} has no space.yaml"
             fi
 
-            echo -n "Testing ${name} "  
+            echo -n "Testing ${name}"  
             if [[ ${{ secrets.IMAGE_USERNAME }} == "$(cat USERNAME)" ]] && [[ ${{ secrets.IMAGE_PASSWORD}} == "$(cat PASSWORD)" ]];
             then
               echo "with credentials"
