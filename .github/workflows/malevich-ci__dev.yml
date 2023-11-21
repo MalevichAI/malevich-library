@@ -98,7 +98,6 @@ jobs:
             if [[ -f .github/workflows/app.py ]];
             then
               python3 .github/workflows/app.py --path "lib/src/${name}/space.yaml" --url "$image_url/$name:$commit_sha"
-              cat lib/src/$name/space.yaml
             else
               echo "::warning::${name} has no space.yaml"
             fi
@@ -108,7 +107,7 @@ jobs:
             then
               echo "with credentials"
               space ci report ./$dir ${{ steps.extract_branch.outputs.branch }} \
-              $commit_sha "$(git log | grep -P "commit [a-z0-9]{40}" -m 1 | cut -d ' ' -f2 | git log --format=%B -n 1)" done \
+              $commit_sha "$(echo $commit_sha | git log --format=%B -n 1)" done \
               $image_url/$name:$commit_sha \
               --image-user=$(cat USERNAME) --image-token=$(cat PASSWORD) \
               --space-username=${{ secrets.SPACE_USERNAME }} --space-password=${{ secrets.SPACE_PASSWORD }} --space-org=${{ secrets.ORG_ID }} \
