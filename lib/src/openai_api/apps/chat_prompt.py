@@ -1,18 +1,14 @@
 import asyncio
-from collections import defaultdict
 from typing import Any
 
 import pandas as pd
 from malevich.square import DF, Context, processor
 
-from langchain.output_parsers import ResponseSchema
-
-from ..lib.broadcast import broadcast
-from ..lib.chat import exec_structured_chat
+from ..lib.chat import exec_chat
 
 
-@processor(id="structured_prompt_completion")
-async def structured_prompt_completion(variables: DF[Any], ctx: Context):
+@processor()
+async def prompt_completion(variables: DF[Any], ctx: Context):
     """Use Chat Completions feature from OpenAI
 
     Chat completions enable you to chat with OpenAI
@@ -30,20 +26,24 @@ async def structured_prompt_completion(variables: DF[Any], ctx: Context):
     Inputs:
 
         A dataframe with variables to be used in the prompts. Each row of the
-        dataframe will be used to generate a prompt.
+        dataframe will be used to generate a prompt. For example, if your prompt
+        contains a name enclosed in {} like this:
+
+        Hi! Write a story about {someone}
+
+        You have to have a column `someone` in the input dataframe. For each
+        of such variables you should have a separate column.
 
     Outputs:
 
-        A dataframe with following column:
-        - index (int): the index of the variable. If `include_index` is set to
-            True, the index will be included in the output, otherwise it will
-            be omitted
-        - content (str): the content of the model response
+        A dataframe with following columns:
+            - content (str): the content of the model response
 
     Configuration:
 
         - openai_api_key (str, required): your OpenAI API key
         - user_prompt (str, required): the prompt for the user
+        - system_prompt (str, optional): the prompt for the system
         - model (str, default: 'gpt-3.5-turbo'): the model to use
         - organization (str, default: None): the organization to use
         - max_retries (int, default: 3): the maximum number of retries
@@ -56,9 +56,6 @@ async def structured_prompt_completion(variables: DF[Any], ctx: Context):
         - stream (bool, default: False): whether to stream the response
         - n (int, default: 1): the number of completions to generate
         - response_format (str, default: None): the response format
-        - fields (list of dict, default: empty): a list of fields to parse the output.
-            Each field is a dict that contains fields name, description and type
-        - include_index (bool, default: False): whether to include the index in the output
 
     Notes:
         If `response_format` is set to 'json_object', the system prompt should
@@ -79,7 +76,7 @@ async def structured_prompt_completion(variables: DF[Any], ctx: Context):
 
     Returns:
         DF[Any]: the chat messages
-    """  # noqa: E501
+    """
 
     try:
         conf = ctx.app_cfg["conf"]
@@ -88,34 +85,25 @@ async def structured_prompt_completion(variables: DF[Any], ctx: Context):
 
     assert "user_prompt" in ctx.app_cfg, "Missing `user_prompt` in app config."
 
-    # system_prompt = ctx.app_cfg.get('system_prompt', '')
+    system_prompt = ctx.app_cfg.get("system_prompt", "")
     user_prompt = ctx.app_cfg["user_prompt"]
 
     messages = [
-        user_prompt.format(**_vars) for _vars in variables.to_dict(orient="records")
+        [
+            {"role": "system", "content": system_prompt.format(**_vars)},
+            {"role": "user", "content": user_prompt.format(**_vars)},
+        ]
+        for _vars in variables.to_dict(orient="records")
     ]
 
-    schema = [
-        ResponseSchema(
-            name=field["name"],
-            description=field["description"],
-            type=field.get("type", "string"),
-        )
-        for field in ctx.app_cfg.get("fields", [{}])
-    ]
+    response = await asyncio.gather(*[exec_chat(x, conf) for x in messages])
 
-    response = await asyncio.gather(
-        *[exec_structured_chat(message, conf, schema) for message in messages]
-    )
+    df = {
+        "content": [],
+    }
 
-    df = defaultdict(lambda: [])
-
-    for i, message in enumerate(response):
-        ln = 0
-        for key, value in broadcast(message).items():
-            df[key].extend(value)
-            ln = len(value)
-        if conf.include_index:
-            df["index"].extend([variables.index[i]] * ln)
+    for _response in response:
+        for _message in _response:
+            df["content"].append(_message.content)
 
     return pd.DataFrame(df)

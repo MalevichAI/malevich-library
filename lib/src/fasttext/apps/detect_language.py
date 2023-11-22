@@ -1,14 +1,12 @@
+import fasttext
 import pandas as pd
 from malevich.square import DF, processor, scheme
 from pydantic import BaseModel
-
-import fasttext
 
 
 @scheme()
 class Text(BaseModel):
     text: str
-
 
 @processor()
 def detect_language(texts: DF[Text]):

@@ -1,10 +1,9 @@
 import os
 
+import aspose.words as aw
 import pandas as pd
 from malevich.square import APP_DIR, DF, Context, processor, scheme
 from pydantic import BaseModel
-
-import aspose.words as aw
 
 
 @scheme()

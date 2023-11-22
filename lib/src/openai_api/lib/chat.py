@@ -1,11 +1,10 @@
 from typing import List
 
-from openai import AsyncOpenAI
-from openai.types.chat import ChatCompletion, ChatCompletionMessage
-
 from langchain.chat_models import ChatOpenAI as LLMOpenAI
 from langchain.output_parsers import ResponseSchema, StructuredOutputParser
 from langchain.prompts import ChatPromptTemplate, HumanMessagePromptTemplate
+from openai import AsyncOpenAI
+from openai.types.chat import ChatCompletion, ChatCompletionMessage
 
 from ..models.configuration.base import Configuration
 

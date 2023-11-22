@@ -5,7 +5,6 @@ import cv2
 import pandas as pd
 from malevich.square import APP_DIR, DF, Context, input_true, processor, scheme
 from pydantic import BaseModel
-
 from ultralytics import YOLO
 
 
@@ -130,7 +129,9 @@ def detect(yolo_inputs: DF[YOLOInputs], context: Context):
             boxes = r.boxes
             xyxy.extend([json.dumps(x) for x in boxes.xyxy.tolist()])
             cls_ids.extend([json.dumps(x) for x in boxes.cls.long().tolist()])
-            cls_names.extend([mapping.get(str(i), str(i)) for i in boxes.cls.long().tolist()])
+            cls_names.extend(
+                [mapping.get(str(i), str(i)) for i in boxes.cls.long().tolist()]
+            )
             keys.extend([slice_[j]] * len(boxes))
 
             if should_plot:

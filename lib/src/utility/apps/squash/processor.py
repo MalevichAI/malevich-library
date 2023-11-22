@@ -15,6 +15,29 @@ def _squash_df(df: pd.DataFrame, key: str, delm: str = ",") -> pd.DataFrame:
 
 @processor()
 def squash(df: DF[Any], context: Context):
+    """Squash multiple rows into one row.
+
+    Inputs:
+        An arbitrary dataframe with columns that contain multiple values.
+
+    Outputs:
+        A dataframe with the same columns as the input dataframe, but with
+        multiple rows for each input row.
+
+    Configuration:
+        by (str): The column to group by. If not specified, all
+            columns will be squashed.
+
+        delim (str): The delimiter used to separate values in the columns. If
+            not specified, the default delimiter is a comma (,).
+
+    Args:
+        df (DF[Any]): Dataframe
+        context (Context): Context object
+
+    Returns:
+        Dataframe with squashed rows
+    """
     squash_by = context.app_cfg.get("by", None)
     squash_delim = context.app_cfg.get("delim", ",")
 

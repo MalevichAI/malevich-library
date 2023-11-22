@@ -1,7 +1,6 @@
 import concurrent.futures
 
 import pandas as pd
-
 from langchain.chat_models.base import BaseChatModel
 from langchain.schema import HumanMessage
 

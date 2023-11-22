@@ -24,10 +24,10 @@ class TextSpider(scrapy.Spider):
         # Extract text using CSS selectors
         for text in response.css('body *:not(script):not(style)::text').getall():
             if text.strip():  # Check if the text is not just whitespace
-                l = len(text.strip())
-                if l < self.min_text_length:
+                __length = len(text.strip())
+                if __length < self.min_text_length:
                     continue
-                if l > self.max_text_length:
+                if __length > self.max_text_length:
                     continue
                 yield {'text': text.strip()}
 

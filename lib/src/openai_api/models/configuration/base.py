@@ -6,7 +6,6 @@ from pydantic import BaseModel, Field
 class Configuration(BaseModel):
     api_key: str = Field(
         ...,
-        alias="openai_api_key",
         description="Your OpenAI API key. Get it here: https://platform.openai.com/api-keys",
     )
 

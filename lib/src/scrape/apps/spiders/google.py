@@ -55,11 +55,11 @@ class GoogleSpider(scrapy.Spider):
         allow_same_domain = False,
         cut_to_domain = False,
         start_urls = None,
-        *args: Any,
-        **kwargs: Any
-    ) -> None:  # noqa: ANN401, E501
-        super().__init__(self.name, **kwargs)
+        *args: Any,  # noqa: ANN401
+        **kwargs: Any  # noqa: ANN401
+    ) -> None:
 
+        super().__init__(self.name, **kwargs)
         if not scrape_api_key:
             raise ValueError("scrape_api_key is required")
 

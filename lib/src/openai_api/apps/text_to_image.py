@@ -1,5 +1,4 @@
 import asyncio
-from concurrent.futures import ProcessPoolExecutor
 from typing import Any
 
 import pandas as pd
@@ -13,12 +12,24 @@ async def text_to_image(
     variables: DF[Any],
     ctx: Context
 ):
-    """Converts image to text using OpenAI API
+    """Use Text to Image feature from OpenAI
+
+    Text to Image enables you to generate images from text prompts.
+    To use this processor you should set the following parameters:
+
+    - `openai_api_key`: Your OpenAI API key. Get it here: https://platform.openai.com/api-keys
+    - `user_prompt`: The prompt for the user
 
     Inputs:
 
         A dataframe with variables to be used in the prompts. Each row of the
-        dataframe will be used to generate a prompt.
+        dataframe will be used to generate a prompt. For example, if your prompt
+        contains a name enclosed in {} like this:
+
+        Hi! Write a story about {someone}
+
+        You have to have a column `someone` in the input dataframe. For each
+        of such variables you should have a separate column.
 
     Outputs:
 
@@ -28,8 +39,8 @@ async def text_to_image(
     Configuration:
 
         - openai_api_key (str, required): your OpenAI API key
-        - model (str, default: 'dall-e-3'): the model to use
         - user_prompt (str, required): the prompt for the user
+        - model (str, default: 'dall-e-3'): the model to use
 
     Args:
         variables (DF[ImageLinks]): Dataframe with variables
