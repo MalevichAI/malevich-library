@@ -27,7 +27,6 @@ async def exec_chat(
         frequency_penalty=conf.frequency_penalty,
         presence_penalty=conf.presence_penalty,
         stop=conf.stop,
-        stream=conf.stream,
         n=conf.n,
         response_format={"type": conf.response_format or "text"},
     )
