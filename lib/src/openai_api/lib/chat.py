@@ -28,7 +28,6 @@ async def exec_chat(
         presence_penalty=conf.presence_penalty,
         stop=conf.stop,
         n=conf.n,
-        response_format={"type": conf.response_format or "text"},
     )
 
     return [choice.message for choice in response.choices]
