@@ -1,0 +1,9 @@
+utility:
+  name: Data Manipulation Utilities
+  description: Enables you to perform basic data manipulations within the flow
+  visibility:
+    - public
+  app:
+    container_ref: public.ecr.aws/u6e1k0c7/utility
+    container_user: null
+    container_token: null

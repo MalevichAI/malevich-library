@@ -1,0 +1,9 @@
+translate:
+  name: Translation Services Operations
+  description: A simple text translator built on popular translation services
+  visibility:
+    - public
+  app:
+    container_ref: public.ecr.aws/u6e1k0c7/translate
+    container_user: null
+    container_token: null

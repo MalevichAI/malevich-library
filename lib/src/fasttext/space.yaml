@@ -1,0 +1,9 @@
+fasttext:
+  name: Facebook fastText Integration
+  description: Language identification, text classification, and more powered by Facebook fastText
+  visibility:
+    - public
+  app:
+    container_ref: public.ecr.aws/u6e1k0c7/fasttext
+    container_user: null
+    container_token: null

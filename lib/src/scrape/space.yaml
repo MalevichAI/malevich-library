@@ -1,0 +1,9 @@
+scrape:
+  name: Scraper
+  description: Retrieve data from Web Pages
+  visibility:
+    - public
+  app:
+    container_ref: public.ecr.aws/u6e1k0c7/scrape
+    container_user: null
+    container_token: null
