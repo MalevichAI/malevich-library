@@ -1,5 +1,5 @@
 name: Malevich Manual CI
-on:  
+on:
   workflow_dispatch:
     inputs:
       branch:
@@ -84,7 +84,7 @@ jobs:
             image_url=${{ secrets.REGISTRY_URL }}/${{ secrets.REGISTRY_ID }}
           fi
           for dir in $dirs
-          do  
+          do
             dir=lib/src/$dir
             name=$(basename $dir)
             if [[ $dir != *.* ]] && [[ -e $dir ]] && [[ -f $dir/Dockerfile ]]; 
