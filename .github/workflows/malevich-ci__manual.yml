@@ -17,14 +17,13 @@ jobs:
   build_push:
     environment: ${{ inputs.branch }}
     runs-on: ubuntu-latest
-    if: ${{ github.ref_type == 'branch' }} && ${{ github.ref == 'refs/heads/dev' }}
     steps:
-      - name: "Install aws cli"
-        uses: unfor19/install-aws-cli-action@v1
       - name: Checkout
         uses: actions/checkout@v4.1.0
         with:
           ref: ${{ inputs.branch }}
+      - name: "Install aws cli"
+        uses: unfor19/install-aws-cli-action@v1
       - name: Docker Login
         run: |
           if [[ ${{ secrets.REGISTRY_TYPE }} == ecr* ]];
@@ -70,16 +69,14 @@ jobs:
       
       - name: Build, Test and Push
         run: |
-          dirs=$(git log --name-only | grep '/' | cut -d '/' -f3 | sort -u)
+          dirs=$(git log --name-only -1 | grep '/' | cut -d '/' -f3 | sort -u)
           errors=()
           commit_sha=$(git rev-parse HEAD)
-          if [[ ${dirs[0]} == "" ]];
-          then
+          if [[ ${dirs[0]} == "" ]]; then
             echo "No changed directories, exiting..."
             exit 0
           fi
-          if [[ ${{ secrets.REGISTRY_TYPE}} == 'ecr-private' ]];
-          then
+          if [[ ${{ secrets.REGISTRY_TYPE}} == 'ecr-private' ]]; then
             image_url=${{ secrets.REGISTRY_ID }}.dkr.ecr.us-east-1.amazonaws.com
           else
             image_url=${{ secrets.REGISTRY_URL }}/${{ secrets.REGISTRY_ID }}
@@ -88,15 +85,12 @@ jobs:
           do  
             dir=lib/src/$dir
             name=$(basename $dir)
-              if [[ $dir != *.* ]] && [[ -e $dir ]] && [[ -f $dir/Dockerfile ]];
-            then
+            if [[ $dir != *.* ]] && [[ -e $dir ]] && [[ -f $dir/Dockerfile ]]; then
               echo "Building ${name}"
               docker build -q -t $image_url/$name:$commit_sha $dir || { echo "::warning::Failed to build ${name}" ; errors+=("${name}") ; continue ;}
-              if [[ ${{ secrets.REGISTRY_TYPE}} == ecr* ]];
-              then
+              if [[ ${{ secrets.REGISTRY_TYPE}} == ecr* ]]; then
                 echo "Finding/Creating AWS repository"
-                if [[ ${{ secrets.REGISTRY_TYPE}} == "ecr" ]];
-                then
+                if [[ ${{ secrets.REGISTRY_TYPE}} == "ecr" ]]; then
                   aws ecr-public describe-repositories --repository-names $name > /dev/null || \
                   aws ecr-public create-repository --repository-name $name > /dev/null 
                 else
@@ -107,16 +101,13 @@ jobs:
               echo "Pushing ${name}"
               docker push -q --all-tags $image_url/$name || { echo "::warning::Failed to push ${name}" ; errors+=("${name}") ; continue ;}
               
-              if [[ -f .github/workflows/app.py ]];
-              then
-                python3 .github/workflows/app.py --path "lib/src/${name}/space.yaml" --url "$image_url/$name:$commit_sha"
+              if [[ -f .github/workflows/app.py ]]; then
+                python3 .github/workflows/app.py --path "lib/src/${name}/space.yaml" --url "$image_url/$name:$commit_sha" && \
+                echo "::notice::${name} configured"
               else
-                echo "::warning::${name} has no space.yaml"
-              fi
 
-              echo -n "Testing ${name}"  
-              if [[ ${{ secrets.IMAGE_USERNAME }} == "$(cat USERNAME)" ]] && [[ ${{ secrets.IMAGE_PASSWORD}} == "$(cat PASSWORD)" ]];
-              then
+              echo -n "Testing ${name} "  
+              if [[ ${{ secrets.IMAGE_USERNAME }} == "$(cat USERNAME)" ]] && [[ ${{ secrets.IMAGE_PASSWORD}} == "$(cat PASSWORD)" ]]; then
                 echo "with credentials"
                 space ci report ./$dir ${{ steps.extract_branch.outputs.branch }} \
                 $commit_sha "$(echo $commit_sha | git log --format=%B -n 1)" done \
