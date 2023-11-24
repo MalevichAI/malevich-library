@@ -3,6 +3,8 @@ tts:
   description: Lightweight app for voicing texts
   visibility:
     - public
+  icon: component/tts.png
+  repo_url: https://github.com/MalevichAI/malevich-library/tree/dev/lib/src/tts
   app:
     container_ref: public.ecr.aws/u6e1k0c7/scrape
     container_user: null

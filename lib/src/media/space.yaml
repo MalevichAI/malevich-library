@@ -3,6 +3,8 @@ media:
   description: Allows to perform operations with images or videos
   visibility:
     - public
+  icon: component/media.png
+  repo_url: https://github.com/MalevichAI/malevich-library/tree/dev/lib/src/media
   app:
     container_ref: public.ecr.aws/u6e1k0c7/media
     container_user: null

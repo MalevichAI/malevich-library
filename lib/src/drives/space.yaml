@@ -3,6 +3,8 @@ drives:
   description: Allows you to perform operations with cloud drives (Google Drive, Dropbox, etc.)
   visibility:
     - public
+  icon: component/drives.png
+  repo_url: https://github.com/MalevichAI/malevich-library/tree/dev/lib/src/drives
   app:
     container_ref: public.ecr.aws/u6e1k0c7/drives
     container_user: null
