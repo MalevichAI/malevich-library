@@ -103,13 +103,13 @@ jobs:
                   aws ecr create-repository --repository-name $name > /dev/null
                 fi
               fi  
-              echo "Pushing ${name}"
+              echo "Pushing ${name} "
               docker push -q --all-tags $image_url/$name || { echo "::warning::Failed to push ${name}" ; errors+=("${name}") ; continue ;}
               if [[ -f .github/workflows/app.py ]]; 
               then
                 python3 .github/workflows/app.py --path "lib/src/${name}/space.yaml" --url "$image_url/$name:$commit_sha" && \
                 echo "::notice::${name} configured"
-              else
+              fi
 
               echo -n "Testing ${name} "  
               if [[ ${{ secrets.IMAGE_USERNAME }} == "$(cat USERNAME)" ]] && [[ ${{ secrets.IMAGE_PASSWORD}} == "$(cat PASSWORD)" ]]; 
