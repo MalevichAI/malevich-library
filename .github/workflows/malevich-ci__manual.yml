@@ -18,12 +18,12 @@ jobs:
     environment: ${{ inputs.branch }}
     runs-on: ubuntu-latest
     steps:
+      - name: "Install aws cli"
+        uses: unfor19/install-aws-cli-action@v1
       - name: Checkout
         uses: actions/checkout@v4.1.0
         with:
           ref: ${{ inputs.branch }}
-      - name: "Install aws cli"
-        uses: unfor19/install-aws-cli-action@v1
       - name: Docker Login
         run: |
           if [[ ${{ secrets.REGISTRY_TYPE }} == ecr* ]];
@@ -100,7 +100,6 @@ jobs:
               fi  
               echo "Pushing ${name}"
               docker push -q --all-tags $image_url/$name || { echo "::warning::Failed to push ${name}" ; errors+=("${name}") ; continue ;}
-              
               if [[ -f .github/workflows/app.py ]]; then
                 python3 .github/workflows/app.py --path "lib/src/${name}/space.yaml" --url "$image_url/$name:$commit_sha" && \
                 echo "::notice::${name} configured"
