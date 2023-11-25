@@ -3,6 +3,8 @@ openai:
   description: Provides services from OpenAI
   visibility:
     - public
+  icon: component/openai_api.png
+  repo_url: https://github.com/MalevichAI/malevich-library/tree/dev/lib/src/openai_api
   app:
     container_ref: public.ecr.aws/u6e1k0c7/openai_api
     container_user: null

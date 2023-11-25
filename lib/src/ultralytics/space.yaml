@@ -3,6 +3,8 @@ ultralytics:
   description: Integrates with Ultralytics platform providing object detection and segmentation models 
   visibility:
     - public
+  icon: component/ultralytics.png
+  repo_url: https://github.com/MalevichAI/malevich-library/tree/dev/lib/src/ultralytics
   app:
     container_ref: public.ecr.aws/u6e1k0c7/ultralytics
     container_user: null
