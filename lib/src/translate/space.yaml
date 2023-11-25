@@ -3,6 +3,8 @@ translate:
   description: A simple text translator built on popular translation services
   visibility:
     - public
+  icon: component/translate.png
+  repo_url: https://github.com/MalevichAI/malevich-library/tree/dev/lib/src/translate
   app:
     container_ref: public.ecr.aws/u6e1k0c7/translate
     container_user: null

@@ -3,6 +3,8 @@ fasttext:
   description: Language identification, text classification, and more powered by Facebook fastText
   visibility:
     - public
+  icon: component/fasttext.png
+  repo_url: https://github.com/MalevichAI/malevich-library/tree/dev/lib/src/fasttext
   app:
     container_ref: public.ecr.aws/u6e1k0c7/fasttext
     container_user: null
