@@ -1,6 +1,8 @@
 openai:
   name: OpenAI
-  description: Provides services from OpenAI
+  description: |
+    Provides functionality available at Open AI. Enables you to run chat completions, vision and text-to-image (DALL-E)
+    models. Supports most of the configuration available with Open AI API.
   visibility:
     - public
   icon: component/openai_api.png
