@@ -64,6 +64,7 @@ async def exec_vision(
     response: ChatCompletion = await client.chat.completions.create(
         messages=messages,
         model=conf.model or 'gpt-4-vision-preview',
+        max_tokens=conf.max_tokens,
     )
 
     return [choice.message for choice in response.choices]

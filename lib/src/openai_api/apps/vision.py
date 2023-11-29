@@ -23,6 +23,7 @@ async def llm_with_vision(variables: DF[Any], ctx: Context):
         - openai_api_key (str, required): your OpenAI API key
         - user_prompt (str, required): the prompt for the user
         - image_column (str, default: 'images'): the column with images
+        - max_tokens (int, default: 2048): the maximum number of tokens
 
     Inputs:
 
