@@ -60,7 +60,7 @@ jobs:
     
     - name: Build, Test and Push
       run: |
-        dirs=$(git log --name-only --diff-filter=d -1 | grep '/' | cut -d '/' -f3 | sort -u)
+        dirs=$(git log --name-only -1 | grep '/' | cut -d '/' -f3 | sort -u)
         errors=()
         commit_sha=$(git rev-parse HEAD)
         if [[ ${dirs[0]} == "" ]];

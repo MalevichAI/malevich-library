@@ -63,7 +63,6 @@ async def exec_structured_chat(
         },
     )
 
-
     output = await client.ainvoke(
         prompt.format_prompt().to_messages()
     )
