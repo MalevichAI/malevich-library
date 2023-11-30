@@ -10,10 +10,10 @@ from ..models.configuration.base import Configuration
 
 
 @processor()
-async def llm_with_vision(variables: DF[Any], ctx: Context):
+async def completion_with_vision(variables: DF[Any], ctx: Context):
     """Use Language Model with Vision feature from OpenAI
 
-    Language Model with Vision enables you to generate text
+    Completion with Vision enables you to generate text
     based on an image.
 
     The model is set to 'gpt-4-vision-preview' by default.
@@ -24,6 +24,16 @@ async def llm_with_vision(variables: DF[Any], ctx: Context):
         - user_prompt (str, required): the prompt for the user
         - image_column (str, default: 'images'): the column with images
         - max_tokens (int, default: 2048): the maximum number of tokens
+        - top_p (float, default: 1.0): the probability of the model
+            returning a next token that is in the top P tokens
+        - temperature (float, default: 1.0): the higher the value,
+            the more random the generated text
+        - frequency_penalty (float, default: 0.0): the higher the value,
+            the less likely the model is to repeat the same word
+        - presence_penalty (float, default: 0.0): the higher the value,
+            the less likely the model is to talk about the same topic again
+        - model (str, default: 'gpt-4-vision-preview'): the model to use
+
 
     Inputs:
 
@@ -45,6 +55,24 @@ async def llm_with_vision(variables: DF[Any], ctx: Context):
 
         A dataframe with following columns:
             - content (str): the content of the model response
+
+    Supported file types:
+
+        - png
+        - jpg
+        - jpeg
+        - gif
+        - bmp
+        - tiff
+        - tif
+        - webp
+
+    Args:
+        variables (DF[Any]): a dataframe with variables
+        ctx (Context): context
+
+    Returns:
+        A dataframe with model responses
     """
 
 

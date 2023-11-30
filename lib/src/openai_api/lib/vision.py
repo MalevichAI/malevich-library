@@ -58,13 +58,17 @@ async def exec_vision(
     client = AsyncOpenAI(
         api_key=conf.api_key,
         max_retries=conf.max_retries,
-        organization=conf.organization,
+        organization=conf.organization
     )
 
     response: ChatCompletion = await client.chat.completions.create(
         messages=messages,
         model=conf.model or 'gpt-4-vision-preview',
         max_tokens=conf.max_tokens,
+        top_p=conf.top_p,
+        frequency_penalty=conf.frequency_penalty,
+        presence_penalty=conf.presence_penalty,
+        temperature=conf.temperature,
     )
 
     return [choice.message for choice in response.choices]
