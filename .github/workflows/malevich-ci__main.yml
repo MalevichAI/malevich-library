@@ -74,11 +74,12 @@ jobs:
         else
           image_url=${{ secrets.REGISTRY_URL }}/${{ secrets.REGISTRY_ID }}
         fi
+
         for dir in $dirs
-        do  
+        do
           dir=lib/src/$dir
           name=$(basename $dir)
-            if [[ $dir != *.* ]] && [[ -e $dir ]] && [[ -f $dir/Dockerfile ]];
+          if [[ $dir != *.* ]] && [[ -e $dir ]] && [[ -f $dir/Dockerfile ]];
           then
             echo "Building ${name}"
             docker build -q -t $image_url/$name:$commit_sha $dir || { echo "::warning::Failed to build ${name}" ; errors+=("${name}") ; continue ;}
@@ -100,11 +101,10 @@ jobs:
             if [[ -f .github/workflows/app.py ]];
             then
               python3 .github/workflows/app.py --path "lib/src/${name}/space.yaml" --url "$image_url/$name:$commit_sha"
-            else
-              echo "::warning::${name} has no space.yaml"
+              echo "::notice::${name} configured"
             fi
 
-            echo -n "Testing ${name}"  
+            echo -n "Testing ${name} "  
             if [[ ${{ secrets.IMAGE_USERNAME }} == "$(cat USERNAME)" ]] && [[ ${{ secrets.IMAGE_PASSWORD}} == "$(cat PASSWORD)" ]];
             then
               echo "with credentials"
