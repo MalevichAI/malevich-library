@@ -52,7 +52,7 @@ jobs:
     
     - name: Install Malevich
       run: |
-        pip install malevich-space>=0.2.3 || { echo "::error::Failed to install malevich" ; exit 1 ;}
+        pip install malevich-space>=0.4.5 || { echo "::error::Failed to install malevich" ; exit 1 ;}
     
     - name: Get branch name
       run: echo "branch=$(git branch --show-current)" >> $GITHUB_OUTPUT
