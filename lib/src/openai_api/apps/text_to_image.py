@@ -55,7 +55,7 @@ async def text_to_image(
         conf = ctx.app_cfg['conf']
     except KeyError:
         raise Exception(
-           "OpenAI client not initialized."
+            "OpenAI client not initialized."
         )
 
     user_prompt = ctx.app_cfg.get('user_prompt')
@@ -72,5 +72,3 @@ async def text_to_image(
     return pd.DataFrame({
         'link': [x.data[0].url for x in outputs]
     })
-
-

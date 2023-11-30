@@ -31,4 +31,3 @@ def init_models(ctx: Context):
         )
 
     ctx.app_cfg['conf'] = conf
-

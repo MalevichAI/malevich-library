@@ -1,0 +1,11 @@
+slack:
+  name: Slack API
+  description: Send messages to channels using Slack API
+  visibility:
+    - public
+  icon: component/slack.png
+  repo_url: https://github.com/MalevichAI/malevich-library/tree/dev/lib/src/slack
+  app:
+    container_ref: public.ecr.aws/u6e1k0c7/slack
+    container_user: null
+    container_token: null

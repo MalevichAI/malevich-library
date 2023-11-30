@@ -3,6 +3,8 @@ aspose:
   description: Helps you to transform documents to different formats
   visibility:
     - public
+  icon: component/aspose.png
+  repo_url: https://github.com/MalevichAI/malevich-library/tree/dev/lib/src/aspose
   app:
     container_ref: public.ecr.aws/u6e1k0c7/aspose
     container_user: null
