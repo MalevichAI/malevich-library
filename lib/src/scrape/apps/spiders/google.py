@@ -29,7 +29,7 @@ def append_api_key(url: str, api_key: str) -> str:
 
 
 def build_google_link(query: str):
-    google_dict = {'q': query, 'num': -1}
+    google_dict = {'q': query, 'num': 65535}
     return 'http://www.google.com/search?' + urlencode(google_dict)
 
 
