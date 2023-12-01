@@ -1,7 +1,7 @@
 import json
 import logging
 from typing import Any
-from urllib.parse import urlencode
+from urllib.parse import urlencode, urlparse
 
 import scrapy
 import scrapy.http
@@ -18,8 +18,18 @@ def get_scrappable_url(url: str, api_key: str) -> str:
     return proxy_url
 
 
+def append_api_key(url: str, api_key: str) -> str:
+    parsed = urlparse(url)
+    query = parsed.query
+    if query:
+        query += '&api_key=' + api_key
+    else:
+        query = 'api_key=' + api_key
+    return parsed._replace(query=query).geturl()
+
+
 def build_google_link(query: str):
-    google_dict = {'q': query }
+    google_dict = {'q': query, 'num': -1}
     return 'http://www.google.com/search?' + urlencode(google_dict)
 
 
@@ -75,19 +85,23 @@ class GoogleSpider(scrapy.Spider):
 
     def parse(self, response: scrapy.http.Response):
         di = json.loads(response.text)
+        self.logger.info(f"RESULTS {len(di['organic_results'])}")
         for result in di['organic_results']:
             domain = get_domain(result['link'])
             if not self._allow_same_domain and domain in self._domain_set:
+                self.logger.info(f"SKIPPING {domain}")
                 continue
             self._domain_set.add(domain)
             link = result['link'] if not self._cut_to_domain else domain
+            self.logger.info(f"LINK {link}")
             yield {'text': link}
 
         try:
             next_page = di['pagination']['load_more_url']
+            self.logger.info(f"NEXT PAGE {next_page}")
             if next_page:
                 yield scrapy.Request(
-                    get_scrappable_url(next_page, self._api_key),
+                    append_api_key(next_page, self._api_key),
                     callback=self.parse
                 )
         except Exception:
