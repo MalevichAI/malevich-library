@@ -24,7 +24,6 @@ def convert_pdf_to_jpeg(files: DF[Filename], context: Context):
                         result_path
                     )
             )
-            print(f'Saved into {os.path.join(APP_DIR, result_path)}')
             context.share(result_path)
             pages.append(result_path)
         df = pd.DataFrame(pages, columns=['jpeg'])
