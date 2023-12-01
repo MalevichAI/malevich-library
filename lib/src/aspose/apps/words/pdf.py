@@ -43,11 +43,11 @@ def convert_pdf_to_markdown(files: DF[Filename], context: Context):
         doc = aw.Document(context.get_share_path(filename))
         pages = []
         if start_page != 0 or page_num is not None:
-            for i in range(start_page, 
+            for i in range(start_page,
             min(doc.page_count if page_num is None else start_page+page_num,
                 doc.page_count
                 )
-            ):  
+            ):
                 page = doc.extract_pages(i, 1)
                 result_path = os.path.basename(
                     filename.replace(".pdf", f"_{i+1}.md")

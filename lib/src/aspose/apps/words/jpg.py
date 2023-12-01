@@ -42,8 +42,7 @@ def convert_pdf_to_jpg(files: DF[Filename], context: Context):
     for filename in files.filename.to_list():
         doc = aw.Document(context.get_share_path(filename))
         pages = []
-     
-        for i in range(start_page, 
+        for i in range(start_page,
                        min(
                            doc.page_count if page_num is None else start_page+page_num,
                            doc.page_count)
