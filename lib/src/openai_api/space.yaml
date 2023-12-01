@@ -8,6 +8,6 @@ openai:
   icon: component/openai_api.png
   repo_url: https://github.com/MalevichAI/malevich-library/tree/dev/lib/src/openai_api
   app:
-    container_ref: public.ecr.aws/u6e1k0c7/openai_api:dea2dd0e6fbe609cc8a46dcca9c7c993237fa005
+    container_ref: public.ecr.aws/u6e1k0c7/openai_api
     container_user: null
     container_token: null
