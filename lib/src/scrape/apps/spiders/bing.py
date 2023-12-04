@@ -7,13 +7,12 @@ import scrapy
 import scrapy.http
 
 
-def get_scrappable_url(query, offset, count) -> str:
+def get_scrappable_url(query, offset, count=50) -> str:
     payload = {
         "q": query,
         "count": count,
         "offset": offset,
-        "cc": "us",
-        "answerCount": 1
+        "cc": "us"
     }
     proxy_url = 'https://api.bing.microsoft.com/v7.0/search?' + urlencode(payload)
     return proxy_url
@@ -55,7 +54,7 @@ class BingSpider(scrapy.Spider):
 
         super().__init__(self.name, **kwargs)
         if not bing_api_key:
-            raise ValueError("scrape_api_key is required")
+            raise ValueError("bing_api_key is required")
 
         self._api_key = bing_api_key
         self.start_urls = start_urls
@@ -70,19 +69,18 @@ class BingSpider(scrapy.Spider):
                 scrapy.Request(
                     url=get_scrappable_url(query,1),
                     headers={"Ocp-Apim-Subscription-Key": self._api_key},
-                    callback=self.first_parse
-                    )
+                    callback=self.parse,
+                    cb_kwargs={
+                        'offset': 1
+                    }
+                )
             )
         return requests
 
-    def first_parse(self, response:scrapy.http.Response):
+    def parse(self, response: scrapy.http.Response, offset=1, count=50, max=None):
         di = json.loads(response.text)
-        self.offset = 1
-        self.max = min(di['totalEstimatedMatches'], 65535)
-        self.parse(response=response)
-
-    def parse(self, response: scrapy.http.Response):
-        di = json.loads(response.text)
+        if max is None:
+            max = min(di['webPages']['totalEstimatedMatches'], 65535)
         self.logger.info(f"RESULTS {len(di['webPages']['value'])}")
         for result in di['webPages']['value']:
             domain = get_domain(result['url'])
@@ -93,18 +91,23 @@ class BingSpider(scrapy.Spider):
             link = result['url'] if not self._cut_to_domain else domain
             self.logger.info(f"LINK {link}")
             yield {'text': link}
-
-        self.offset += 50
-        if self.offset < self.max:
+        self.logger.info(f"Offset {offset}, Count: {count}, Max: {max}")
+        offset += count
+        if offset < max:
             yield scrapy.Request(
                 url=get_scrappable_url(
                     di['queryContext']['originalQuery'],
-                    self.offset,
-                    50 if self.max - self.offset+1 >= 50 else self.max - self.offset+1
+                    offset,
+                    count
                 ),
                 callback=self.parse,
                 headers={
                     "Ocp-Apim-Subscription-Key": self._api_key
+                },
+                cb_kwargs={
+                    'offset': offset,
+                    'count': count,
+                    'max': max
                 }
             )
         else:
