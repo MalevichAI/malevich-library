@@ -12,6 +12,38 @@ class Filename(BaseModel):
 
 @processor()
 def convert_pdf_to_jpeg(files: DF[Filename], context: Context):
+    """Converts PDF to JPEG
+
+    Inputs:
+        A dataframe with a column `filename` that contains
+        names of the files. Files should be either downloaded
+        or shared in apps before
+
+    Outputs:
+        A dataframe with two columns: `filename` and `jpeg`.
+        The `filename` column contains the name of the original
+        file, the `jpeg` column contains the name of the converted
+        file. The converted file is shared in apps.
+
+    Configuration:
+        - start_page (int): the number of the first page to convert.
+            If not specified, converts from the first page
+        - page_num (int): the number of pages to convert. If not
+            specified, converts all pages
+
+    Args:
+        files (DF[Filename]): a dataframe with a column `filename`
+            that contains names of the files
+        context (Context): a context object that contains
+            the configuration and the methods to work with files
+
+    Returns:
+        DF[Filename]: a dataframe with two columns: `filename` and `jpeg`.
+            The `filename` column contains the name of the original
+            file, the `jpeg` column contains the name of the converted
+            file. The converted file is shared in apps
+
+    """
     outputs = []
     start_page = context.app_cfg.get('start_page', 0)
     page_num = context.app_cfg.get('page_num', None)
