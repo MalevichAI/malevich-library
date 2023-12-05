@@ -14,8 +14,10 @@ def get_scrappable_url(query, offset, count=50) -> str:
         "offset": offset,
         "cc": "us"
     }
-    proxy_url = 'https://api.bing.microsoft.com/v7.0/search?' + urlencode(payload)
+    proxy_url = 'https://api.bing.microsoft.com/v7.0/search?' + \
+        urlencode(payload)
     return proxy_url
+
 
 def get_domain(url: str) -> str:
     # https://stackoverflow.com/a/9626540/9263761 -> www.stackoverflow.com
@@ -32,7 +34,6 @@ def get_domain(url: str) -> str:
     return 'www.' + url
 
 
-
 class BingSpider(scrapy.Spider):
     name = 'bing'
     custom_settings = {
@@ -44,10 +45,10 @@ class BingSpider(scrapy.Spider):
 
     def __init__(
         self,
-        bing_api_key = None,
-        allow_same_domain = False,
-        cut_to_domain = False,
-        start_urls = None,
+        bing_api_key=None,
+        allow_same_domain=False,
+        cut_to_domain=False,
+        start_urls=None,
         *args: Any,  # noqa: ANN401
         **kwargs: Any  # noqa: ANN401
     ) -> None:
@@ -67,7 +68,7 @@ class BingSpider(scrapy.Spider):
         for query in self.start_urls:
             requests.append(
                 scrapy.Request(
-                    url=get_scrappable_url(query,1),
+                    url=get_scrappable_url(query, 1),
                     headers={"Ocp-Apim-Subscription-Key": self._api_key},
                     callback=self.parse,
                     cb_kwargs={
