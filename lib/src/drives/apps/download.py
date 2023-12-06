@@ -6,12 +6,14 @@ import pandas as pd
 from malevich.square import APP_DIR, DF, Context, processor, scheme
 from pydantic import BaseModel
 
+# from mosaic.files.assertfile import assertfile
+
 
 @scheme()
 class GoogleDriveLink(BaseModel):
     link: str
 
-
+# @assertfile(output_column="filename")
 @processor()
 def download_from_google_drive(links: DF[GoogleDriveLink], context: Context):
     """Download files from google drive.
@@ -38,37 +40,68 @@ def download_from_google_drive(links: DF[GoogleDriveLink], context: Context):
     """
     outputs = []
     for link in links.link.to_list():
-        try:
-            output_file = gdown.download(
-                link,
-                fuzzy=True,
-                quiet=True
-            )
+        if 'folder' not in link:
+            try:
+                output_file = gdown.download(
+                    link,
+                    fuzzy=True,
+                    quiet=True
+                )
 
-            basename = os.path.basename(output_file)
+                basename = os.path.basename(output_file)
 
-            shutil.copyfile(
-                output_file,
-                os.path.join(
-                    APP_DIR,
+                shutil.copyfile(
+                    output_file,
+                    os.path.join(
+                        APP_DIR,
+                        basename
+                    )
+                )
+
+                outputs.append(
                     basename
                 )
-            )
-            print(os.listdir(APP_DIR))
+            except Exception as e:
+                if context.app_cfg.get("fail_on_error", False):
+                    raise e
+                else:
+                    print(f"Failed to download {link}")
+                    print(e)
+        else:
+            try:
+                output_files = gdown.download_folder(
+                    link,
+                    quiet=True
+                )
 
-            context.share(
-                basename
-            )
+                for output_file in output_files:
+                    basename = os.path.basename(output_file)
 
-            outputs.append(
-                basename
-            )
-        except Exception as e:
-            if context.app_cfg.get("fail_on_error", False):
-                raise e
-            else:
-                print(f"Failed to download {link}")
-                print(e)
+                    shutil.copyfile(
+                        output_file,
+                        os.path.join(
+                            APP_DIR,
+                            basename
+                        )
+                    )
+
+                    outputs.append(
+                        basename
+                    )
+            except Exception as e:
+                if context.app_cfg.get("fail_on_error", False):
+                    raise e
+                else:
+                    print(f"Failed to download {link}")
+                    print(e)
+
+    context.share_many(
+        outputs
+    )
+
+    outputs = [
+        output_file.replace(APP_DIR, '').lstrip('/') for output_file in outputs
+    ]
 
     return pd.DataFrame(
         outputs,
