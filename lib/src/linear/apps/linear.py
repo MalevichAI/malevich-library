@@ -138,9 +138,10 @@ class LinearExecutor:
             }}
             """)
         response = self.client.execute(doc)
-        print(response)
         if email is not None:
             self.assign_user(email, title)
+
+        return response
 
     def assign_user(self, email, title):
         user_id = self.get_user_id(email)
