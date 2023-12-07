@@ -115,7 +115,6 @@ class LinearExecutor:
                     project_name: str,
                     priority: int,
                     state: str,
-                    email: str|None=None
                 ):
         team_id = self.get_team_id(team_key)
         project_id = self.get_project_id(project_name)
@@ -133,15 +132,14 @@ class LinearExecutor:
                         stateId: "{state_id}"
                     }}
                 ){{
-                    success
+                    issue{{
+                        id
+                    }}
                 }}
             }}
             """)
         response = self.client.execute(doc)
-        if email is not None:
-            self.assign_user(email, title)
-
-        return response
+        return response['issueCreate']['issue']['id']
 
     def assign_user(self, email, title):
         user_id = self.get_user_id(email)
@@ -160,101 +158,108 @@ class LinearExecutor:
                     }}
             """
         )
-        self.client.execute(doc)
+        response = self.client.execute(doc)
+        return response['issueUpdate']['success']
 
-
-    def get_issues(self):
+    def get_issues(self, team_key: str):
         doc = gql(
-            """
-                query{
-                    issues {
-                        nodes {
+            f"""
+                query{{
+                    issues(
+                        filter:{{
+                            team:{{
+                                key: {{
+                                    eq: "{team_key}"
+                                }}
+                            }}
+                        }}){{
+                        nodes {{
                             id
                             title
                             description
                             priority
-                            state {
+                            state {{
                                 name
-                            }
-                            assignee {
+                            }}
+                            assignee {{
                                 name
                                 email
-                            }
-                        }
-                    }
-                }
+                            }}
+                        }}
+                    }}
+                }}
             """
         )
         response = self.client.execute(doc)
         return response['issues']['nodes']
 
-    def get_users(self):
+    def get_users_in_team(self, team_key):
         doc = gql(
-            """
-            query{
-                users{
-                    nodes {
-                        id
+            f"""
+            query{{
+               teams(
+                filter:{{
+                    key:{{
+                    eq: "{team_key}"
+                    }}
+                }}){{
+                nodes {{
+                    members {{
+                    nodes {{
                         name
                         email
-                    }
-                }
-            }
+                    }}
+                    }}
+                }}
+                }}
+            }}
             """
         )
         response = self.client.execute(doc)
-        return response['users']['nodes']
+        return response['teams']['nodes'][0]['members']['nodes']
 
-    def get_teams(self):
+    def get_projects(self, team_key):
         doc = gql(
-            """
-            query{
-                teams{
-                    nodes {
-                        id
-                        key
-                        name
-                        description
-                        members {
-                            nodes {
-                            name
-                            email
-                            }
-                        }
-                    }
-                }
-            }
-            """
-        )
-        response = self.client.execute(doc)
-        return response['teams']['nodes']
-
-    def get_projects(self):
-        doc = gql(
-            """
-            query{
-                projects{
-                    nodes {
+           f"""
+            query{{
+                projects(
+                    filter:{{
+                        accessibleTeams:{{
+                            some: {{
+                                key:{{
+                                    eq: "{team_key}"
+                                }}
+                            }}
+                        }}
+                    }}){{
+                    nodes {{
                         id
                         name
-                        members {
-                            nodes {
+                        members {{
+                            nodes {{
                             name
                             email
-                            }
-                        }
-                    }
-                }
-            }
+                            }}
+                        }}
+                    }}
+                }}
+            }}
             """
         )
         response = self.client.execute(doc)
         return response['projects']['nodes']
 
-
-if __name__ == '__main__':
-    headers = {
-            'Content-Type': 'application/json',
-            'Authorization': 'Linear API Key'
-        }
-    client = LinearExecutor('https://api.linear.app/graphql', headers)
+    def get_project_by_identifier(self, project_id):
+        doc = gql(
+            f"""
+            query ExampleQuery {{
+                project(
+                    id: "{project_id}"
+                ){{
+                    name
+                }}
+                }}
+            """
+        )
+        response = self.client.execute(doc)
+        return response['project']['name']
