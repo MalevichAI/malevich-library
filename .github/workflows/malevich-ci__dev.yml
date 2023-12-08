@@ -83,7 +83,6 @@ jobs:
             build_context=$dir
             build_file=$dir/Dockerfile
             if [[ -f $dir/.buildconf ]];
-            if [[ -f $dir/.buildconf ]];
             then
               build_context=$( cat $dir/.buildconf | grep "BuildContext" || echo "context ${build_context}" )
               build_context=$( echo $build_context | cut -d ' ' -f2 )
