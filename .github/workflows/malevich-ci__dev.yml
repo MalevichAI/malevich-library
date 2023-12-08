@@ -80,8 +80,18 @@ jobs:
           name=$(basename $dir)
             if [[ $dir != *.* ]] && [[ -e $dir ]] && [[ -f $dir/Dockerfile ]];
           then
+            build_context=$dir
+            build_file=$dir/Dockerfile
+            if [[ -f $dir/.buildconf ]];
+            if [[ -f $dir/.buildconf ]];
+            then
+              build_context=$( cat $dir/.buildconf | grep "BuildContext" || echo "context ${build_context}" )
+              build_context=$( echo $build_context | cut -d ' ' -f2 )
+              build_file=$( cat $dir/.buildconf | grep "BuildFile" || echo "file ${build_file}" )
+              build_file=$( echo $build_file | cut -d ' ' -f2 )
+            fi
             echo "Building ${name}"
-            docker build -q -t $image_url/$name:$commit_sha $dir || { echo "::warning::Failed to build ${name}" ; errors+=("${name}") ; continue ;}
+            docker build -q -t $image_url/$name:$commit_sha -f $build_file $build_context || { echo "::warning::Failed to build ${name}" ; errors+=("${name}") ; continue ;}
             if [[ ${{ secrets.REGISTRY_TYPE}} == ecr* ]];
             then
               echo "Finding/Creating AWS repository"
