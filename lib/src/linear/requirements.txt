@@ -1,0 +1,4 @@
+gql
+pandas
+requests-toolbelt
+pyparsing
