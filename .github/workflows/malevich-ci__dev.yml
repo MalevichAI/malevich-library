@@ -106,7 +106,7 @@ jobs:
             echo "Pushing ${name}"
             docker push -q --all-tags $image_url/$name || { echo "::warning::Failed to push ${name}" ; errors+=("${name}") ; continue ;}
             
-            if [[ -f .github/workflows/app.py ]];
+            if [[ -f .github/workflows/app.py ]] && [[ -f $dir/space.yaml ]];
             then
               python3 .github/workflows/app.py --path "lib/src/${name}/space.yaml" --url "$image_url/$name:$commit_sha"
             else
@@ -117,16 +117,18 @@ jobs:
             if [[ ${{ secrets.IMAGE_USERNAME }} == "$(cat USERNAME)" ]] && [[ ${{ secrets.IMAGE_PASSWORD}} == "$(cat PASSWORD)" ]];
             then
               echo "with credentials"
+              echo "::debug::Commit Message: $(git log --format=%B -1 $commit_sha)"
               space ci report ./$dir ${{ steps.extract_branch.outputs.branch }} \
-              $commit_sha "$(echo $commit_sha | git log --format=%B -n 1)" done \
+              $commit_sha "$(git log --format=%B -1 $commit_sha)" done \
               $image_url/$name:$commit_sha \
               --image-user=$(cat USERNAME) --image-token=$(cat PASSWORD) \
               --space-username=${{ secrets.SPACE_USERNAME }} --space-password=${{ secrets.SPACE_PASSWORD }} --space-org=${{ secrets.ORG_ID }} \
               ${{ secrets.API_URL }} || { echo "::warning::Failed to report" ; errors+=("${name}") ;}
             else
               echo "without credentials"
+              echo "::debug::Commit Message: $(git log --format=%B -1 $commit_sha)"
               space ci report ./$dir ${{ steps.extract_branch.outputs.branch }} \
-              $commit_sha "$(git rev-parse HEAD)" done \
+              $commit_sha "$(git log --format=%B -1 $commit_sha)" done \
               $image_url/$name:$commit_sha \
               --space-username=${{ secrets.SPACE_USERNAME }} --space-password=${{ secrets.SPACE_PASSWORD }} --space-org=${{ secrets.ORG_ID }} \
               ${{ secrets.API_URL }} || { echo "::warning::Failed to report ${name}" ; errors+=("${name}") ;}
