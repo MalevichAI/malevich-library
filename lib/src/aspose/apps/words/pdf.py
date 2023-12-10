@@ -37,38 +37,73 @@ def convert_pdf_to_markdown(files: DF[Filename], context: Context):
             end. The column contains the path to the converted markdown files.
     """
     outputs = []
+    start_page = context.app_cfg.get('start_page', 0)
+    page_num = context.app_cfg.get('page_num', None)
     for filename in files.filename.to_list():
         doc = aw.Document(context.get_share_path(filename))
-        result_path = os.path.basename(
-            filename.replace(".pdf", ".md")
-        )
-        doc.save(
-            os.path.join(
-                APP_DIR,
-                result_path
-            ), aw.SaveFormat.MARKDOWN
-        )
+        pages = []
+        if start_page != 0 or page_num is not None:
+            for i in range(start_page,
+            min(doc.page_count if page_num is None else start_page+page_num,
+                doc.page_count
+                )
+            ):
+                page = doc.extract_pages(i, 1)
+                result_path = os.path.basename(
+                    filename.replace(".pdf", f"_{i+1}.md")
+                )
+                page.save(
+                    os.path.join(
+                        APP_DIR,
+                        result_path
+                    ), aw.SaveFormat.MARKDOWN
+                )
+                context.share(result_path)
+                if context.app_cfg.get("write_contents", False):
+                    with open(
+                        os.path.join(
+                            APP_DIR,
+                            result_path
+                        )
+                    ) as f:
+                        pages.append(
+                            f.read()
+                        )
+                else:
+                    pages.append(
+                        result_path
+                    )
 
-        context.share(result_path)
-        if context.app_cfg.get("write_contents", False):
-            with open(
+        else:
+            result_path = os.path.basename(
+                filename.replace(".pdf", ".md")
+            )
+            doc.save(
                 os.path.join(
                     APP_DIR,
                     result_path
-                )
-            ) as f:
-                outputs.append(
-                    f.read()
-                )
-        else:
-            outputs.append(
-                result_path
+                ), aw.SaveFormat.MARKDOWN
             )
 
-    files.insert(
-        len(files.columns),
-        "markdown",
-        pd.Series(outputs)
-    )
+            context.share(result_path)
+            if context.app_cfg.get("write_contents", False):
+                with open(
+                    os.path.join(
+                        APP_DIR,
+                        result_path
+                    )
+                ) as f:
+                    pages.append(
+                        f.read()
+                    )
+            else:
+                pages.append(
+                    result_path
+                )
+        df = pd.DataFrame({
+                    'markdown': pages
+                })
+        df.insert(1, 'filename', filename)
+        outputs.append(df)
 
-    return files
+    return pd.concat(outputs)

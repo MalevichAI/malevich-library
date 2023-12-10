@@ -1,0 +1,23 @@
+linear:
+  name: Linear
+  description: |
+    Utilize this tool to make the most of Linear API's capabilities. Extract and analyze user and project data, create issues, and streamline your workflow. Designed to enhance data-driven operations, it is ideal for diverse use cases, from project management to issue resolution and user analysis.
+  visibility:
+    - public
+  icon: component/linear.png
+  repo_url: https://github.com/MalevichAI/malevich-library/tree/main/lib/src/linear
+  app:
+    container_ref: public.ecr.aws/u6e1k0c7/linear
+    container_user: null
+    container_token: null
+  designed_for_use_case:
+    - title: Collect information about issues
+      body: Collects information about issues in a Linear workspace. For example, you can use this tool to collect team keys, issue IDs, titles, descriptions, states and assignees.
+    - title: Assign issues to users
+      body: Assigns issues to users in a Linear workspace by issue title and email address.
+    - title: Create issues
+      body: Creates issues in a Linear workspace.
+  not_designed_for_use_case:
+    - title: Run queries for Linear API
+      body: The app is not designed to run queries for Linear API.
+
