@@ -40,6 +40,7 @@ jobs:
           echo 'Default log in'
           username=${{ secrets.IMAGE_USERNAME }}
           token=${{ secrets.IMAGE_PASSWORD }}
+          image_url=${{ secrets.REGISTRY_URL }}/${{ secrets.REGISTRY_ID }}
         fi
         echo "$username" >> USERNAME
         echo "$token" >> PASSWORD
@@ -60,7 +61,7 @@ jobs:
     
     - name: Build, Test and Push
       run: |
-        dirs=$(git log --name-only -1 | grep '/' | cut -d '/' -f3 | sort -u)
+         dirs=$(git log --name-only -1 | grep '/' | cut -d '/' -f3 | sort -u)
         errors=()
         commit_sha=$(git rev-parse HEAD)
         if [[ ${dirs[0]} == "" ]];
@@ -81,8 +82,17 @@ jobs:
           name=$(basename $dir)
           if [[ $dir != *.* ]] && [[ -e $dir ]] && [[ -f $dir/Dockerfile ]];
           then
+            build_context=$dir
+            build_file=$dir/Dockerfile
+            if [[ -f $dir/.buildconf ]];
+            then
+              build_context=$( cat $dir/.buildconf | grep "BuildContext" || echo "context ${build_context}" )
+              build_context=$( echo $build_context | cut -d ' ' -f2 )
+              build_file=$( cat $dir/.buildconf | grep "BuildFile" || echo "file ${build_file}" )
+              build_file=$( echo $build_file | cut -d ' ' -f2 )
+            fi
             echo "Building ${name}"
-            docker build -q -t $image_url/$name:$commit_sha $dir || { echo "::warning::Failed to build ${name}" ; errors+=("${name}") ; continue ;}
+            docker build -q -t $image_url/$name:$commit_sha -f $build_file $build_context || { echo "::warning::Failed to build ${name}" ; errors+=("${name}") ; continue ;}
             if [[ ${{ secrets.REGISTRY_TYPE}} == ecr* ]];
             then
               echo "Finding/Creating AWS repository"
@@ -98,26 +108,29 @@ jobs:
             echo "Pushing ${name}"
             docker push -q --all-tags $image_url/$name || { echo "::warning::Failed to push ${name}" ; errors+=("${name}") ; continue ;}
             
-            if [[ -f .github/workflows/app.py ]];
+            if [[ -f .github/workflows/app.py ]] && [[ -f $dir/space.yaml ]];
             then
               python3 .github/workflows/app.py --path "lib/src/${name}/space.yaml" --url "$image_url/$name:$commit_sha"
-              echo "::notice::${name} configured"
+            else
+              echo "::warning::${name} has no space.yaml"
             fi
 
             echo -n "Testing ${name} "  
             if [[ ${{ secrets.IMAGE_USERNAME }} == "$(cat USERNAME)" ]] && [[ ${{ secrets.IMAGE_PASSWORD}} == "$(cat PASSWORD)" ]];
             then
               echo "with credentials"
+              echo "::debug::Commit Message - $(git log --format=%B -1 $commit_sha)"
               space ci report ./$dir ${{ steps.extract_branch.outputs.branch }} \
-              $commit_sha "$(echo $commit_sha | git log --format=%B -n 1)" done \
+              $commit_sha "$(git log --format=%B -1 $commit_sha)" done \
               $image_url/$name:$commit_sha \
               --image-user=$(cat USERNAME) --image-token=$(cat PASSWORD) \
               --space-username=${{ secrets.SPACE_USERNAME }} --space-password=${{ secrets.SPACE_PASSWORD }} --space-org=${{ secrets.ORG_ID }} \
               ${{ secrets.API_URL }} || { echo "::warning::Failed to report" ; errors+=("${name}") ;}
             else
               echo "without credentials"
+              echo "::debug::Commit Message - $(git log --format=%B -1 $commit_sha)"
               space ci report ./$dir ${{ steps.extract_branch.outputs.branch }} \
-              $commit_sha "$(git rev-parse HEAD)" done \
+              $commit_sha "$(git log --format=%B -1 $commit_sha)" done \
               $image_url/$name:$commit_sha \
               --space-username=${{ secrets.SPACE_USERNAME }} --space-password=${{ secrets.SPACE_PASSWORD }} --space-org=${{ secrets.ORG_ID }} \
               ${{ secrets.API_URL }} || { echo "::warning::Failed to report ${name}" ; errors+=("${name}") ;}
