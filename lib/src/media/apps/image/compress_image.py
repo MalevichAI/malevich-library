@@ -76,7 +76,7 @@ def resize(df: DF[ImageSchema], context: Context):
             )
         except OSError:
             try:
-                img = img.convert('RGBA')
+                img = img.convert('RGB')
                 img.save(
                     os.path.join(
                         APP_DIR,
