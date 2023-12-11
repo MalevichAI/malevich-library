@@ -62,6 +62,8 @@ def download_from_google_drive(links: DF[GoogleDriveLink], context: Context):
                     basename
                 )
                 context.share(basename)
+                print(context.get_share_path(basename))
+                context.synchronize([basename])
             except Exception as e:
                 if context.app_cfg.get("fail_on_error", False):
                     raise e
