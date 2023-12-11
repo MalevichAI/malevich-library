@@ -25,8 +25,7 @@ def compress_img(df: DF[ImageSchema], context: Context):
         new_filename = os.path.basename(
                 os.path.splitext(row['filename'])[0] + f'.{im_type}'
             )
-        if im_type == 'jpg' and img.mode == 'RGBA':
-            img = img.convert('RGB')
+        img = img.convert('RGB')
         img.save(
             os.path.join(
                 APP_DIR,
