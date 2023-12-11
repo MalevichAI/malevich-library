@@ -1,5 +1,3 @@
-import json
-
 import scrapy
 import scrapy.http
 
@@ -29,19 +27,21 @@ class XpathSpider(scrapy.Spider):
             if self.type == 'text':
                 data.append(cfg['key'])
             try:
-                data = selector.xpath(cfg['xpath']).getall()
+                data.extend(selector.xpath(cfg['xpath']).getall())
             except KeyError:
-                data = selector.css(cfg['css']).getall()
+                data.extend(selector.css(cfg['css']).getall())
+            for i in range(len(data)):
+                data[i] = data[i].replace('\n', '\\n')
+                data[i] = data[i].replace('\t', '\\t')
 
             if self.type == 'json':
                 outputs[cfg['key']] = data
             else:
                 outputs.append('\n'.join(data))
-
         if self.type == 'json':
-            yield json.dumps(outputs)
+            yield outputs
         else:
-            yield '\n\n'.join(outputs)
+            yield {'items': '\n\n'.join(outputs)}
 
 
 
