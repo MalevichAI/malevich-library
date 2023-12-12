@@ -4,6 +4,7 @@ from .linked_in_profiles import LinkedInPeopleSpider
 from .linked_in_org import LinkedInCompanySpider
 from .bing import BingSpider
 from .aliexpress import AliexpSpider
+from .xpath import XpathSpider
 
 SPIDERS = {
     'text': TextSpider,
@@ -11,5 +12,6 @@ SPIDERS = {
     'bing': BingSpider,
     'linkedin_people_profile': LinkedInPeopleSpider,
     'linkedin_company_profile': LinkedInCompanySpider,
-    'aliexpress': AliexpSpider
+    'aliexpress': AliexpSpider,
+    'xpath': XpathSpider
 }
