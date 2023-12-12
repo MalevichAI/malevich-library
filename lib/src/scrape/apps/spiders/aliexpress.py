@@ -13,7 +13,15 @@ class Response:
 class AliexpSpider(scrapy.Spider):
     name = 'aliexpress'
 
-    def __init__(self, start_urls, scrape_api_key, output_type='json') -> None:
+    def __init__(
+            self,
+            start_urls,
+            scrape_api_key,
+            output_type='json',
+            *args,
+            **kwargs
+        ) -> None:
+        super().__init__(self.name, **kwargs)
         self.start_urls=start_urls
         self.type = output_type
         self.api_key=scrape_api_key
@@ -26,14 +34,11 @@ class AliexpSpider(scrapy.Spider):
             'url': url,
             'key': self.api_key
         }
-        print("URL", 'https://api.scrapfly.io/scrape?' + urlencode(payload))
         return 'https://api.scrapfly.io/scrape?' + urlencode(payload)
 
     def start_requests(self):
-        return [
-            scrapy.Request(self.form_request(url), callback=self.parse) \
-            for url in self.start_urls
-        ]
+        for url in self.start_urls:
+            yield scrapy.Request(self.form_request(url), callback=self.parse) \
 
     def parse(self, response: scrapy.http.Response):
         with open('file1.html', 'w') as f:
@@ -54,7 +59,7 @@ class AliexpSpider(scrapy.Spider):
         if self.type == 'json':
             data['title'] = title
             data['description'] = characteristics
-            return data
+            yield {'text': json.dumps(data, ensure_ascii=False)}
         else:
             data += f'Title:\n{title}\n\nDescription:\n{characteristics}'
-            return {'items': data }
+            yield {'text': data }

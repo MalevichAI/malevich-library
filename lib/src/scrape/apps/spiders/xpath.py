@@ -1,3 +1,5 @@
+import json
+
 import scrapy
 import scrapy.http
 
@@ -5,7 +7,15 @@ import scrapy.http
 class XpathSpider(scrapy.Spider):
     name = 'xpath'
 
-    def __init__(self, start_urls, components, output_type='json') -> None:
+    def __init__(
+            self,
+            start_urls,
+            components,
+            output_type='json',
+            *args,
+            **kwargs
+        ) -> None:
+        super().__init__(self.name, **kwargs)
         self.start_urls=start_urls
         self.config = components
         self.type = output_type
@@ -39,9 +49,9 @@ class XpathSpider(scrapy.Spider):
             else:
                 outputs.append('\n'.join(data))
         if self.type == 'json':
-            yield outputs
+            yield {'text': json.dumps(outputs, ensure_ascii=False)}
         else:
-            yield {'items': '\n\n'.join(outputs)}
+            yield {'text': '\n\n'.join(outputs)}
 
 
 
