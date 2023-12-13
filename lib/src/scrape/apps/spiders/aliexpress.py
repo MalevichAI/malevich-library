@@ -41,8 +41,6 @@ class AliexpSpider(scrapy.Spider):
             yield scrapy.Request(self.form_request(url), callback=self.parse) \
 
     def parse(self, response: scrapy.http.Response):
-        with open('file1.html', 'w') as f:
-            f.write(response.text)
         outputs = json.loads(response.text)
         sel = scrapy.Selector(Response(outputs['result']['content'], response.url))
         data = {} if self.type == 'json' else ''
