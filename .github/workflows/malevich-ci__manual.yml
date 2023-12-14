@@ -8,11 +8,11 @@ on:
       build:
         description: 'Build images'
         required: false
-        default: true
+        default: 'true'
         type: choice
         options:
-        - true
-        - false
+        - 'true'
+        - 'false'
 jobs:
   build_push:
     environment: ${{ inputs.branch }}
@@ -89,26 +89,40 @@ jobs:
             name=$(basename $dir)
             if [[ $dir != *.* ]] && [[ -e $dir ]] && [[ -f $dir/Dockerfile ]]; 
             then
-              echo "Building ${name}"
-              docker build -q -t $image_url/$name:$commit_sha $dir || { echo "::warning::Failed to build ${name}" ; errors+=("${name}") ; continue ;}
-              if [[ ${{ secrets.REGISTRY_TYPE}} == ecr* ]]; 
+              if [[ ${{ inputs.build }} == 'true' ]];
               then
-                echo "Finding/Creating AWS repository"
-                if [[ ${{ secrets.REGISTRY_TYPE}} == "ecr" ]]; 
+                build_context=$dir
+                build_file=$dir/Dockerfile
+                if [[ -f $dir/.buildconf ]];
                 then
-                  aws ecr-public describe-repositories --repository-names $name > /dev/null || \
-                  aws ecr-public create-repository --repository-name $name > /dev/null 
-                else
-                  aws ecr describe-repositories --repository-names $name > /dev/null || \
-                  aws ecr create-repository --repository-name $name > /dev/null
+                  build_context=$( cat $dir/.buildconf | grep "BuildContext" || echo "context ${build_context}" )
+                  build_context=$( echo $build_context | cut -d ' ' -f2 )
+                  build_file=$( cat $dir/.buildconf | grep "BuildFile" || echo "file ${build_file}" )
+                  build_file=$( echo $build_file | cut -d ' ' -f2 )
                 fi
-              fi  
-              echo "Pushing ${name} "
-              docker push -q --all-tags $image_url/$name || { echo "::warning::Failed to push ${name}" ; errors+=("${name}") ; continue ;}
-              if [[ -f .github/workflows/app.py ]]; 
+                echo "Building ${name}"
+                docker build -q -t $image_url/$name:$commit_sha -f $build_file $build_context || { echo "::warning::Failed to build ${name}" ; errors+=("${name}") ; continue ;}
+                if [[ ${{ secrets.REGISTRY_TYPE}} == ecr* ]]; 
+                then
+                  echo "Finding/Creating AWS repository"
+                  if [[ ${{ secrets.REGISTRY_TYPE}} == "ecr" ]]; 
+                  then
+                    aws ecr-public describe-repositories --repository-names $name > /dev/null || \
+                    aws ecr-public create-repository --repository-name $name > /dev/null 
+                  else
+                    aws ecr describe-repositories --repository-names $name > /dev/null || \
+                    aws ecr create-repository --repository-name $name > /dev/null
+                  fi
+                fi  
+                echo "Pushing ${name} "
+                docker push -q --all-tags $image_url/$name || { echo "::warning::Failed to push ${name}" ; errors+=("${name}") ; continue ;}
+              fi
+              if [[ -f .github/workflows/app.py ]] && [[ -f $dir/space.yaml ]];  
               then
                 python3 .github/workflows/app.py --path "lib/src/${name}/space.yaml" --url "$image_url/$name:$commit_sha" && \
                 echo "::notice::${name} configured"
+              else
+                echo "::warning::${name} has no space.yaml"
               fi
 
               echo -n "Testing ${name} "  
@@ -116,7 +130,7 @@ jobs:
               then
                 echo "with credentials"
                 space ci report ./$dir ${{ steps.extract_branch.outputs.branch }} \
-                $commit_sha "$(echo $commit_sha | git log --format=%B -n 1)" done \
+                $commit_sha "$(git log --format=%B -1 $commit_sha)" done \
                 $image_url/$name:$commit_sha \
                 --image-user=$(cat USERNAME) --image-token=$(cat PASSWORD) \
                 --space-username=${{ secrets.SPACE_USERNAME }} --space-password=${{ secrets.SPACE_PASSWORD }} --space-org=${{ secrets.ORG_ID }} \
@@ -124,14 +138,17 @@ jobs:
               else
                 echo "without credentials"
                 space ci report ./$dir ${{ steps.extract_branch.outputs.branch }} \
-                $commit_sha "$(git rev-parse HEAD)" done \
+                $commit_sha "$(git log --format=%B -1 $commit_sha)" done \
                 $image_url/$name:$commit_sha \
                 --space-username=${{ secrets.SPACE_USERNAME }} --space-password=${{ secrets.SPACE_PASSWORD }} --space-org=${{ secrets.ORG_ID }} \
                 ${{ secrets.API_URL }} || { echo "::warning::Failed to report ${name}" ; errors+=("${name}") ;}
-              fi  
-              echo "Tagging ${name} as latest and pushing"
-              docker tag $image_url/$name:$commit_sha $image_url/$name:latest
-              docker push -q --all-tags $image_url/$name || { echo "::warning::Failed to push ${name} as latest" ; errors+=("${name}") ; continue ;}
+              fi
+              if [[ ${{ inputs.build }} == 'true' ]];
+              then  
+                echo "Tagging ${name} as latest and pushing"
+                docker tag $image_url/$name:$commit_sha $image_url/$name:latest
+                docker push -q --all-tags $image_url/$name || { echo "::warning::Failed to push ${name} as latest" ; errors+=("${name}") ; continue ;}
+              fi
             fi
           done
           if [[ ${#errors[@]} > 0 ]];

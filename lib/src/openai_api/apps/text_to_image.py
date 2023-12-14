@@ -1,8 +1,11 @@
 import asyncio
+import os
+import uuid
 from typing import Any
 
 import pandas as pd
-from malevich.square import DF, Context, processor
+import requests
+from malevich.square import APP_DIR, DF, Context, processor
 
 from ..lib.image import exec_image
 
@@ -33,14 +36,21 @@ async def text_to_image(
 
     Outputs:
 
-        A dataframe with following column:
-        - links (str): links to images
+        The format of the output depends on the configuration.
+
+        If `download` set to true, then an output dataframe will
+        contain a column `filename` with filenames of downloaded images.
+
+        Otherwise, an output dataframe will contain a column `link`
+        with links to the images provided directly by Open AI.
 
     Configuration:
 
         - openai_api_key (str, required): your OpenAI API key
         - user_prompt (str, required): the prompt for the user
         - model (str, default: 'dall-e-3'): the model to use
+        - download (bool, default: false): whether to download images
+        - n (int, default: 1): amount of images to generate for each request
 
     Args:
         variables (DF[ImageLinks]): Dataframe with variables
@@ -50,6 +60,7 @@ async def text_to_image(
     Returns:
         Dataframe with links to images
     """
+    download = ctx.app_cfg.get('download', False)
 
     try:
         conf = ctx.app_cfg['conf']
@@ -65,10 +76,30 @@ async def text_to_image(
         for __vars in variables.to_dict(orient='records')
     ]
 
-    outputs = await asyncio.gather(
+    _outputs = await asyncio.gather(
         *[exec_image(x, conf) for x in inputs],
     )
 
+    outputs = []
+    for _o in _outputs:
+        outputs.extend([x.url for x in _o.data])
+
+    if download:
+        files = []
+        for link in outputs:
+            response = requests.get(link)
+            fname = uuid.uuid4().hex[:8]
+            with open(os.path.join(APP_DIR, fname), 'wb+') as f:
+                f.write(response.content)
+            ctx.share(fname)
+            files.append(fname)
+        ctx.synchronize(files)
+
+        return pd.DataFrame({
+            'file': files
+        })
+
+
     return pd.DataFrame({
-        'link': [x.data[0].url for x in outputs]
+        'link': outputs
     })

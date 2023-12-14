@@ -13,6 +13,7 @@ async def exec_image(prompt: str, conf: Configuration) -> ImagesResponse:
 
     return await client.images.generate(
         prompt=prompt,
-        model=conf.model,
+        model=conf.model or 'dall-e-3',
         timeout=60,
+        n=conf.n
     )

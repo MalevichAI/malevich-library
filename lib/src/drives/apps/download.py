@@ -61,6 +61,8 @@ def download_from_google_drive(links: DF[GoogleDriveLink], context: Context):
                 outputs.append(
                     basename
                 )
+                context.share(basename)
+                context.synchronize([basename])
             except Exception as e:
                 if context.app_cfg.get("fail_on_error", False):
                     raise e
@@ -88,20 +90,13 @@ def download_from_google_drive(links: DF[GoogleDriveLink], context: Context):
                     outputs.append(
                         basename
                     )
+                    context.share(basename)
             except Exception as e:
                 if context.app_cfg.get("fail_on_error", False):
                     raise e
                 else:
                     print(f"Failed to download {link}")
                     print(e)
-
-    context.share_many(
-        outputs
-    )
-
-    outputs = [
-        output_file.replace(APP_DIR, '').lstrip('/') for output_file in outputs
-    ]
 
     return pd.DataFrame(
         outputs,
