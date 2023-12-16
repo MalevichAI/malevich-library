@@ -4,6 +4,13 @@ scrape:
   visibility:
     - public
   icon: component/scrape.png
+  tags:
+    - Scraper
+    - Web
+  designed_for_use_case:
+    - title: Retrieve data from Web Pages
+    - title: Search with Google
+    - title: Search with Bing
   repo_url: https://github.com/MalevichAI/malevich-library/tree/dev/lib/src/scrape
   app:
     container_ref: public.ecr.aws/u6e1k0c7/scrape
