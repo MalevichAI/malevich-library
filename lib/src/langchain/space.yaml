@@ -4,6 +4,10 @@ langchain:
   visibility:
     - public
   icon: component/langchain.png
+  tags:
+    - Text Embedding
+    - LLM
+    - NLP
   repo_url: https://github.com/MalevichAI/malevich-library/tree/dev/lib/src/langchain
   app:
     container_ref: public.ecr.aws/u6e1k0c7/langchain
