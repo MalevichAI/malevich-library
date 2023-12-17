@@ -5,7 +5,15 @@ openai:
     models. Supports most of the configuration available with Open AI API.
   visibility:
     - public
-  icon: component/openai_api.png
+  tags:
+    - LLM
+    - NLP
+    - Agents
+    - Text Embedding
+  designed_for_use_case:
+    - title: Text completion with OpenAI LLMs
+    - title: Text embeddings with OpenAI models
+  icon: component/openai.png
   repo_url: https://github.com/MalevichAI/malevich-library/tree/main/lib/src/openai_api
   app:
     container_ref: public.ecr.aws/u6e1k0c7/openai_api
