@@ -12,7 +12,7 @@ openai:
     - Text Embedding
   designed_for_use_case:
     - title: Text completion with OpenAI LLMs
-    - title: Text emebeddings with OpenAI models
+    - title: Text embeddings with OpenAI models
   icon: component/openai.png
   repo_url: https://github.com/MalevichAI/malevich-library/tree/main/lib/src/openai_api
   app:
