@@ -10,4 +10,5 @@ RUN apt-get update && apt-get install gcc ffmpeg libsm6 libxext6 build-essential
 COPY requirements.txt requirements.txt
 RUN apt-get update && apt-get install -y poppler-utils
 RUN if test -e requirements.txt; then pip install --no-cache-dir -r requirements.txt; fi
+
 COPY ./apps ./apps
