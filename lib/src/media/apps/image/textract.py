@@ -19,7 +19,8 @@ def textract_tables(files: DF[TextracTable], context: Context):
     textract = boto3.client(
             'textract',
             aws_access_key_id=key_id,
-            aws_secret_access_key=secret_key
+            aws_secret_access_key=secret_key,
+            region_name='us-east-1'
         )
     outputs = []
     for filename in files.filename.to_list():
@@ -34,8 +35,7 @@ def textract_tables(files: DF[TextracTable], context: Context):
         tables = []
         columns = 0
         rows = 0
-        data =json.loads(response)
-        for d in data['Blocks']:
+        for d in response['Blocks']:
             if(d['BlockType'] == 'TABLE'):
                 for rel in d['Relationships']:
                     if rel['Type'] == 'CHILD':
@@ -85,5 +85,10 @@ def textract_tables(files: DF[TextracTable], context: Context):
                 )
             )
             context.share(new_filename)
-            outputs.append([filename, new_filename])
-    return pd.DataFrame(outputs, columns=['filename', 'table_filename'])
+            if context.app_cfg.get('write_contents', False):
+                outputs.append(
+                    [filename, open(os.path.join(APP_DIR, new_filename)).read()]
+                )
+            else:
+                outputs.append([filename, new_filename])
+    return pd.DataFrame(outputs, columns=['filename', 'table'])
