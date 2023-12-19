@@ -1,7 +1,7 @@
 media:
   name: Video and Audio Media Operations
-  description: Allows to perform operations with images or videos
-  visibility:
+  description: A simple tool for handling videos, images and docs
+  visibility: 
     - public
   icon: component/media.png
   repo_url: https://github.com/MalevichAI/malevich-library/tree/dev/lib/src/media
@@ -9,3 +9,18 @@ media:
     container_ref: public.ecr.aws/u6e1k0c7/media
     container_user: null
     container_token: null
+  tags:
+    - Computer Vision
+    - Media
+  designed_for_use_case:
+    - title: Split into frames
+      body: Split your videos into frames to analyze them with machine learning models.
+    - title: Convert PDF to images
+      body: Produce images from PDF files to analyze them with GPT-4 Vision or other models.
+    - title: Compress Images
+      body: Resize and reformate images to reduce their size and fit certain requirements
+  not_designed_for_use_case:
+    - title: Posting on social media
+      body: The app is not designed to post on social media.
+    - title: Video editing
+      body: The app is not designed to edit videos.

@@ -3,6 +3,11 @@ translate:
   description: A simple text translator built on popular translation services
   visibility:
     - public
+  tags:
+    - Translate
+    - NLP
+  designed_for_use_case:
+    - title: Translate text between languages
   icon: component/translate.png
   repo_url: https://github.com/MalevichAI/malevich-library/tree/dev/lib/src/translate
   app:

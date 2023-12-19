@@ -1,0 +1,16 @@
+spacy:
+  name: spaCy Integration
+  description: spaCy allows you to use state-of-the-art NLP models in your solutions. Extract named entities, analyze sentiment, and solve complex text classification tasks with the spaCy apps on Malevich.
+  visibility:
+    - public
+  icon: component/spacy.png
+  tags:
+    - NLP
+    - Entity detection
+  designed_for_use_case:
+    - title: Find named entities in text
+  repo_url: https://github.com/MalevichAI/malevich-library/tree/main/lib/src/spacy
+  app:
+    container_ref: public.ecr.aws/u6e1k0c7/spacy
+    container_user: null
+    container_token: null
