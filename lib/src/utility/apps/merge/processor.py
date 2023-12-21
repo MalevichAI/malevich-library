@@ -1,7 +1,7 @@
 from typing import Any, List
 
 import pandas as pd
-from malevich.square import DF, DFS, Context, M, processor
+from malevich.square import DF, Context, Sink, processor
 
 
 def merge_dfs(dfs: List[DF[Any]], context: Context):
@@ -44,7 +44,7 @@ def merge_dfs(dfs: List[DF[Any]], context: Context):
 
 
 @processor()
-def merge(dfs: DFS[M[Any]], context: Context):
+def merge(dfs: Sink[Any], context: Context):
     """Merges multiple dataframes into one
 
     Input:
