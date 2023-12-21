@@ -1,0 +1,15 @@
+dependencies: []
+project_id: null
+space:
+  api_gateway_path: /e
+  api_url: https://dev.api.malevich.ai
+  auth_path: /api/v1/login/access-token
+  graphql_path: /api/v1/graphql
+  host:
+    alias: null
+    conn_url: https://core.malevich.ai/
+  org: rival
+  password: secret#557549
+  token: null
+  username: zak@malevich.ai
+version: null
