@@ -57,6 +57,7 @@ def get_links_to_files(df: DF, ctx: Context):
             )
 
             ctx.share(_fbase, all_runs=True)
+            # ctx.synchronize([_fbase], all_runs=True)
             return _fbase, ctx.get_share_path(_fbase, all_runs=True)
         elif _exst(_obj, all_runs=True):
             return _obj, ctx.get_share_path(_obj, all_runs=True)
@@ -90,6 +91,7 @@ def get_links_to_files(df: DF, ctx: Context):
                 )
                 _fbase += '.zip'
                 ctx.share(_fbase, all_runs=True)
+                # ctx.synchronize([_fbase], all_runs=True)
                 _links.append(_fbase)
                 _fo2zip[_obj] = _fbase
                 return _fbase

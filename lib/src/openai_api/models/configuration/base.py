@@ -88,3 +88,18 @@ class Configuration(BaseModel):
         1,
         description="The number of best completions to return. Default is 1.",
     )
+
+    voice: str = Field(
+        'alloy',
+        description="A voice for text-to-speech. Default is 'alloy'.",
+    )
+
+    speed: float = Field(
+        1.0,
+        description="The speed of the voice. Default is 1.0.",
+    )
+
+    language: str = Field(
+        'en',
+        description="The language of the audio. Default is 'en'.",
+    )
