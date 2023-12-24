@@ -8,6 +8,7 @@ from pydantic import BaseModel
 
 from .lib.crawl import crawl
 from .lib.proc import Process
+from .middleware.selenium import Selenium
 from .spiders import SPIDERS
 
 
@@ -311,17 +312,21 @@ def scrape_web(
     ids = []
     for links_batch in links:
         _id = uuid.uuid4().hex
-        proc = Process(
-            target=crawl,
-            kwargs={
-                'settings': {
+        settings = {
                     'CLOSESPIDER_TIMEOUT': timeout,
                     'CLOSESPIDER_ITEMCOUNT': context.app_cfg.get('max_results', 0),
                     'DEPTH_LIMIT': context.app_cfg.get('max_depth', 1),
                     'FEED_FORMAT': 'json',
-                    "FEED_EXPORT_ENCODING": "utf-8",
+                    'FEED_EXPORT_ENCODING': 'utf-8',
                     'FEED_URI': f'output-{_id}.json'
-                },
+        }
+        if context.app_cfg.get('spider', 'text') == 'aliexpress':
+            settings['DOWNLOADER_MIDDLEWARES'] = {Selenium : 543}
+
+        proc = Process(
+            target=crawl,
+            kwargs={
+                'settings': settings,
                 'spider_cls': spider_cls,
                 'start_urls': links_batch,
                 'allowed_domains': context.app_cfg.get('allowed_domains', []),
