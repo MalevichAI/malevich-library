@@ -1,5 +1,4 @@
 import json
-
 import scrapy
 import scrapy.http
 
@@ -45,10 +44,8 @@ class AliexpSpider(scrapy.Spider):
                 "//span[contains(@class, 'titleContent') or \
                     contains(@class, 'value')]/text()"
             ).getall())
-
             images = sel.xpath("//div[@class = 'gallery_Gallery__picList__1gsooe']//picture//img/@src").getall()   # noqa: E501
             images.extend(sel.xpath("//div[@id = 'content_anchor']//img/@src").getall())
-
             if self.type == 'json':
                 data['title'] = title
                 data['description'] = characteristics

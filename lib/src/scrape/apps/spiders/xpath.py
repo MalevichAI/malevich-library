@@ -12,6 +12,7 @@ class XpathSpider(scrapy.Spider):
             start_urls,
             components,
             output_type='json',
+            include_keys=False,
             *args,
             **kwargs
         ) -> None:
@@ -19,6 +20,7 @@ class XpathSpider(scrapy.Spider):
         self.start_urls=start_urls
         self.config = components
         self.type = output_type
+        self._include_keys = include_keys
 
     def start_requests(self):
         for url in self.start_urls:
@@ -34,7 +36,7 @@ class XpathSpider(scrapy.Spider):
         outputs = {} if self.type == 'json' else []
         for cfg in self.config:
             data = []
-            if self.type == 'text':
+            if self.type == 'text' and self._include_keys:
                 data.append(cfg['key'])
             try:
                 data.extend(selector.xpath(cfg['xpath']).getall())
