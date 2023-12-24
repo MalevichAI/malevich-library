@@ -1,5 +1,4 @@
 import json
-from urllib.parse import urlencode
 
 import scrapy
 import scrapy.http
@@ -16,7 +15,6 @@ class AliexpSpider(scrapy.Spider):
     def __init__(
             self,
             start_urls,
-            scrape_api_key,
             output_type='json',
             only_images=False,
             *args,
@@ -25,32 +23,22 @@ class AliexpSpider(scrapy.Spider):
         super().__init__(self.name, **kwargs)
         self.start_urls=start_urls
         self.type = output_type
-        self.api_key=scrape_api_key
         self.img_only=only_images
-
-    def form_request(self, url):
-        payload = {
-            'asp': 'true',
-            'render_js': 'true',
-            'auto_scroll': 'true',
-            'url': url,
-            'key': self.api_key
-        }
-        return 'https://api.scrapfly.io/scrape?' + urlencode(payload)
 
     def start_requests(self):
         for url in self.start_urls:
-            yield scrapy.Request(self.form_request(url), callback=self.parse) \
+            yield scrapy.Request(url=url, callback=self.parse)
 
-    def parse(self, response: scrapy.http.Response):
-        outputs = json.loads(response.text)
-        sel = scrapy.Selector(Response(outputs['result']['content'], response.url))
+
+    def parse(self, response:scrapy.http.Response):
+        sel = scrapy.Selector(Response(response.body.decode(), response.url))
         if not self.img_only:
             data = {} if self.type == 'json' else ''
             title = ' '.join(sel.xpath('//h1/text()').getall())
+
             description = ' '.join(
                 sel.xpath(
-                    "//span[contains(@id, 'tl_')]/text()"
+                    "//*[contains(@id, 'tl_')]/text()"
                 ).getall()
             )
             characteristics = description + ' ' + ' '.join(sel.xpath(
@@ -58,6 +46,7 @@ class AliexpSpider(scrapy.Spider):
                     contains(@class, 'value')]/text()"
             ).getall())
             images = sel.xpath("//div[@class = 'gallery_Gallery__picList__1gsooe']//picture//img/@src").getall()   # noqa: E501
+            images.extend(sel.xpath("//div[@id = 'content_anchor']//img/@src").getall())
             if self.type == 'json':
                 data['title'] = title
                 data['description'] = characteristics
