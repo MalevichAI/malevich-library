@@ -2,4 +2,6 @@ opencv-python
 pdf2image
 Pillow
 rembg
-
+boto3
+pandas
+tabulate
