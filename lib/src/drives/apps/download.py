@@ -97,7 +97,6 @@ def download_from_google_drive(links: DF[GoogleDriveLink], context: Context):
                 else:
                     print(f"Failed to download {link}")
                     print(e)
-
     return pd.DataFrame(
         outputs,
         columns=["filename"]

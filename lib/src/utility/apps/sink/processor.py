@@ -3,7 +3,7 @@ from typing import Any
 from malevich.square import DF, processor
 
 
-@processor()
+#@processor()
 def sink_two(df_1: DF[Any], df_2: DF[Any]):
     """Combine dataframes from different sources into a collection of dataframes.
 
@@ -23,7 +23,7 @@ def sink_two(df_1: DF[Any], df_2: DF[Any]):
     return df_1, df_2
 
 
-@processor()
+#@processor()
 def sink_three(_d1: DF[Any], _d2: DF[Any], _d3: DF[Any]):
     """Combine dataframes from different sources into a collection of dataframes.
 
@@ -44,7 +44,7 @@ def sink_three(_d1: DF[Any], _d2: DF[Any], _d3: DF[Any]):
     return _d1, _d2, _d3
 
 
-@processor()
+#@processor()
 def sink_four(_d1: DF[Any], _d2: DF[Any], _d3: DF[Any], _d4: DF[Any]):
     """Combine dataframes from different sources into a collection of dataframes.
 
@@ -66,7 +66,7 @@ def sink_four(_d1: DF[Any], _d2: DF[Any], _d3: DF[Any], _d4: DF[Any]):
     return _d1, _d2, _d3, _d4
 
 
-@processor()
+#@processor()
 def sink_five(_d1: DF[Any], _d2: DF[Any], _d3: DF[Any], _d4: DF[Any], _d5: DF[Any]):
     """Combine dataframes from different sources into a collection of dataframes.
 

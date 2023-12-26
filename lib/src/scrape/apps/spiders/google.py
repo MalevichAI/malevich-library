@@ -42,10 +42,7 @@ def get_domain(url: str) -> str:
     # remove www.
     url = url.replace('www.', '')
 
-    # remove everything after the first /
-    url = url.split('/')[0]
-
-    return 'www.' + url
+    return 'www.' + url.split('/')[0]
 
 
 

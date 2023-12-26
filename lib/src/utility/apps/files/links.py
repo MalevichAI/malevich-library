@@ -43,9 +43,6 @@ def get_links_to_files(df: DF, ctx: Context):
         )
 
     def _get(_obj: str) -> tuple[str, str]:
-        print(_obj)
-        print(_exst(_obj, all_runs=False))
-        print(_exst(_obj, all_runs=True))
         if _exst(_obj, all_runs=False):
             # /FOLDER/FILE.EXT -> /FOLDER/FILE__RUNID.EXT
             _fbase = os.path.basename(_obj)
@@ -60,8 +57,7 @@ def get_links_to_files(df: DF, ctx: Context):
             )
 
             ctx.share(_fbase, all_runs=True)
-            ctx.synchronize([_fbase])
-            print(_fbase)
+            ctx.synchronize([_fbase], all_runs=True)
             return _fbase, ctx.get_share_path(_fbase, all_runs=True)
         elif _exst(_obj, all_runs=True):
             return _obj, ctx.get_share_path(_obj, all_runs=True)
@@ -95,6 +91,7 @@ def get_links_to_files(df: DF, ctx: Context):
                 )
                 _fbase += '.zip'
                 ctx.share(_fbase, all_runs=True)
+                ctx.synchronize([_fbase], all_runs=True)
                 _links.append(_fbase)
                 _fo2zip[_obj] = _fbase
                 return _fbase
@@ -109,14 +106,11 @@ def get_links_to_files(df: DF, ctx: Context):
     for _col in df.columns:
         df[_col] = df[_col].apply(_collect)
 
-    print(df)
-    print(_links)
 
     key_link = ctx.object_storage.update(
         keys=_links, presigned_expire=_expire_secs
     )
 
-    print(key_link)
 
     def _set(_obj: object) -> object:
         if not isinstance(_obj, str):

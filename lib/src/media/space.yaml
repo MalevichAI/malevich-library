@@ -1,6 +1,6 @@
 media:
   name: Video and Audio Media Operations
-  description: Media App is a powerful and simple tool for handling videos, images and docs. From tailoring images to dissecting videos, it simplifies complex tasks, enabling you to focus on harnessing the power of your content for endless possibilities, all in an intuitive, easy-to-use interface.
+  description: A simple tool for handling videos, images and docs
   visibility: 
     - public
   icon: component/media.png
@@ -9,7 +9,9 @@ media:
     container_ref: public.ecr.aws/u6e1k0c7/media
     container_user: null
     container_token: null
-
+  tags:
+    - Computer Vision
+    - Media
   designed_for_use_case:
     - title: Split into frames
       body: Split your videos into frames to analyze them with machine learning models.
@@ -22,5 +24,3 @@ media:
       body: The app is not designed to post on social media.
     - title: Video editing
       body: The app is not designed to edit videos.
-
-

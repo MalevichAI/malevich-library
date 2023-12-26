@@ -1,9 +1,11 @@
 aspose:
-  name: Aspose Service Integration
-  description: Helps you to transform documents to different formats
+  name: Aspose Service
+  description: Helps transform documents to different structured formats
   visibility:
     - public
   icon: component/aspose.png
+  designed_for_use_case:
+    - title: Transform PDFs into markdown
   repo_url: https://github.com/MalevichAI/malevich-library/tree/dev/lib/src/aspose
   app:
     container_ref: public.ecr.aws/u6e1k0c7/aspose
