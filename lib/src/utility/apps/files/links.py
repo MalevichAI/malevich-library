@@ -117,7 +117,6 @@ def get_links_to_files(df: DF, ctx: Context):
     )
 
     print(key_link)
-
     def _set(_obj: object) -> object:
         if not isinstance(_obj, str):
             try:

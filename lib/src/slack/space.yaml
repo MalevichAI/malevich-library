@@ -3,6 +3,11 @@ slack:
   description: Send messages to channels using Slack API
   visibility:
     - public
+  tags:
+    - Productivity
+    - Messaging
+  designed_for_use_case:
+    - title: Send messages to Slack channels
   icon: component/slack.png
   repo_url: https://github.com/MalevichAI/malevich-library/tree/dev/lib/src/slack
   app:

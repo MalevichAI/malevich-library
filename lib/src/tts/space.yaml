@@ -4,6 +4,13 @@ tts:
   visibility:
     - public
   icon: component/tts.png
+  tags:
+    - Speech
+    - Text-to-Speech
+    - Voice
+    - Audio
+  designed_for_use_case:
+    - title: Convert text to spoken speech audio
   repo_url: https://github.com/MalevichAI/malevich-library/tree/dev/lib/src/tts
   app:
     container_ref: public.ecr.aws/u6e1k0c7/scrape

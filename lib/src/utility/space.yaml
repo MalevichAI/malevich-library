@@ -4,6 +4,9 @@ utility:
   visibility:
     - public
   icon: component/utility.png
+  tags:
+    - ETL
+    - Preprocessing
   repo_url: https://github.com/MalevichAI/malevich-library/tree/dev/lib/src/utility
   app:
     container_ref: public.ecr.aws/u6e1k0c7/utility

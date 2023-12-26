@@ -4,6 +4,11 @@ spacy:
   visibility:
     - public
   icon: component/spacy.png
+  tags:
+    - NLP
+    - Entity detection
+  designed_for_use_case:
+    - title: Find named entities in text
   repo_url: https://github.com/MalevichAI/malevich-library/tree/main/lib/src/spacy
   app:
     container_ref: public.ecr.aws/u6e1k0c7/spacy

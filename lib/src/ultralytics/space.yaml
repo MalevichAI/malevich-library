@@ -3,6 +3,13 @@ ultralytics:
   description: Integrates with Ultralytics platform providing object detection and segmentation models 
   visibility:
     - public
+  tags:
+    - Computer Vision
+    - Object detection
+    - Object segmentation
+  designed_for_use_case:
+    - title: Detect objects in images
+    - title: Segment objects in images
   icon: component/ultralytics.png
   repo_url: https://github.com/MalevichAI/malevich-library/tree/dev/lib/src/ultralytics
   app:

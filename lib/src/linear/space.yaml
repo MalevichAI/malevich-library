@@ -10,6 +10,9 @@ linear:
     container_ref: public.ecr.aws/u6e1k0c7/linear
     container_user: null
     container_token: null
+  tags:
+    - Productivity
+    - Project Management
   designed_for_use_case:
     - title: Collect information about issues
       body: Collects information about issues in a Linear workspace. For example, you can use this tool to collect team keys, issue IDs, titles, descriptions, states and assignees.
@@ -20,4 +23,3 @@ linear:
   not_designed_for_use_case:
     - title: Run queries for Linear API
       body: The app is not designed to run queries for Linear API.
-
