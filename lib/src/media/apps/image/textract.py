@@ -13,8 +13,35 @@ class TextracTable(BaseModel):
 
 @processor()
 def textract_tables(files: DF[TextracTable], context: Context):
-    key_id = context.app_cfg.get('aws_access_key_id', None)
+    """Extracts tables from PDF files using AWS Textract.
+
+    Input:
+        A dataframe with a column named `filename` containing 
+        the name of the file to process.
+
+    Output:
+        A dataframe with the following columns:
+
+        - `filename`: The name of the file.
+        - `table`: If `write_contents` is False, the name of the
+            markdow file containing the table, otherwise the contents
+            of the file.
+
+    Configuration:
+        - aws_access_key_id (str, required): Your AWS access key ID.
+        - aws_secret_access_key (str, required): Your AWS secret access key.
+        - write_contents (bool, default False): Whether to write the contents
+            of the table to the output.
+
+    Args:
+        files (DF[TextracTable]): The files to process.
+        context (Context): The context.
+
+    Returns:
+        The processed dataframe
+    """
     secret_key = context.app_cfg.get('aws_secret_access_key', None)
+    key_id = context.app_cfg.get('aws_access_key_id', None)
     assert key_id and secret_key, 'Must provide AWS Key credentials'
     textract = boto3.client(
             'textract',
