@@ -8,6 +8,12 @@ from pydantic import BaseModel
 class Text(BaseModel):
     text: str
 
+def _prepare_text(text: str):
+    text = text.replace('\n', ' ').replace('\r', ' ')
+    text = text.replace('\t', ' ').replace('\v', ' ')
+    return text
+
+
 @processor()
 def detect_language(texts: DF[Text]):
     model = fasttext.load_model('/model/lid.176.ftz')
@@ -16,7 +22,7 @@ def detect_language(texts: DF[Text]):
         {
             'text': texts.text.to_list(),
             'language': [
-                model.predict(text)[0][0].replace('__label__', '')
+                model.predict(_prepare_text(text))[0][0].replace('__label__', '')
                 for text in texts.text.to_list()
             ]
         }

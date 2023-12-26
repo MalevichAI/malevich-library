@@ -14,7 +14,7 @@ class Text(BaseModel):
 
 @processor()
 def extract_named_entities(
-    df: DF,
+    df: DF[Text],
     context: Context,
 ):
     """Extracts named entities from text.
