@@ -389,7 +389,7 @@ def scrape_web(
                     'CLOSESPIDER_ITEMCOUNT': context.app_cfg.get('max_results', 0),
                     'DEPTH_LIMIT': context.app_cfg.get('max_depth', 1),
                     'FEED_FORMAT': 'json',
-                    'FEED_EXPORT_ENCODING': 'utf-8',
+                    "FEED_EXPORT_ENCODING": "utf-8",
                     'FEED_URI': f'output-{_id}.json'
         }
         if context.app_cfg.get('spider', 'text') == 'aliexpress':
