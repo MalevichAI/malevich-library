@@ -265,6 +265,78 @@ def scrape_web(
                 - cut_to_domain (bool): whether to cut the links to the domain
                     Default: false
 
+        Bing Spider
+
+            The bing spider extracts links from bing search results.
+            It traverses all links in the search results.
+
+            To use the bing spider, set the `spider` option to `bing`.
+
+            < Spider Configuration >
+
+            The bing spider accepts the following configuration options:
+
+                - bing_api_key (string): your Bing API Key.
+                    You can get it here: https://azure.microsoft.com/en-us/try/cognitive-services/?api=bing-web-search-api
+
+                - allow_same_domain (bool): whether to allow links from the same domain
+                    Default: false
+
+                - cut_to_domain (bool): whether to cut the links to the domain
+
+        xPath Spider
+
+            The xPath spider extracts links from web pages using xPath (or CSS) selectors.
+
+            To use the xPath spider, set the `spider` option to `xpath`.
+
+            < Spider Configuration >
+
+            The xPath spider accepts the following configuration options:
+
+                - components (list[dict]): a list of rules in the following format:
+                [
+                    {
+                        "key": <string>,
+                        "xpath": <string>,
+                        "css": <string>,
+                    }
+                ]
+
+                where `key` is the name of entity to extract, `xpath` is the xPath selector,
+                and `css` is the CSS selector. Either `xpath` or `css` must be provided.
+
+                - output_format (string): the output format. Valid values are "json" or "text.
+                    Default: "json".
+                    If "json", the output will be a JSON object with the following structure:
+                    {
+                        <key1>: [<value1>, ..., <valueN>],
+                        <key2>: [<value1>, ..., <valueN>],
+                    }
+
+                    where `key` is the name of the entity and `value` is the values matched by
+                    the selector.
+
+                    If "text", the output will be a raw text in the following format:
+
+                    <key1>:
+                        <value1>
+                        ...
+                        <valueN>
+                    <key2>:
+                        <value1>
+                        ...
+
+                    where `key` is the name of the entity and `value` is the values matched by
+                    the selector. If there are multiple values, they will be separated by a
+                    newline character. If include_keys is False, the output will be a raw text
+                    in the following format:
+
+                    <value1>
+                    <value2>
+                    ...
+                    <valueN>
+
 
     [Suggestions]
 
