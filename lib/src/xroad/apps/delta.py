@@ -33,12 +33,11 @@ def count_delta(
     ways: DF[StreetWays],
     context: Context
     ):
-    ways = {}
+    way_ids = {}
     for _, row in ways.iterrows():
-        ways[row['name']] = row['way']
-
-    way_ids = [ways[name] for name in doc['name'].to_list()]
-    doc.insert(0, 'way', way_ids)
+        way_ids[row['name']] = row['way']
+    way_ids = [way_ids[name] for name in doc['name'].to_list()]
+    doc.insert(loc=0, column='way', value=way_ids)
     result_df = pd.DataFrame(
         columns=['way', 'direction', 'class', 'units', 'reduced_units', 'camera_id']
     )
@@ -46,13 +45,15 @@ def count_delta(
     for _, row in tech.iterrows():
         doc_row = doc[(doc['way'] == row['way']) &
                       (doc['direction'] == row['direction']) &
-                      (doc['cls'] == row['cls'])][0]
-        result_df.loc[len(result_df.index)] = [
-            doc['way'],
-            doc['direction'],
-            doc['cls'],
-            float(doc_row['units']) - float(tech['units']),
-            float(doc_row['reduced_units'] - float(tech['reduced_units'])),
-            row['camera_id']
-        ]
+                      (doc['cls'] == row['cls'])]
+        if len(doc_row.index) != 0:
+            doc_row = doc_row.iloc[0]
+            result_df.loc[len(result_df.index)] = [
+                doc_row['way'],
+                doc_row['direction'],
+                doc_row['cls'],
+                float(doc_row['units']) - float(row['units']),
+                float(doc_row['reduced_units'] - float(row['reduced_units'])),
+                row['camera_id']
+            ]
     return result_df

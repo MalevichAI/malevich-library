@@ -108,7 +108,7 @@ def get_units(units_list, ways, froms):
 @processor()
 def report_to_df(df: DF[XroadReport], context: Context) -> pd.DataFrame:
     outputs = []
-    for _, filename in df['filename'].to_list():
+    for filename in df['filename'].to_list():
         xls = pd.read_excel(context.get_share_path(filename))
         xls = clean_df(xls)
         intervals = get_intervals(xls)
