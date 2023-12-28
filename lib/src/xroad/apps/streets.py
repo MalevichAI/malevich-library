@@ -1,7 +1,8 @@
 import pandas as pd
-from checker import report_to_df
 from malevich.square import DF, Context, processor, scheme
 from pydantic import BaseModel
+
+from .checker import report_to_df
 
 
 @scheme()

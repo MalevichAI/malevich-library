@@ -5,14 +5,17 @@ from pydantic import BaseModel
 
 @scheme()
 class TechReport(BaseModel):
-    filename: str
+    way: str
+    direction: str
+    cls: str
+    name: str
+    units: str
+    reduced_units: str
+    camera_id: str
 
 @processor()
 def get_osm_way_links(df: DF[TechReport], context: Context):
-    ids = []
-    for _, filename in df['filename'].to_list():
-        report = pd.read_csv(context.get_share_path(filename))
-        ids.extend(report['way'].to_list())
+    ids = df['way'].to_list()
     ids = list(set(ids))
     links = []
     for id in ids:
