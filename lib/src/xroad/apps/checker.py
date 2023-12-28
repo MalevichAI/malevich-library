@@ -134,8 +134,8 @@ def report_to_df(df: DF[XroadReport], context: Context) -> pd.DataFrame:
                                             val['FE'],
                                             val['PE']])
 
-            out = pd.DataFrame(out, columns=['name', 'direction', 'class', 'unit',
-                                            'reduced_unit'])
+            out = pd.DataFrame(out, columns=['name', 'direction', 'class', 'units',
+                                            'reduced_units'])
             out = out[out['direction'] != 'overall']
             out = reset_idx(out)
             output_df.append(out)
