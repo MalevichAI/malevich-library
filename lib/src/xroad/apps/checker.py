@@ -1,4 +1,6 @@
 import pandas as pd
+from malevich.square import DF, Context, processor, scheme
+from pydantic import BaseModel
 
 classes = {
     'Троллейбус': 3,
@@ -16,6 +18,10 @@ classes = {
 ways_id = {}
 
 directions = ['left', 'through', 'right', 'backward', 'overall']
+
+@scheme()
+class XroadReport(BaseModel):
+    filename: str
 
 def combine_columns(row):
     tmp1 = str(row['0']) if not pd.isna(row['0']) else ''
@@ -99,37 +105,42 @@ def get_units(units_list, ways, froms):
                         'PE': fepe[i+fe+1]
                     }
 
-def check(filepath: str):
-    xls = pd.read_excel(filepath)
-    xls = clean_df(xls)
-    intervals = get_intervals(xls)
-    output_df = []
+@processor()
+def report_to_df(df: DF[XroadReport], context: Context) -> pd.DataFrame:
+    outputs = []
+    for _, filename in df['filename'].to_list():
+        xls = pd.read_excel(context.get_share_path(filename))
+        xls = clean_df(xls)
+        intervals = get_intervals(xls)
+        output_df = []
 
-    for interval in intervals:
-        interval['1'] = interval.apply(combine_columns, axis=1)
-        interval.drop(columns='0', axis=1, inplace=True)
-        interval = reset_idx(interval)
-        ways = get_ways(interval.iloc[0, 1:].to_list())
-        ways.append((len(interval.columns), 'end'))
-        froms = get_froms(interval.iloc[1, 1:], ways)
-        get_units(interval, ways, froms)
-        out = []
-        for way in ways_id.keys():
-            for fr in ways_id[way].keys():
-                for cls in ways_id[way][fr].keys():
-                    for dir in ways_id[way][fr][cls].keys():
-                        val = ways_id[way][fr][cls][dir]
-                        out.append([way + ' ' + fr,
-                                    dir, classes[cls],
-                                    val['FE'],
-                                    val['PE']])
+        for interval in intervals:
+            interval['1'] = interval.apply(combine_columns, axis=1)
+            interval.drop(columns='0', axis=1, inplace=True)
+            interval = reset_idx(interval)
+            ways = get_ways(interval.iloc[0, 1:].to_list())
+            ways.append((len(interval.columns), 'end'))
+            froms = get_froms(interval.iloc[1, 1:], ways)
+            get_units(interval, ways, froms)
+            out = []
+            for way in ways_id.keys():
+                for fr in ways_id[way].keys():
+                    for cls in ways_id[way][fr].keys():
+                        if cls in classes.keys():
+                            for dir in ways_id[way][fr][cls].keys():
+                                val = ways_id[way][fr][cls][dir]
+                                out.append([way + ' ' + fr,
+                                            dir, classes[cls],
+                                            val['FE'],
+                                            val['PE']])
 
-        out = pd.DataFrame(out, columns=['name', 'direction', 'class', 'unit',
-                                         'reduced_unit'])
-        out = out[out['direction'] != 'overall']
-        out = reset_idx(out)
-        output_df.append(out)
+            out = pd.DataFrame(out, columns=['name', 'direction', 'class', 'unit',
+                                            'reduced_unit'])
+            out = out[out['direction'] != 'overall']
+            out = reset_idx(out)
+            output_df.append(out)
 
-    output_df = reset_idx(pd.concat(output_df))
+        output_df = reset_idx(pd.concat(output_df))
 
-    return output_df
+        outputs.append(output_df)
+    return pd.concat(outputs)
