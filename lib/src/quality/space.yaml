@@ -4,7 +4,7 @@ quality:
   visibility: 
     - public
   icon: component/quality.png
-  repo_url: https://github.com/MalevichAI/malevich-library/tree/dev/lib/src/media
+  repo_url: https://github.com/MalevichAI/malevich-library/main/dev/lib/src/quality
   app:
     container_ref: public.ecr.aws/u6e1k0c7/quality
     container_user: null
