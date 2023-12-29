@@ -17,12 +17,22 @@ class Rule(BaseModel):
     column: Optional[Union[str, Index]] = None
     row: Optional[Union[str, Index]] = None
     invert: Optional[bool] = False
+    message: Optional[str] = None
 
 
-def _error_message(val: str, re_: re.Pattern, column: str, row: int) -> str:
-    return f"The value at column {column} and row {row} " \
-        f"does not match pattern {re_.pattern}:\n {val[:50]}" \
-        f"{'...' if len(val) > 50 else ''}"
+def _error_message(
+    val: str,
+    re_: re.Pattern,
+    column: str,
+    row: int,
+    message: Optional[str] = None
+) -> str:
+    if message:
+        return f"At column '{column}' and row {row}: {message}"
+    else:
+        return f"The value at column {column} and row {row} " \
+            f"does not match pattern {re_.pattern}:\n {val[:50]}" \
+            f"{'...' if len(val) > 50 else ''}"
 
 
 @processor()
@@ -159,17 +169,18 @@ def assert_regex(df: DF, ctx: Context):
                     if not (re.match(re_, val_) is not None) ^ rule.invert:
                         if raise_on_error:
                             raise Exception(
-                                _error_message(val_, re_, col_, i)
+                                _error_message(val_, re_, col_, i, rule.message)
                             )
                         else:
-                            errors.append(_error_message(val_, re_, col_, i)
-)
+                            errors.append(
+                                _error_message(val_, re_, col_, i, rule.message)
+                            )
                 except re.error:
                     if raise_on_error:
                         raise Exception(
-                            _error_message(val_, re_, col_, i)
+                            _error_message(val_, re_, col_, i, rule.message)
                         )
                     else:
-                        errors.append(_error_message(val_, re_, col_, i))
+                        errors.append(_error_message(val_, re_, col_, i, rule.message))
 
     return pd.DataFrame(errors, columns=["errors"])
