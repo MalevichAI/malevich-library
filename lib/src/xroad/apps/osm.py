@@ -15,6 +15,24 @@ class TechReport(BaseModel):
 
 @processor()
 def get_osm_way_links(df: DF[TechReport], context: Context):
+    """Get links to OpenStreetMap ways by their id
+
+    Input:
+        A dataframe with columns: [ way, direction, cls, name, units, reduced_units, camera_id ]
+
+
+    Output:
+        A dataframe with a column named `link` containing the links to the ways on OpenStreetMap
+        in format https://www.openstreetmap.org/way/id
+
+    Args:
+        links (DF[TechReport]):
+            A dataframe with columns: [ way, direction, cls, name, units, reduced_units, camera_id ]
+
+    Returns:
+        A dataframe with a column named `link` containing the links to the ways on OpenStreetMap
+        in format https://www.openstreetmap.org/way/id
+    """  # noqa: E501
     ids = df['way'].to_list()
     ids = list(set(ids))
     links = []

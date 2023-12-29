@@ -90,23 +90,48 @@ def get_units(units_list, ways, froms):
             break
     for _, row in units_list[start_row:].iterrows():
             cls = row.iloc[0]
-            fepe = row[1:].to_list()
-            where_idx = 0
-            ways_id[ways[0][1]][froms[0][1]][cls] = {}
-            for i in range(0, len(froms)*10, 10):
-                if i >= ways[where_idx+1][0]:
-                    where_idx += 1
-                ways_id[ways[where_idx][1]][froms[i//10][1]][cls] = {}
+            if cls in classes.keys():
+                cls = classes[cls]
+                fepe = row[1:].to_list()
+                where_idx = 0
+                if cls not in ways_id[ways[0][1]][froms[0][1]].keys():
+                    ways_id[ways[0][1]][froms[0][1]][cls] = {}
+                for i in range(0, len(froms)*10, 10):
+                    if i >= ways[where_idx+1][0]:
+                        where_idx += 1
+                    if cls not in ways_id[ways[where_idx][1]][froms[i//10][1]].keys():
+                        ways_id[ways[where_idx][1]][froms[i//10][1]][cls] = {}
 
-                for fe in range(0, 10, 2):
-                    ways_id[ways[where_idx][1]] \
-                    [froms[i//10][1]][cls][directions[fe//2]] = {
-                        'FE': fepe[i+fe],
-                        'PE': fepe[i+fe+1]
-                    }
+                    for fe in range(0, 10, 2):
+                        fepes =  ways_id[ways[where_idx][1]] \
+                        [froms[i//10][1]][cls].get(directions[fe//2], {})
+
+                        fepes['FE'] = fepes.get('FE', 0) + fepe[i+fe]
+                        fepes['PE'] = fepes.get('PE', 0) + fepe[i+fe+1]
+
+                        ways_id[ways[where_idx][1]] \
+                        [froms[i//10][1]][cls][directions[fe//2]] = fepes
+
 
 @processor()
 def report_to_df(df: DF[XroadReport], context: Context) -> pd.DataFrame:
+    """
+    Converts Xroad reports from excel to pandas dataframe
+
+    Input:
+        DataFrame with column 'filename' containing filenames of the reports
+
+    Output:
+        DataFrame with columns: ['name', 'direction', 'class', 'units', 'reduced_units']
+        containing the data from the document report
+
+    Args:
+        DataFrame with column 'filename' containing filenames of the reports
+
+    Returns:
+        DataFrame with columns: [name, direction, class, units, reduced_units]
+        containing the data from the document report
+    """
     outputs = []
     for filename in df['filename'].to_list():
         xls = pd.read_excel(context.get_share_path(filename))
@@ -126,13 +151,12 @@ def report_to_df(df: DF[XroadReport], context: Context) -> pd.DataFrame:
             for way in ways_id.keys():
                 for fr in ways_id[way].keys():
                     for cls in ways_id[way][fr].keys():
-                        if cls in classes.keys():
-                            for dir in ways_id[way][fr][cls].keys():
-                                val = ways_id[way][fr][cls][dir]
-                                out.append([way + ' ' + fr,
-                                            dir, classes[cls],
-                                            val['FE'],
-                                            val['PE']])
+                        for dir in ways_id[way][fr][cls].keys():
+                            val = ways_id[way][fr][cls][dir]
+                            out.append([way + ' ' + fr,
+                                        dir, cls,
+                                        val['FE'],
+                                        val['PE']])
 
             out = pd.DataFrame(out, columns=['name', 'direction', 'class', 'units',
                                             'reduced_units'])

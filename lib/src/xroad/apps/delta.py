@@ -33,6 +33,33 @@ def count_delta(
     ways: DF[StreetWays],
     context: Context
     ):
+    """
+    Count the difference of units and reduced_units between technical and document reports
+
+    Input:
+        DF[TechReportDF]:
+            # Technical report dataframe with columns [way, direction, class, name, units, reduced_units, camera_id]
+        DF[DocReportDF]:
+            Document report dataframe with columns [name, direction, class, units, reduced_units]
+        DF[StreetWays]:
+            Collection with columns [way, name] containing the mapped way ids to street names
+
+    Output:
+        DataFrame with columns: [way, direction, class, units, reduced_units, camera_id] contains the information
+        about ways and difference in units and reduced_units
+
+    Args:
+        DF[TechReportDF]:
+            Technical report dataframe with columns [way, direction, class, name, units, reduced_units, camera_id]
+        DF[DocReportDF]:
+            Document report dataframe with columns [name, direction, class, units, reduced_units]
+        DF[StreetWays]:
+            Collection with columns [way, name] containing the mapped way ids to street names
+
+    Returns:
+        DataFrame with columns: [way, direction, class, units, reduced_units, camera_id] contains the information
+        about ways and difference in units and reduced_units
+    """  # noqa: E501
     way_ids = {}
     for _, row in ways.iterrows():
         way_ids[row['name']] = row['way']
