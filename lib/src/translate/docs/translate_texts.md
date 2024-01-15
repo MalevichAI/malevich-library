@@ -31,4 +31,3 @@ Since this component does not have any configuration parameters, there are no ad
 ## Usage Notes
 
 The **Translate Texts** component is straightforward to use and does not require any programming knowledge. Users simply need to provide the input data in the specified format, and the component will handle the rest. It is important to ensure that the language codes used in the `from_language` and `to_language` columns are valid and supported by the Google Translate API for successful translation.
-
