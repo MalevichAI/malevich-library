@@ -2,15 +2,29 @@ import os
 import uuid
 from itertools import islice
 
+import apps.lib.crawl
+import apps.lib.proc
+import apps.middleware.selenium
+import apps.spiders.aliexpress
+import apps.spiders.bing
+import apps.spiders.google
+import apps.spiders.linked_in_org
+import apps.spiders.linked_in_profiles
+import apps.spiders.text
+import apps.spiders.xpath
 import pandas as pd
 from malevich.square import DF, Context, processor, scheme
 from pydantic import BaseModel
 
-from .lib.crawl import crawl
-from .lib.proc import Process
-from .middleware.selenium import Selenium
-from .spiders import SPIDERS
-
+SPIDERS = {
+    'text': 'apps.spiders.text.TextSpider',
+    'google': 'apps.spiders.google.GoogleSpider',
+    'bing': 'apps.spiders.bing.BingSpider',
+    'linkedin_people_profile': 'apps.spiders.linked_in_profiles.LinkedInPeopleSpider',
+    'linkedin_company_profile': 'apps.spiders.linked_in_org.LinkedInCompanySpider',
+    'aliexpress': 'apps.spiders.aliexpress.AliexpSpider',
+    'xpath': 'apps.spiders.xpath.XpathSpider',
+}
 
 @scheme()
 class ScrapeLinks(BaseModel):
@@ -380,8 +394,9 @@ def scrape_web(
         links = [scrape_links.link.to_list()]
 
     results = []
-    procs: list[Process] = []
+    procs: list[apps.lib.proc.XtProcess] = []
     ids = []
+    print(id(apps.spiders.aliexpress.AliexpSpider), id(eval(spider_cls)))
     for links_batch in links:
         _id = uuid.uuid4().hex
         settings = {
@@ -393,13 +408,15 @@ def scrape_web(
                     'FEED_URI': f'output-{_id}.json'
         }
         if context.app_cfg.get('spider', 'text') == 'aliexpress':
-            settings['DOWNLOADER_MIDDLEWARES'] = {Selenium : 543}
+            settings['DOWNLOADER_MIDDLEWARES'] = {
+                apps.middleware.selenium.Selenium : 543
+            }
 
-        proc = Process(
-            target=crawl,
+        proc = apps.lib.proc.XtProcess(
+            target=apps.lib.crawl.crawl,
             kwargs={
                 'settings': settings,
-                'spider_cls': spider_cls,
+                'spider_cls': eval(spider_cls),
                 'start_urls': links_batch,
                 'allowed_domains': context.app_cfg.get('allowed_domains', []),
                 **context.app_cfg.get('spider_cfg', {})

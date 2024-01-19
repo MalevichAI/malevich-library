@@ -1,7 +1,7 @@
 import multiprocessing
 
 
-class Process(multiprocessing.Process):
+class XtProcess(multiprocessing.Process):
     def __init__(self, *args, **kwargs) -> None:
         multiprocessing.Process.__init__(self, *args, **kwargs)
         self._pconn, self._cconn = multiprocessing.Pipe()
