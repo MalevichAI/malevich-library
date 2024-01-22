@@ -18,8 +18,13 @@ class Selenium:
                 driver.get(request.url)
                 WebDriverWait(driver, 10).until(
                     expected_conditions.presence_of_element_located(
-                                (By.XPATH, "//div[@id = 'content_anchor']")
+                        (By.XPATH, "//div[@id = 'content_anchor']")
                 ))
+                WebDriverWait(driver, 10).until(
+                    expected_conditions.presence_of_element_located(
+                        (By.XPATH, "//div[@id = 'characteristics_anchor']")
+                    )
+                )
                 break
             except TimeoutException:
                 print('Timeout')

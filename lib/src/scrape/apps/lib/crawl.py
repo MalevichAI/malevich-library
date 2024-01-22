@@ -3,7 +3,6 @@ from scrapy.crawler import CrawlerRunner
 
 def crawl(settings, spider_cls, *args, **kwargs):
     process = CrawlerRunner(settings=settings)
-    open('log.txt', 'w').write('PROC STARTED\n')
     from twisted.internet import reactor
     d = process.crawl(
         spider_cls,
