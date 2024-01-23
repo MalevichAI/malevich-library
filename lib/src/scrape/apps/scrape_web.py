@@ -396,7 +396,7 @@ def scrape_web(
     results = []
     procs: list[apps.lib.proc.XtProcess] = []
     ids = []
-    print(id(apps.spiders.aliexpress.AliexpSpider), id(eval(spider_cls)))
+
     for links_batch in links:
         _id = uuid.uuid4().hex
         settings = {
@@ -428,7 +428,7 @@ def scrape_web(
         ids.append(_id)
 
     for proc_, _id in zip(procs, ids):
-        proc_.join()
+        proc_.join(timeout * len(procs) if timeout > 0 else None)
         # Raise if proc failed
         if proc_.exitcode != 0:
             # print exception in proc

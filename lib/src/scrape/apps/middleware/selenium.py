@@ -7,12 +7,19 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 
 class Selenium:
-    def process_request(self, request, spider):
+    def process_request(
+        self,
+        request: scrapy.Request,
+        *args,
+        **kwargs
+    ) -> scrapy.http.Response:
+
         options = webdriver.ChromeOptions()
         options.add_argument('--no-sandbox')
         options.add_argument('--disable-dev-shm-usage')
         options.add_argument('--headless')
         driver = webdriver.Chrome(options)
+        successful = False
         for _ in range(5):
             try:
                 driver.get(request.url)
@@ -25,9 +32,15 @@ class Selenium:
                         (By.XPATH, "//div[@id = 'characteristics_anchor']")
                     )
                 )
+                successful = True
                 break
-            except TimeoutException:
-                print('Timeout')
-            except WebDriverException:
-                print('WebDriverException')
-        return scrapy.http.Response(url = request.url, body=driver.page_source.encode())
+            except (TimeoutException, WebDriverException):
+                continue
+
+        if not successful:
+            raise Exception(
+                "After several attempts, the page did not load correctly. Check "
+                f"that the link is valid: {request.url}"
+            )
+
+        return scrapy.http.Response(url=request.url, body=driver.page_source.encode())
