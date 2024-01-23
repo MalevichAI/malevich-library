@@ -42,7 +42,7 @@ class AliexpSpider(scrapy.Spider):
 
             description = ' '.join(
                 sel.xpath(
-                    "//*[contains(@id, 'tl_')]/text()"
+                    "//div[@id = 'content_anchor']/*[not(self::g-img)]/text()"
                 ).getall()
             )
             keys = sel.xpath(

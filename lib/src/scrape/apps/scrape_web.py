@@ -452,5 +452,4 @@ def scrape_web(
                 )
             else:
                 results.extend(results_)
-
     return pd.DataFrame({'result': results})

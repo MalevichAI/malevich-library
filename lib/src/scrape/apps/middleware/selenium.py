@@ -50,28 +50,30 @@ class Selenium:
         options.add_argument('--no-sandbox')
         options.add_argument('--disable-dev-shm-usage')
         options.add_argument('--ignore-certificate-errors')
+        options.add_argument('--headless')
         options.add_argument('--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36') # noqa: E501
         driver = webdriver.Chrome(options)
         successful = False
-        wait = WebDriverWait(driver, 10)
+        wait = WebDriverWait(driver, 20)
         for _ in range(5):
             try:
                 driver.get(request.url)
                 wait.until(
                     expected_conditions.presence_of_element_located(
-                        (By.XPATH, "//div[text() = 'EN' or text = 'RU']")
+                        (By.XPATH, "//div[@id = 'content_anchor']")
                         )
                     )
                 try:
-                    driver.execute_script(
-                        TO_EN_SCRIPT if spider.browser_language == 'en' else TO_RU_SCRIPT # noqa:E501
-                    )
-                    wait.until(
-                        expected_conditions.presence_of_element_located(
-                            (By.XPATH,
-                            "//div[@id = 'content_anchor']/h2[text() = 'Description']")  # noqa: E501
+                    if spider.browser_language == 'en':
+                        driver.execute_script(
+                            TO_EN_SCRIPT # noqa:E501
                         )
-                    )
+                        wait.until(
+                            expected_conditions.presence_of_element_located(
+                                (By.XPATH,
+                                "//div[@id = 'content_anchor']/h2[text() = 'Description']")  # noqa: E501
+                            )
+                        )
                 except (TimeoutException, WebDriverException):
                     continue
                 wait.until(
@@ -85,9 +87,10 @@ class Selenium:
                 continue
 
         if not successful:
+            driver.delete_all_cookies()
             raise Exception(
                 "After several attempts, the page did not load correctly. Check "
                 f"that the link is valid: {request.url}"
             )
-
+        driver.delete_all_cookies()
         return scrapy.http.Response(url=request.url, body=driver.page_source.encode())
