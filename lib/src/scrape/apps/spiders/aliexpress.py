@@ -18,6 +18,7 @@ class AliexpSpider(scrapy.Spider):
             output_type='json',
             only_images=False,
             only_properties=False,
+            browser_language='ru',
             *args,
             **kwargs
         ) -> None:
@@ -26,6 +27,7 @@ class AliexpSpider(scrapy.Spider):
         self.type = output_type
         self.img_only = only_images
         self.prop_only = only_properties
+        self.browser_language = browser_language
 
     def start_requests(self):
         for url in self.start_urls:
