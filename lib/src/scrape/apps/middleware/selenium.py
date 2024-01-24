@@ -23,21 +23,6 @@ TO_EN_SCRIPT = """
         resp = ru.dispatchEvent(click_event)
         """  # noqa: E501
 
-TO_RU_SCRIPT = """
-        var icon_xp = "//div[text() = 'EN']"
-        var lang_xp = "//li/div/span/span[text() = 'Русский язык']"
-        var click_event = new Event("click", { bubbles: true, cancelable: false });
-
-        var icon = document.evaluate(icon_xp, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue
-        if (icon == null){
-            icon_xp = "//div[text() = 'RU']"
-            icon = document.evaluate(icon_xp, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue
-        }
-        var resp = icon.dispatchEvent(click_event)
-        icon = document.evaluate(lang_xp, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue
-        resp = icon.dispatchEvent(click_event)
-        """  # noqa: E501
-
 class Selenium:
     def process_request(
         self,
@@ -51,6 +36,7 @@ class Selenium:
         options.add_argument('--disable-dev-shm-usage')
         options.add_argument('--ignore-certificate-errors')
         options.add_argument('--headless')
+        options.add_argument('--disable-blink-features=AutomationControlled')
         options.add_argument('--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36') # noqa: E501
         driver = webdriver.Chrome(options)
         successful = False
@@ -66,12 +52,12 @@ class Selenium:
                 try:
                     if spider.browser_language == 'en':
                         driver.execute_script(
-                            TO_EN_SCRIPT # noqa:E501
+                            TO_EN_SCRIPT
                         )
                         wait.until(
                             expected_conditions.presence_of_element_located(
                                 (By.XPATH,
-                                "//div[@id = 'content_anchor']/h2[text() = 'Description']")  # noqa: E501
+                                "//div[@id = 'content_anchor']/h2[text() = 'Description']") # noqa: E501
                             )
                         )
                 except (TimeoutException, WebDriverException):

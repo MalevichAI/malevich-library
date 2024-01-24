@@ -39,12 +39,10 @@ class AliexpSpider(scrapy.Spider):
         if not self.img_only and not self.prop_only:
             data = {} if self.type == 'json' else ''
             title = ' '.join(sel.xpath('//h1/text()').getall())
-
-            description = ' '.join(
-                sel.xpath(
-                    "//div[@id = 'content_anchor']/*[not(self::g-img)]/text()"
-                ).getall()
-            )
+            description = "" + ' '.join(sel.xpath(
+                "//div[@id = 'content_anchor']//*[not(self::img) and not(self::script) \
+                and not(self::div)]/text()"
+            ).getall())
             keys = sel.xpath(
                 "//div[@id = 'characteristics_anchor']//span[contains(@class, 'title')]/text()"  # noqa: E501
             ).getall()
