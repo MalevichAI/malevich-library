@@ -66,8 +66,8 @@ class AliexpSpider(scrapy.Spider):
             else:
                 data += f'Title:\n{title}\n\n' +\
                     f'Description:\n{description}\n\n' +\
-                    f'Properties:{properties}\n\n' +\
-                    'Images:\n'.join(images)
+                    f'Properties:\n{properties}\n\n' +\
+                    'Images:\n' + '\n'.join(images)
                 yield {'text': data }
         elif self.prop_only:
             keys = sel.xpath(
