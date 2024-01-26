@@ -23,6 +23,11 @@ TO_EN_SCRIPT = """
         resp = ru.dispatchEvent(click_event)
         """  # noqa: E501
 
+class Response:
+    def __init__(self, text, url) -> None:
+        self.text = text
+        self.url = url
+
 class Selenium:
     def process_request(
         self,
@@ -70,6 +75,11 @@ class Selenium:
                 successful = True
                 break
             except (TimeoutException, WebDriverException):
+                capcha_sel = scrapy.Selector(Response(driver.page_source, request.url))
+                capcha_sel = capcha_sel.xpath("//div[@class = 'scratch-captcha-title']").getall()
+                if len(capcha_sel) > 0:
+                    driver.execute_script("localStorage = {}")
+                    driver.delete_all_cookies()
                 continue
 
         if not successful:
