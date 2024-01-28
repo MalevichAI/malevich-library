@@ -1,3 +1,8 @@
+import json
+import os
+from itertools import islice
+
+import pandas as pd
 from apps.scrape_web import ScrapeLinks, run_spider
 from malevich.square import DF, Context, processor
 
@@ -246,4 +251,41 @@ def scrape_aliexpress(
         context.app_cfg['timeout'] = 120
 
     context.app_cfg['links_are_independent'] = True
-    return run_spider(scrape_links, context)
+    procs, ids = run_spider(scrape_links, context)
+    results = []
+    timeout = context.app_cfg.get('timeout', 15)
+    for proc_, _id in zip(procs, ids):
+        proc_.join(timeout * len(procs) if timeout > 0 else None)
+        # Raise if proc failed
+        if proc_.exitcode != 0:
+            # print exception in proc
+            proc_.terminate()
+            raise Exception(f'Scraping failed. {proc_.exception}')
+
+        assert os.path.exists(f'output-{_id}.json'), \
+            "Scraper failed to save the results. Try descresing `max_results` or `timeout` options"  # noqa: E501
+
+        with open(f'output-{_id}.json') as f:
+            max_results = context.app_cfg.get('max_results', None)
+            # df = pd.read_json(f).to_dict('records')
+            data = json.loads(f.read())
+            # if max_results == 0:
+            #     max_results = len(df)
+
+            # results_ = [item['text'] for item in islice(df, max_results)]
+            spider_cfg = context.app_cfg.get('spider_cfg', {})
+            for d in data:
+                result_ = []
+                result_.append(
+                    d['text'] if \
+                    spider_cfg.get('output_type', 'json') == 'text'\
+                    else d['json']
+                )
+                json_data = json.loads(d['json'])
+                result_.append(json_data['properties'])
+                result_.append('\n'.join(json_data['images'][:max_results]))
+                results.append(
+                    pd.DataFrame([result_], columns=['text', 'properties', 'images'])
+                )
+    results = pd.concat(results, ignore_index=True)
+    return results

@@ -1,6 +1,4 @@
-import os
 import uuid
-from itertools import islice
 
 import apps.lib.crawl
 import apps.lib.proc
@@ -10,7 +8,6 @@ import apps.spiders.bing
 import apps.spiders.google
 import apps.spiders.text
 import apps.spiders.xpath
-import pandas as pd
 from malevich.square import DF, Context, scheme
 from pydantic import BaseModel
 
@@ -50,7 +47,6 @@ def run_spider(
     else:
         links = [scrape_links.link.to_list()]
 
-    results = []
     procs: list[apps.lib.proc.XtProcess] = []
     ids = []
 
@@ -84,29 +80,5 @@ def run_spider(
         procs.append(proc)
         ids.append(_id)
 
-    for proc_, _id in zip(procs, ids):
-        proc_.join(timeout * len(procs) if timeout > 0 else None)
-        # Raise if proc failed
-        if proc_.exitcode != 0:
-            # print exception in proc
-            proc_.terminate()
-            raise Exception(f'Scraping failed. {proc_.exception}')
+    return (procs, ids)
 
-        assert os.path.exists(f'output-{_id}.json'), \
-            "Scraper failed to save the results. Try descresing `max_results` or `timeout` options"  # noqa: E501
-
-        with open(f'output-{_id}.json') as f:
-            max_results = context.app_cfg.get('max_results', 0)
-            df = pd.read_json(f).to_dict('records')
-            if max_results == 0:
-                max_results = len(df)
-
-            results_ = [item['text'] for item in islice(df, max_results)]
-            if context.app_cfg.get('squash_results', False) or links_are_independent:
-                results.append(
-                    context.app_cfg.get('squash_delimiter',
-                                        '\n').join(results_)
-                )
-            else:
-                results.extend(results_)
-    return pd.DataFrame({'result': results})

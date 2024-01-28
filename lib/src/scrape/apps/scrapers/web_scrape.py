@@ -1,3 +1,7 @@
+import os
+from itertools import islice
+
+import pandas as pd
 from apps.scrape_web import ScrapeLinks, run_spider
 from malevich.square import DF, Context, processor
 
@@ -222,4 +226,33 @@ def scrape_web(
     Returns:
         A dataframe with a textual column named `result`
     """  # noqa: E501
-    return run_spider(scrape_links, context)
+    procs, ids = run_spider(scrape_links, context)
+    results = []
+    timeout = context.app_cfg.get('timeout', 15)
+    for proc_, _id in zip(procs, ids):
+        proc_.join(timeout * len(procs) if timeout > 0 else None)
+        # Raise if proc failed
+        if proc_.exitcode != 0:
+            # print exception in proc
+            proc_.terminate()
+            raise Exception(f'Scraping failed. {proc_.exception}')
+
+        assert os.path.exists(f'output-{_id}.json'), \
+            "Scraper failed to save the results. Try descresing `max_results` or `timeout` options"  # noqa: E501
+
+        with open(f'output-{_id}.json') as f:
+            max_results = context.app_cfg.get('max_results', 0)
+            df = pd.read_json(f).to_dict('records')
+            if max_results == 0:
+                max_results = len(df)
+
+            results_ = [item['text'] for item in islice(df, max_results)]
+            if context.app_cfg.get('squash_results', False) \
+                or context.app_cfg.get('links_are_independent', False):
+                results.append(
+                    context.app_cfg.get('squash_delimiter',
+                                        '\n').join(results_)
+                )
+            else:
+                results.extend(results_)
+    return pd.DataFrame({'result': results})
