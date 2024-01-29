@@ -49,6 +49,7 @@ class Selenium:
         options.add_argument('--ignore-certificate-errors')
         options.add_argument('--headless')
         options.add_argument('--disable-blink-features=AutomationControlled')
+
         options.add_argument(f'--user-agent={agent.random}') # noqa: E501
         driver = webdriver.Chrome(options)
         successful = False
@@ -106,5 +107,4 @@ class Selenium:
             )
         driver.execute_script('localStorage = {}')
         driver.delete_all_cookies()
-
         return scrapy.http.Response(url=request.url, body=driver.page_source.encode())

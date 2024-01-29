@@ -79,6 +79,4 @@ def run_spider(
         proc.start()
         procs.append(proc)
         ids.append(_id)
-
     return (procs, ids)
-
