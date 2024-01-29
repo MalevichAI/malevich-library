@@ -1,6 +1,5 @@
 import json
 import os
-from itertools import islice
 
 import pandas as pd
 from apps.scrape_web import ScrapeLinks, run_spider
@@ -260,7 +259,11 @@ def scrape_aliexpress(
         if proc_.exitcode != 0:
             # print exception in proc
             proc_.terminate()
-            raise Exception(f'Scraping failed. {proc_.exception}')
+            raise Exception(f'''
+                            Scraping failed. Exception: {proc_.exception}
+                            1. Make sure, that links are valid
+                            2. Most likely we faced CAPTCHA. Try again after 1-3 minutes
+                            ''')
 
         assert os.path.exists(f'output-{_id}.json'), \
             "Scraper failed to save the results. Try descresing `max_results` or `timeout` options"  # noqa: E501

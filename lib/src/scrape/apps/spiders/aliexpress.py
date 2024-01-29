@@ -1,4 +1,5 @@
 import json
+import re
 
 import scrapy
 import scrapy.http
@@ -33,8 +34,9 @@ class AliexpSpider(scrapy.Spider):
         title = ' '.join(sel.xpath('//h1/text()').getall())
         description = "" + ' '.join(sel.xpath(
             "//div[@id = 'content_anchor']//*[not(self::img) and not(self::script) \
-            and not(self::div)]/text()"
+            and not(self::div) and not(self::br) and not(br)]/text()"
         ).getall())
+        description = re.sub("[\n ]*$", "", description)
         keys = sel.xpath(
             "//div[@id = 'characteristics_anchor']//span[contains(@class, 'title')]/text()"  # noqa: E501
         ).getall()
@@ -57,9 +59,8 @@ class AliexpSpider(scrapy.Spider):
         data = ''
         data += f'Title:\n{title}\n\n' +\
             f'Description:\n{description}\n\n' +\
-            f'Properties:\n{properties}\n\n' +\
-            'Images:\n' + '\n'.join(images)
+            f'Properties:\n{properties}\n\n'
         yield {
                 'text': data,
-                'json': json.dumps(json_data)
+                'json': json.dumps(json_data, ensure_ascii=False)
             }
