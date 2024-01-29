@@ -1,4 +1,5 @@
 import multiprocessing
+import traceback
 
 
 class XtProcess(multiprocessing.Process):
