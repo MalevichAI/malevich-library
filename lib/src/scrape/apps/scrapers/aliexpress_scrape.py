@@ -19,12 +19,12 @@ def scrape_aliexpress(
         to be scraped
 
     [Output Format]
-
-        A dataframe with a column named `result` containing the results.
-        There is not distinction between results from different links. The
-        number of rows in the output dataframe is equal to the number of
-        results or is exactly one if `squash_results` option is set.
-
+    
+        A dataframe with three columns:
+            text: json string or text string depending on output_type option
+            properties: product properties
+            images: product image links
+            
     [Available Options]
         - allowed_domains (a list of strings)
 
@@ -242,7 +242,10 @@ def scrape_aliexpress(
         context: The configuration dictionary. See [Available Options] for more information.
 
     Returns:
-        A dataframe with a textual column named `result`
+        A dataframe with three columns:
+            text: json string or text depending on output_type option
+            properties: product properties
+            images: product image links
     """ # noqa: E501
     context.app_cfg['spider'] = 'aliexpress'
 
