@@ -49,7 +49,7 @@ class AliexpSpider(scrapy.Spider):
 
         properties = ', '.join(properties)
 
-        images = sel.xpath("//div[@class = 'gallery_Gallery__picList__1gsooe']//picture//img/@src").getall()   # noqa: E501
+        images = sel.xpath("//div[ contains( @class, 'gallery_Gallery__picList')]//picture//img/@src").getall()   # noqa: E501
         images.extend(sel.xpath("//div[@id = 'content_anchor']//img/@src").getall())
         json_data = {}
         json_data['title'] = title

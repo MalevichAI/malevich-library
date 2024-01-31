@@ -19,12 +19,12 @@ def scrape_aliexpress(
         to be scraped
 
     [Output Format]
-    
+
         A dataframe with three columns:
             text: json string or text string depending on output_type option
             properties: product properties
             images: product image links
-            
+
     [Available Options]
         - allowed_domains (a list of strings)
 
