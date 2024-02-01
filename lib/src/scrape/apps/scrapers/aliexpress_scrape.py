@@ -24,7 +24,7 @@ def scrape_aliexpress(
             text: json string or text string depending on output_type option
             properties: product properties
             images: product image links
-            
+
     [Available Options]
         - allowed_domains (a list of strings)
 
