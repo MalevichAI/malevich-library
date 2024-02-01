@@ -84,7 +84,9 @@ class Selenium:
             except (TimeoutException, WebDriverException):
                 time_out += 5
                 capcha_sel = scrapy.Selector(Response(driver.page_source, request.url))
-                capcha_sel = capcha_sel.xpath("//div[@class = 'scratch-captcha-title']").getall()
+                capcha_sel = capcha_sel.xpath(
+                    "//div[@class = 'scratch-captcha-title']"
+                ).getall()
                 if len(capcha_sel) > 0:
                     driver.execute_script("localStorage = {}")
                     driver.delete_all_cookies()

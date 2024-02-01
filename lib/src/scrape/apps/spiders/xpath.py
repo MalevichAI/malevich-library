@@ -1,4 +1,5 @@
 import json
+from urllib.parse import urljoin
 
 import scrapy
 import scrapy.http
@@ -36,15 +37,21 @@ class XpathSpider(scrapy.Spider):
         outputs = {} if self.type == 'json' else []
         for cfg in self.config:
             data = []
+            count = cfg.get('count', None)
             if self.type == 'text' and self._include_keys:
                 data.append(cfg['key'])
             try:
-                data.extend(selector.xpath(cfg['xpath']).getall())
+                data.extend(selector.xpath(cfg['xpath']).getall()[:count])
             except KeyError:
-                data.extend(selector.css(cfg['css']).getall())
+                data.extend(selector.css(cfg['css']).getall()[:count])
             for i in range(len(data)):
-                data[i] = data[i].replace('\n', '\\n')
-                data[i] = data[i].replace('\t', '\\t')
+                if cfg.get('join_url', False):
+                    if self._include_keys and i == 0:
+                        continue
+                    data[i] = urljoin(response.url, data[i])
+                else:
+                    data[i] = data[i].replace('\n', '\\n')
+                    data[i] = data[i].replace('\t', '\\t')
 
             if self.type == 'json':
                 outputs[cfg['key']] = data
