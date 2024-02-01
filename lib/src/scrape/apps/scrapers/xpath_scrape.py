@@ -197,13 +197,15 @@ def scrape_by_selectors(
                 "key": <string>,
                 "xpath": <string>,
                 "css": <string>,
-                "join_url": <boolean>
+                "join_url": <boolean>,
+                "count": <int>
             }
         ]
 
         where `key` is the name of entity to extract, `xpath` is the xPath selector,
         and `css` is the CSS selector. Either `xpath` or `css` must be provided. If
         `join_url` is True, the scraper will join relative links with the site domain.
+        `count` is used to control the number of objects to retrieve.
 
         - output_format (string): the output format. Valid values are "json" or "text.
             Default: "json".
