@@ -13,21 +13,52 @@ class TaskImages(BaseModel):
     task: str
     image: str
 
+@scheme()
+class UploadResult(BaseModel):
+    task: str
+    image: str
+    status: str
+
 @processor()
 def upload_images_to_task(df: DF[TaskImages], context: Context):
     """
-        Create task (if does not exists) and upload images to the task
+        Creates task (if does not exists) and upload images to the task.
+
+        Input:
+            DF [TaskImages]:
+                DataFrame which contains 2 columns:
+                    - task: Name of the task where image should be uploaded
+                    - image: Name of the image file
 
         Configuration:
-        cvat_user, cvat_password - CVAT account credentials
-        cvat_url - URL of your CVAT server
-        aws_access_key_id, aws_secret_access_key - AWS user credentials
-        endpoint_url - In case if you do not use default AWS S3, provide endpoint URL
+        -  `cvat_user`, `cvat_password` - CVAT account credentials
 
-        cloud_storage_id - ID of CVAT cloud storage
-        project_id - ID of CVAT project
+        -  `cvat_url` - URL of your CVAT server
 
-    """
+        -   `aws_access_key_id`, `aws_secret_access_key` - AWS user credentials
+
+        -   `endpoint_url` - In case if you do not use default AWS S3, provide endpoint URL
+
+        -   `bucker_name` - Bucket name
+
+        -   `cloud_storage_id` - ID of CVAT cloud storage
+
+        -   `project_id` - ID of CVAT project
+
+        Output:
+            DF [UploadResult]:
+                DataFrame which contains 3 columns:
+                    task: Name of the task where image should be uploaded
+                    image: Name of the image file
+                    status: Upload Status Code
+        Args:
+            TaskImages: DF[TaskImages]:
+                A DataFrame with image and corresponding task
+
+        Returns:
+            DF[UploadResult]:
+                A DataFrame with status code of each image upload
+    """  # noqa: E501
     login = context.app_cfg.get('cvat_user', None)
     password = context.app_cfg.get('cvat_password', None)
     assert login and password, "CVAT credentials were not provided"
@@ -56,25 +87,31 @@ def upload_images_to_task(df: DF[TaskImages], context: Context):
             endpoint_url=endpoint_url
     )
 
-    df: pd.DataFrame = df # REMOVE
     results = {}
-    data = requests.get(f'{cvat_url}/api/tasks', auth=auth)
+    data = requests.get(
+        f'{cvat_url}/api/tasks',
+        auth=auth,
+        json={'project_id': project_id}
+    )
     data =  json.loads(data.text)
 
     for d in data['results']:
         results[d['name']] = d['id']
 
     while data['next'] is not None:
-        data = requests.get(data['next'], auth=auth)
+        data = requests.get(
+            data['next'],
+            auth=auth,
+            json={'project_id': project_id}
+        )
         data =  json.loads(data.text)
 
         for d in data['results']:
             results[d['name']] = d['id']
     outputs = []
-    task_names = df['task_name'].unique().tolist()
+    task_names = df['task'].unique().tolist()
     for task_name in task_names:
         if task_name not in results.keys():
-            print(f'Creating task {task_name}')
             task_id = requests.post(
                 f'{cvat_url}/api/tasks',
                 auth=auth,
@@ -85,24 +122,31 @@ def upload_images_to_task(df: DF[TaskImages], context: Context):
             )
             task_id = json.loads(task_id.text)
             results[task_name] = task_id['id']
-        images = df[df['task_name'] == task_name]['image'].to_list()
+        images = df[df['task'] == task_name]['image'].to_list()
 
+        image_set = []
         for image in images:
             path = context.get_share_path(image)
-            image_set = []
             client.upload_file(path, bucket_name, f'{task_name}/{image}')
             image_set.append(f'{task_name}/{image}')
-            outputs.append([task_name, image])
 
-        requests.post(
+        status = requests.post(
             f'{cvat_url}/api/tasks/{results[task_name]}/data',
             auth=auth,
             json={
                 'image_quality': 100,
                 'cloud_storage_id': cloud_storage_id,
                 'server_files' : image_set,
-                'storage': 'cloud_storage'
+                'storage': 'local',
+                'storage_method': 'file_system'
             }
         )
+        for image in image_set:
+            outputs.append([task_name, image, status.status_code])
 
-    return pd.DataFrame(outputs, columns=['task_name', 'image', 'status'])
+    result = pd.DataFrame(
+        outputs,
+        columns=['task', 'image', 'status']
+    )
+
+    return result
