@@ -34,7 +34,7 @@ class AliexpSpider(scrapy.Spider):
         title = ' '.join(sel.xpath('//h1/text()').getall())
         description = "" + ' '.join(sel.xpath(
             "//div[@id = 'content_anchor']//*[not(self::img) and not(self::script) \
-            and not(self::div) and not(self::br) and not(br)]/text()"
+            and not(self::div)]/text()"
         ).getall())
         description = re.sub("[\n ]*$", "", description)
         keys = sel.xpath(
@@ -49,7 +49,7 @@ class AliexpSpider(scrapy.Spider):
 
         properties = ', '.join(properties)
 
-        images = sel.xpath("//div[@class = 'gallery_Gallery__picList__1gsooe']//picture//img/@src").getall()   # noqa: E501
+        images = sel.xpath("//div[ contains( @class, 'gallery_Gallery__picList')]//picture//img/@src").getall()   # noqa: E501
         images.extend(sel.xpath("//div[@id = 'content_anchor']//img/@src").getall())
         json_data = {}
         json_data['title'] = title
