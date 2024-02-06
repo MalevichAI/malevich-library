@@ -1,0 +1,16 @@
+cvat:
+  name: CVAT
+  description: Interact with CVAT server(:) create tasks and upload photos for annotation
+  visibility:
+    - public
+  icon: component/cvat.png
+  tags:
+    - Computer Visition
+    - Annotation
+  designed_for_use_case:
+    - title: Upload images for annotation to CVAT
+  repo_url: https://github.com/MalevichAI/malevich-library/tree/dev/lib/src/cvat
+  app:
+    container_ref: public.ecr.aws/u6e1k0c7/cvat
+    container_user: null
+    container_token: null

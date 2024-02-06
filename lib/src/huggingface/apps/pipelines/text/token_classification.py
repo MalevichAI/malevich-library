@@ -29,20 +29,24 @@ def token_classification(text: DF[TokenClassificationInput], context: Context):
 
     The processor solves a problem of token classification using HuggingFace pipeline.
 
-    Input Format:
+    ## Input:
+
         A dataframe with a column `text` containing text to be classified.
 
-    Output Format:
-        A dataframe with columns:
-            - `sentence_index` (optional) - index of the sentence in the input dataframe
-            - `entity` - entity name (according to the model)
-            - `score` - confidence score
-            - `index` - index of the token in the sentence
-            - `word` - token text (according to the model)
-            - `start` - start index of the token in the sentence (might be absent)
-            - `end` - end index of the token in the sentence (might be absent)
+    ## Output:
 
-    Configuration:
+        A dataframe with columns:
+
+        - `sentence_index` (optional) - index of the sentence in the input dataframe
+        - `entity` - entity name (according to the model)
+        - `score` - confidence score
+        - `index` - index of the token in the sentence
+        - `word` - token text (according to the model)
+        - `start` - start index of the token in the sentence (might be absent)
+        - `end` - end index of the token in the sentence (might be absent)
+
+    ## Configuration:
+
         - `ignore_labels` - list of labels to ignore (e.g. `["O"]`)
         - `keep_text` - whether to keep the input text in the output dataframe
         - `keep_sentence_index` - whether to keep the sentence index in the output dataframe
@@ -52,6 +56,8 @@ def token_classification(text: DF[TokenClassificationInput], context: Context):
         - `batch_size` - batch size to use for inference
         - `aggregation_strategy` - aggregation strategy to use for multiple entities per token.
             See [Aggregation strategy](https://huggingface.co/docs/transformers/v4.36.1/en/main_classes/pipelines#transformers.TokenClassificationPipeline.aggregation_strategy)
+
+    ---
 
     Args:
         text (TokenClassificationInput): input dataframe with text to classify

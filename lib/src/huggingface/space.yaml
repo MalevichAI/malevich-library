@@ -1,0 +1,16 @@
+huggingface:
+  name: Huggingface
+  description: Inference and fine-tuning Huggingface models
+  visibility:
+    - public
+  icon: component/hf.png
+  tags:
+    - Machine Learning
+    - Token Classification
+  designed_for_use_case:
+    - title: Inference on token-classification model (NER, POS, etc.)
+  repo_url: https://github.com/MalevichAI/malevich-library/tree/dev/lib/src/huggingface
+  app:
+    container_ref: public.ecr.aws/u6e1k0c7/huggingface
+    container_user: null
+    container_token: null
