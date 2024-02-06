@@ -1,3 +1,4 @@
+name: Malevich Auto CI on main
 on:
   push:
     branches: main
