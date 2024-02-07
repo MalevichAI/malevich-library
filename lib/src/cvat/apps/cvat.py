@@ -102,7 +102,6 @@ def upload_images_to_task(df: DF[TaskImages], context: Context):
 
     bucket_name = context.app_cfg.get('bucket_name', 'cvat')
 
-
     cfg = Configuration(
         host=cvat_url,
         username=login,
