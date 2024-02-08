@@ -27,7 +27,7 @@ def asser_links(df: DF[Links], context: Context) -> pd.DataFrame:
         `error` containing invalid links.
 
     ## Configuration:
-        - filter_links bool, optional, default False.
+        - filter_links: bool, optional, default False.
             If set to True, will filter the dataframe and exclude invalid links.
 
     ---
