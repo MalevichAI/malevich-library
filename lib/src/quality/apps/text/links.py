@@ -14,20 +14,21 @@ def asser_links(df: DF[Links], context: Context) -> pd.DataFrame:
         Check if the links are valid (do not return error status codes)
 
     ## Input:
-           A dataframe that contains columns:
-                - link: link to be validated
+        A dataframe that contains a column:
+            - link: link to be validated
 
     ## Output:
-            The format of dataframe depends on the configuration provided.
+        The format of dataframe depends on the configuration provided.
 
-            If `filter_links` set to True, the output will be a dataframe
-            with a column named `link` containing valid links.
+        If `filter_links` set to True, the output will be a dataframe
+        with a column named `link` containing valid links.
 
-            Otherwise the output will be a dataframe with a column named
-            `error` containing invalid links.
+        Otherwise the output will be a dataframe with a column named
+        `error` containing invalid links.
 
     ## Configuration:
-        - filter_links(bool, optional): If set to True, will filter the dataframe and exclude invalid links. Default value is False
+        - filter_links bool, optional, default False.
+            If set to True, will filter the dataframe and exclude invalid links.
 
     ---
 
@@ -39,20 +40,23 @@ def asser_links(df: DF[Links], context: Context) -> pd.DataFrame:
         Otherwise, returns a dataframe with a column named `error` containing invalid links
 
     """  # noqa: E501
-    errors = []
-    valids = []
+    outputs = []
+    _filter = context.app_cfg.get('filter_links', False)
     for link in df['link'].to_list():
         try:
             response = requests.get(link)
-            if response.status_code < 400:
-                valids.append(link)
-            else:
-                errors.append(link)
+            if (response.status_code < 400) == _filter:
+                result = link if _filter \
+                         else f"Received {response.status_code} from {link}"
+                outputs.append(result)
+
         except requests.exceptions.ConnectionError:
-            errors.append(link)
+            if not _filter:
+                outputs.append("Links does not exist. \
+                               Probably it leads to an invalid domain (address) \
+                               or a service is down."
+                )
 
     if not context.app_cfg.get('filter_links', False):
-        return pd.DataFrame(errors, columns=['errors'])
+        return pd.DataFrame(outputs, columns=['errors' if not _filter else 'link'])
 
-    else:
-        return pd.DataFrame(valids, columns=['link'])
