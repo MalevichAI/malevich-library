@@ -46,17 +46,20 @@ def asser_links(df: DF[Links], context: Context) -> pd.DataFrame:
         try:
             response = requests.get(link)
             if (response.status_code < 400) == _filter:
-                result = link if _filter \
-                         else f"Received {response.status_code} from {link}"
+                result = (
+                    link
+                    if _filter
+                    else f"Received {response.status_code} from {link}"
+                )
                 outputs.append(result)
 
         except requests.exceptions.ConnectionError:
             if not _filter:
-                outputs.append("Links does not exist. \
-                               Probably it leads to an invalid domain (address) \
-                               or a service is down."
+                outputs.append("Links does not exist."
+                               "Probably it leads to an invalid domain (address)"
+                               "or a service is down."
                 )
 
-    if not context.app_cfg.get('filter_links', False):
+    if not _filter:
         return pd.DataFrame(outputs, columns=['errors' if not _filter else 'link'])
 
