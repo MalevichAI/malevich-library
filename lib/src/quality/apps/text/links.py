@@ -9,7 +9,7 @@ class Links(BaseModel):
     link: str
 
 @processor()
-def asser_links(df: DF[Links], context: Context) -> pd.DataFrame:
+def assert_links(df: DF[Links], context: Context) -> pd.DataFrame:
     """
         Check if the links are valid (do not return error status codes)
 
