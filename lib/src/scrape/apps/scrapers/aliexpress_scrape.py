@@ -281,17 +281,18 @@ def scrape_aliexpress(
             # results_ = [item['text'] for item in islice(df, max_results)]
             spider_cfg = context.app_cfg.get('spider_cfg', {})
             for d in data:
-                result_ = []
-                result_.append(
-                    d['text'] if \
-                    spider_cfg.get('output_type', 'json') == 'text'\
-                    else d['json']
-                )
-                json_data = json.loads(d['json'])
-                result_.append(json_data['properties'])
-                result_.append('\n'.join(json_data['images'][:max_results]))
-                results.append(
-                    pd.DataFrame([result_], columns=['text', 'properties', 'images'])
-                )
+                if d['status'] < 400:
+                    result_ = []
+                    result_.append(
+                        d['text'] if \
+                        spider_cfg.get('output_type', 'json') == 'text'\
+                        else d['json']
+                    )
+                    json_data = json.loads(d['json'])
+                    result_.append(json_data['properties'])
+                    result_.append('\n'.join(json_data['images'][:max_results]))
+                    results.append(
+                        pd.DataFrame([result_], columns=['text', 'properties', 'images'])
+                    )
     results = pd.concat(results, ignore_index=True)
     return results
