@@ -94,10 +94,11 @@ def upload_images_to_task(df: DF[TaskImages], context: Context):
     cloud_id = context.app_cfg.get('cloud_id', None)
     assert cloud_id, "Cloud ID was not provided"
 
-    aws_key_id = context.app_cfg.get('aws_access_key_id', None)
-    aws_secret_key = context.app_cfg.get('aws_secret_access_key', None)
-    assert aws_key_id and aws_secret_key, "AWS credentials were not provided"
-
+    aws_access_key_id = context.app_cfg.get('aws_access_key_id', None)
+    aws_secret_access_key = context.app_cfg.get('aws_secret_access_key', None)
+    assert (
+        aws_access_key_id and aws_secret_access_key
+    ), "AWS credentials were not provided"
     endpoint_url = context.app_cfg.get('endpoint_url', None)
 
     bucket_name = context.app_cfg.get('bucket_name', 'cvat')
@@ -125,8 +126,8 @@ def upload_images_to_task(df: DF[TaskImages], context: Context):
                 path = context.get_share_path(image)
                 executor.submit(
                     upload_to_s3,
-                    key_id = aws_key_id,
-                    secret_key = aws_secret_key,
+                    key_id = aws_access_key_id,
+                    secret_key = aws_secret_access_key,
                     path = path,
                     bucket_name = bucket_name,
                     bucket_path = f"{task_name}/{image}",
