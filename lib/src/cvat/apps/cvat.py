@@ -40,45 +40,44 @@ def upload_to_s3(
 @processor()
 def upload_images_to_task(df: DF[TaskImages], context: Context):
     """
-        Creates task (if does not exists) and upload images to the task.
+    Creates task (if does not exists) and upload images to the task.
 
-        Input:
-            DF [TaskImages]:
-                DataFrame which contains 2 columns:
-                    - task: Name of the task where image should be uploaded
-                    - image: Name of the image file
+    ## Input:
 
-        Configuration:
-        -  `cvat_user`, `cvat_password` - CVAT account credentials
+        A dataframe with two columns
+            - task (string): Name of the task where image should be uploaded
+            - image (string): Name of the image file
 
-        - `cvat_org` - CVAT organization. By default uses personal workspace
+    ## Configuration:
 
-        -  `cvat_url` - URL of your CVAT server
-
-        -  `project_id` - ID of CVAT project
-
-        - `cloud_id` - ID of cloud storage
-
-        - `aws_access_key_id`, `aws_secret_access_key` - AWS credentials
-
-        - `endpoint_url` - If you use another cloud, specify endpoint_url
-
-        - `bucket_name` - Name of S3 bucket
+        - `cvat_user`: string. Account user name on CVAT.
+        - `cvat_password`: string. Account user password on CVAT.
+        - `cvat_org`: string. CVAT organization. By default uses personal workspace.
+        - `cvat_url`: string. URL of your CVAT server.
+        - `project_id`: string. ID of CVAT project.
+        - `cloud_id`: string. ID of cloud storage.
+        - `aws_access_key_id`: string. AWS credentials.
+        - `aws_secret_access_key`: string. AWS credentials.
+        - `endpoint_url`: string, default is AWS S3 endpoint.
+                URL endpoint of the cloud storage (S3).
+        - `bucket_name`: string, default "cvat". Name of S3 bucket.
 
 
-        Output:
-            DF [UploadResult]:
-                DataFrame which contains 3 columns:
-                    task: Name of the task where image should be uploaded
-                    image: Name of the image file
-                    status: Upload Status Code
-        Args:
-            TaskImages: DF[TaskImages]:
-                A DataFrame with image and corresponding task
+    ## Output:
 
-        Returns:
-            DF[UploadResult]:
-                A DataFrame with status code of each image upload
+        A dataframe with three columns:
+            - task (string): Name of the task where image should be uploaded
+            - image (string): Name of the image file
+            - status (string): Upload Status Code
+    -----
+
+    Args:
+        TaskImages: DF[TaskImages]:
+            A DataFrame with image and corresponding task
+
+    Returns:
+        DF[UploadResult]:
+            A DataFrame with status code of each image upload
     """  # noqa: E501
     login = context.app_cfg.get('cvat_user', None)
     password = context.app_cfg.get('cvat_password', None)
@@ -94,10 +93,11 @@ def upload_images_to_task(df: DF[TaskImages], context: Context):
     cloud_id = context.app_cfg.get('cloud_id', None)
     assert cloud_id, "Cloud ID was not provided"
 
-    aws_key_id = context.app_cfg.get('aws_access_key_id', None)
-    aws_secret_key = context.app_cfg.get('aws_secret_access_key', None)
-    assert aws_key_id and aws_secret_key, "AWS credentials were not provided"
-
+    aws_access_key_id = context.app_cfg.get('aws_access_key_id', None)
+    aws_secret_access_key = context.app_cfg.get('aws_secret_access_key', None)
+    assert (
+        aws_access_key_id and aws_secret_access_key
+    ), "AWS credentials were not provided"
     endpoint_url = context.app_cfg.get('endpoint_url', None)
 
     bucket_name = context.app_cfg.get('bucket_name', 'cvat')
@@ -125,8 +125,8 @@ def upload_images_to_task(df: DF[TaskImages], context: Context):
                 path = context.get_share_path(image)
                 executor.submit(
                     upload_to_s3,
-                    key_id = aws_key_id,
-                    secret_key = aws_secret_key,
+                    key_id = aws_access_key_id,
+                    secret_key = aws_secret_access_key,
                     path = path,
                     bucket_name = bucket_name,
                     bucket_path = f"{task_name}/{image}",
