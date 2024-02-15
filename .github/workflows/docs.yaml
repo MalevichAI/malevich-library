@@ -13,7 +13,7 @@ jobs:
                 python-version: '3.11'
             
             - name: Install malevich
-              run: pip install malevich
+              run: pip install -U https://github.com/MalevichAI/malevich/archive/dev/unstable.zip
 
             - name: Check docs
               run: |
