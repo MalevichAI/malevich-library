@@ -284,15 +284,25 @@ def scrape_aliexpress(
                 if d['status'] < 400:
                     result_ = []
                     result_.append(
-                        d['text'] if \
-                        spider_cfg.get('output_type', 'json') == 'text'\
+                        d['text'] if
+                        spider_cfg.get('output_type', 'json') == 'text'
                         else d['json']
                     )
                     json_data = json.loads(d['json'])
                     result_.append(json_data['properties'])
                     result_.append('\n'.join(json_data['images'][:max_results]))
+                    multicard = ""
+                    multicard_json = json_data['multicards']
+                    for key in json_data['multicards']:
+                        multicard += (
+                            f"{key}\n" + '\n'.join(multicard_json[key]) + "\n\n"
+                        )
+                    result_.append(multicard)
                     results.append(
-                        pd.DataFrame([result_], columns=['text', 'properties', 'images'])
+                        pd.DataFrame(
+                            [result_],
+                            columns=['text', 'properties', 'images', 'versions']
+                        )
                     )
     results = pd.concat(results, ignore_index=True)
     return results

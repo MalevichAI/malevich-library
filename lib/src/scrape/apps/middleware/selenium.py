@@ -28,9 +28,53 @@ TO_EN_SCRIPT = """
         """  # noqa: E501
 
 class Response:
-    def __init__(self, text, url) -> None:
+    def __init__(self, text, url, cards) -> None:
         self.text = text
         self.url = url
+        self.cards = cards
+
+def get_cards(driver: webdriver.Chrome):
+    chars = driver.find_elements(
+        By.XPATH,
+        "//div[contains(@exp_attribute, 'sku_attr')]/div[contains(@class, 'skuProp')]"
+    )
+
+    chars_data = {}
+
+    more = driver.find_elements(
+        By.XPATH,
+        "//div[contains(@exp_attribute, 'sku_attr')]"
+        "//div[contains(@class, 'showMoreButton')]"
+    )
+
+    open('log.html', 'w').write(driver.page_source)
+
+    for m in more:
+        m.click()
+
+    for j in range(len(chars)):
+        prop_name = driver.find_element(
+            By.XPATH,
+            "//div[contains(@exp_attribute, 'sku_attr')]/"
+            "div[contains(@class, 'skuProp')][{j+1}]/div/span"
+        ).text.strip(':')
+        if prop_name not in chars_data.keys():
+            chars_data[prop_name] = []
+        variants = driver.find_elements(
+            By.XPATH,
+            "//div[contains(@exp_attribute, 'sku_attr')]"
+            f"/div[contains(@class, 'skuProp')][{j+1}]//ul/li/button")
+        for variant in variants:
+            variant.click()
+            prop = driver.find_elements(
+                By.XPATH,
+                "(//div[contains(@exp_attribute, 'sku_attr')]"
+                f"/div[contains(@class, 'skuProp')])[{j+1}]/div/span"
+            )
+            chars_data[prop_name].append(prop[1].text)
+
+        return chars_data
+
 
 class Selenium:
     def process_request(
@@ -109,4 +153,8 @@ class Selenium:
         driver.execute_script('localStorage = {}')
         driver.delete_all_cookies()
 
-        return scrapy.http.Response(url=request.url, body=driver.page_source.encode())
+        return Response(
+            url=request.url,
+            body=driver.page_source.encode(),
+            cards = get_cards(driver)
+        )
