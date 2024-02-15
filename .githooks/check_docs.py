@@ -28,7 +28,7 @@ for file in files:
         procs.extend(
             json.loads(
                 check_output(
-                    ["malevich", "dev", "list", d]
+                    ["malevich", "dev", "list-procs", d]
                 ).decode()
             )
         )
@@ -46,14 +46,14 @@ for proc in procs:
     try:
         check_call(
             ["malevich", "dev" ,"parse-doc", f"\"{doc}\""],
-            stdout=DEVNULL,
+            stderr=DEVNULL,
         )
     except CalledProcessError:
         errors.append(proc['name'])
 
 if len(errors) != 0:
-    print("Following apps' docs should be rewritten:")
+    print("Following apps' docs should be rewritten:\n\t", end="")
     print("\n\t".join(errors))
-    print("Please, rewrite docs and try again")
+    print("\nPlease, rewrite docs and try again")
     print("==========================================\n")
     exit(1)

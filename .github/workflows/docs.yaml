@@ -17,5 +17,5 @@ jobs:
 
             - name: Check docs
               run: |
-                json=malevich dev list ./lib/
+                json=malevich dev list_procs ./lib/
                 python .github/workflows/doc.py --procs="${json}"
