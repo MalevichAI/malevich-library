@@ -1,6 +1,6 @@
 import argparse
 import json
-from subprocess import CalledProcessError, check_call, check_output
+from subprocess import DEVNULL, CalledProcessError, check_call, check_output
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--procs')
@@ -17,13 +17,15 @@ for d in data:
 
     try:
         check_call(
-            ["malevich", "dev", "parse-doc", doc]
+            ["malevich", "dev", "parse-doc", doc],
+            stderr=DEVNULL
         )
     except CalledProcessError:
         errors.append(d['name'])
 
 if len(errors) != 0:
-    print("These processors have invalid documentation:")
-    print("\n\t".join(errors))
-    print("Please rewrite the docs and try again")
+    print("The following processors have invalid documentation:\n\t" +
+          "\n\t".join(errors) +
+          "Please rewrite the docs and try again"
+    )
     exit(1)
