@@ -1,20 +1,13 @@
-quality:
-  name: Quality Assurance
-  description: Monitor the quality of your products and services directly withing the flow
+geohero:
+  name: GeoHero Functions
+  description: Extensive utility functions to work with spatial aware agents.
   visibility: 
     - public
-  icon: component/quality.png
-  repo_url: https://github.com/MalevichAI/malevich-library/main/dev/lib/src/quality
+  icon: component/geohero.png
   app:
-    container_ref: public.ecr.aws/u6e1k0c7/quality
+    container_ref: public.ecr.aws/u6e1k0c7/geohero
     container_user: null
     container_token: null
   tags:
-    - Quality Assurance
-    - Testing
-  designed_for_use_case:
-    - title: Regular Expressions Validation
-      body: Validate data against regular expressions to ensure it meets certain requirements.
-  not_designed_for_use_case:
-    - title: Unit Tests
-      body: The app is not designed to run unit tests.
+    - Geo
+    - Agents
