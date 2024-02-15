@@ -32,6 +32,7 @@ for file in files:
         )
 if len(procs) == 0:
     print("No modified procs to check. Exiting...")
+    print("========================================\n")
     exit(0)
 
 errors = []
@@ -52,4 +53,5 @@ if len(errors) != 0:
     print("Following apps' docs should be rewritten:")
     print("\n\t".join(errors))
     print("Please, rewrite docs and try again")
+    print("========================================\n")
     exit(1)
