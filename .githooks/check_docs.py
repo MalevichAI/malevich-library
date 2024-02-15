@@ -9,6 +9,8 @@ from subprocess import (
     check_output,
 )
 
+print("===== Malevich Git Pre-commit Hook =======")
+
 ps = Popen(("git", "status", "-uno", "-s"), stdout=PIPE)
 
 ps.wait()
