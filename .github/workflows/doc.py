@@ -26,6 +26,6 @@ for d in data:
 if len(errors) != 0:
     print("The following processors have invalid documentation:\n\t" +
           "\n\t".join(errors) +
-          "Please rewrite the docs and try again"
+          "\nPlease rewrite the docs and try again"
     )
     exit(1)
