@@ -55,5 +55,5 @@ if len(errors) != 0:
     print("Following apps' docs should be rewritten:")
     print("\n\t".join(errors))
     print("Please, rewrite docs and try again")
-    print("========================================\n")
+    print("==========================================\n")
     exit(1)
