@@ -17,5 +17,5 @@ jobs:
 
             - name: Check docs
               run: |
-                json=malevich dev list_procs ./lib/
+                json=$(malevich dev list_procs ./lib/) || { echo "::warning::No command found. Make sure you use latest version of malevich" ; exit 0 ;} 
                 python .github/workflows/doc.py --procs="${json}"
