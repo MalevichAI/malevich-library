@@ -57,3 +57,6 @@ if len(errors) != 0:
     print("\nPlease, rewrite docs and try again")
     print("==========================================\n")
     exit(1)
+
+print("Everything is passed. Commiting...")
+print("==========================================\n")
