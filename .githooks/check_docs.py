@@ -34,7 +34,7 @@ for file in files:
         )
 if len(procs) == 0:
     print("No modified procs to check. Exiting...")
-    print("========================================\n")
+    print("==========================================\n")
     exit(0)
 
 errors = []
