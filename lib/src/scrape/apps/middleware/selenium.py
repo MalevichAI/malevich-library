@@ -27,53 +27,64 @@ TO_EN_SCRIPT = """
         resp = ru.dispatchEvent(click_event)
         """  # noqa: E501
 
-class Response:
-    def __init__(self, text, url, cards) -> None:
-        self.text = text
-        self.url = url
+class Response(scrapy.http.Response):
+    def __init__(self, body, url, cards, *args, **kwargs) -> None:
+        super().__init__(
+            body=body,
+            status=200,
+            url=url,
+            *args,
+            **kwargs
+        )
         self.cards = cards
 
 def get_cards(driver: webdriver.Chrome):
+    chars_data = {}
+
     chars = driver.find_elements(
         By.XPATH,
         "//div[contains(@exp_attribute, 'sku_attr')]/div[contains(@class, 'skuProp')]"
     )
 
-    chars_data = {}
-
-    more = driver.find_elements(
-        By.XPATH,
-        "//div[contains(@exp_attribute, 'sku_attr')]"
-        "//div[contains(@class, 'showMoreButton')]"
-    )
-
-    open('log.html', 'w').write(driver.page_source)
-
-    for m in more:
-        m.click()
-
-    for j in range(len(chars)):
+    for i in range(len(chars)):
         prop_name = driver.find_element(
             By.XPATH,
             "//div[contains(@exp_attribute, 'sku_attr')]/"
-            "div[contains(@class, 'skuProp')][{j+1}]/div/span"
+            f"div[contains(@class, 'skuProp')][{i+1}]/div/span"
         ).text.strip(':')
+
         if prop_name not in chars_data.keys():
             chars_data[prop_name] = []
+
         variants = driver.find_elements(
             By.XPATH,
             "//div[contains(@exp_attribute, 'sku_attr')]"
-            f"/div[contains(@class, 'skuProp')][{j+1}]//ul/li/button")
-        for variant in variants:
-            variant.click()
+            f"/div[contains(@class, 'skuProp')][{i+1}]//ul/li/button"
+        )
+        for j in range(len(variants)):
+            driver.execute_script(
+                f"""
+                var click_event = new Event(
+                    "click",
+                    {{ bubbles: true, cancelable: false }}
+                )
+                var button = document.evaluate(
+                    "(//div[contains(@class, 'skuProp')])[{i+1}]//ul/li/button[@id = 'SkuPropertyValue-{j}']",
+                    document.body,
+                    null,
+                    XPathResult.FIRST_ORDERED_NODE_TYPE,
+                    null
+                ).singleNodeValue
+                button.dispatchEvent(click_event)
+                """  # noqa: E501
+            )
             prop = driver.find_elements(
                 By.XPATH,
                 "(//div[contains(@exp_attribute, 'sku_attr')]"
-                f"/div[contains(@class, 'skuProp')])[{j+1}]/div/span"
+                f"/div[contains(@class, 'skuProp')])[{i+1}]/div/span"
             )
             chars_data[prop_name].append(prop[1].text)
-
-        return chars_data
+    return chars_data
 
 
 class Selenium:
@@ -93,7 +104,7 @@ class Selenium:
         options.add_argument('--ignore-certificate-errors')
         options.add_argument('--headless')
         options.add_argument('--disable-blink-features=AutomationControlled')
-        options.add_argument(f'--user-agent={agent.random}') # noqa: E501
+        options.add_argument(f'--user-agent={agent.random}')
         driver = webdriver.Chrome(options)
         successful = False
         time_out = 5
@@ -127,7 +138,9 @@ class Selenium:
                 break
             except (TimeoutException, WebDriverException):
                 time_out += 5
-                capcha_sel = scrapy.Selector(Response(driver.page_source, request.url))
+                capcha_sel = scrapy.Selector(
+                    Response(driver.page_source, request.url)
+                )
                 capcha_sel = capcha_sel.xpath(
                     "//div[@class = 'scratch-captcha-title']"
                 ).getall()
@@ -158,3 +171,4 @@ class Selenium:
             body=driver.page_source.encode(),
             cards = get_cards(driver)
         )
+

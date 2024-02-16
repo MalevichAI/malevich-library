@@ -248,7 +248,6 @@ def scrape_aliexpress(
             images: product image links
     """ # noqa: E501
     context.app_cfg['spider'] = 'aliexpress'
-
     if 'timeout' not in context.app_cfg.keys():
         context.app_cfg['timeout'] = 120
 
@@ -268,17 +267,14 @@ def scrape_aliexpress(
                             2. Most likely we faced CAPTCHA. Try again after 1-3 minutes
                             ''')
 
-        assert os.path.exists(f'output-{_id}.json'), \
-            "Scraper failed to save the results. Try descresing `max_results` or `timeout` options"  # noqa: E501
+        assert os.path.exists(f'output-{_id}.json'), (
+                "Scraper failed to save the results. "
+                "Try descresing `max_results` or `timeout` options"
+            )  # noqa: E501
 
         with open(f'output-{_id}.json') as f:
             max_results = context.app_cfg.get('max_results', None)
-            # df = pd.read_json(f).to_dict('records')
             data = json.loads(f.read())
-            # if max_results == 0:
-            #     max_results = len(df)
-
-            # results_ = [item['text'] for item in islice(df, max_results)]
             spider_cfg = context.app_cfg.get('spider_cfg', {})
             for d in data:
                 if d['status'] < 400:

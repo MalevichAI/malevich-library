@@ -5,6 +5,11 @@ import scrapy
 import scrapy.http
 
 
+class Response:
+    def __init__(self, text, url) -> None:
+        self.text = text
+        self.url = url
+
 class AliexpSpider(scrapy.Spider):
     name = 'aliexpress'
 
@@ -24,8 +29,8 @@ class AliexpSpider(scrapy.Spider):
             yield scrapy.Request(url=url, callback=self.parse)
 
 
-    def parse(self, response):
-        sel = scrapy.Selector(response)
+    def parse(self, response: scrapy.http.Response):
+        sel = scrapy.Selector(Response(response.body.decode(), response.url))
 
         not_found = sel.xpath("//h1/text()").getall()
         if "Такой страницы нет" in not_found:
@@ -71,4 +76,4 @@ class AliexpSpider(scrapy.Spider):
                 'text': data,
                 'json': json.dumps(json_data, ensure_ascii=False),
                 'status': 200
-            }
+        }
