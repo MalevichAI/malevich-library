@@ -1,16 +1,173 @@
-import json
-import os
+import multiprocessing
+import time
+from concurrent.futures import ProcessPoolExecutor
 
 import pandas as pd
-from apps.scrape_web import ScrapeLinks, run_spider
-from malevich.square import DF, Context, processor
+import scrapy
+from fake_useragent import UserAgent
+from malevich.square import DF, Context, processor, scheme
+from pydantic import BaseModel
+from selenium import webdriver
+from selenium.common.exceptions import TimeoutException, WebDriverException
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions
+from selenium.webdriver.support.ui import WebDriverWait
 
+TO_EN_SCRIPT = """
+        var ru_xp = "//div[text() = 'RU']"
+        var eng_xp = "//li/div/span/span[text() = 'English']"
+        var click_event = new Event("click", { bubbles: true, cancelable: false });
+
+        var ru = document.evaluate(ru_xp, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue
+        console.log(ru)
+        if (ru == null){
+            ru_xp = "//div[text() = 'EN']"
+            ru = document.evaluate(ru_xp, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue
+            console.log(ru)
+        }
+        var resp = ru.dispatchEvent(click_event)
+        ru = document.evaluate(eng_xp, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue
+        console.log(ru)
+        resp = ru.dispatchEvent(click_event)
+        """  # noqa: E501
+
+class Response:
+    def __init__(self, text, url) -> None:
+        self.text = text
+        self.url = url
+
+@scheme()
+class ScrapeLinks(BaseModel):
+    link: str
+
+
+@scheme()
+class ScrapeResult(BaseModel):
+    result: str
+
+def get_cards(driver: webdriver.Chrome):
+    chars_data = {}
+
+    chars = driver.find_elements(
+        By.XPATH,
+        "//div[contains(@exp_attribute, 'sku_attr')]/div[contains(@class, 'skuProp')]"
+    )
+
+    for i in range(len(chars)):
+        prop_name = driver.find_element(
+            By.XPATH,
+            "//div[contains(@exp_attribute, 'sku_attr')]/"
+            f"div[contains(@class, 'skuProp')][{i+1}]/div/span"
+        ).text.strip(':')
+
+        if prop_name not in chars_data.keys():
+            chars_data[prop_name] = []
+
+        variants = driver.find_elements(
+            By.XPATH,
+            "//div[contains(@exp_attribute, 'sku_attr')]"
+            f"/div[contains(@class, 'skuProp')][{i+1}]//ul/li/button"
+        )
+        for j in range(len(variants)):
+            driver.execute_script(
+                f"""
+                var click_event = new Event(
+                    "click",
+                    {{ bubbles: true, cancelable: false }}
+                )
+                var button = document.evaluate(
+                    "(//div[contains(@class, 'skuProp')])[{i+1}]//ul/li/button[@id = 'SkuPropertyValue-{j}']",
+                    document.body,
+                    null,
+                    XPathResult.FIRST_ORDERED_NODE_TYPE,
+                    null
+                ).singleNodeValue
+                button.dispatchEvent(click_event)
+                """  # noqa: E501
+            )
+            prop = driver.find_elements(
+                By.XPATH,
+                "(//div[contains(@exp_attribute, 'sku_attr')]"
+                f"/div[contains(@class, 'skuProp')])[{i+1}]/div/span"
+            )
+            chars_data[prop_name].append(prop[1].text)
+    return chars_data
+
+def init_driver():
+    options = webdriver.ChromeOptions()
+    options.add_argument('--no-sandbox')
+    options.add_argument('--disable-dev-shm-usage')
+    options.add_argument('--ignore-certificate-errors')
+    options.add_argument('--headless')
+    options.add_argument('--disable-blink-features=AutomationControlled')
+    options.add_argument(f"--user-agent={UserAgent(browsers=['chrome']).random}") # noqa: E501
+    return webdriver.Chrome(options)
+
+def get_page(link, sp_conf):
+    driver = init_driver()
+    driver.delete_all_cookies()
+    successful = False
+    time_out = 5
+    for _ in range(5):
+        try:
+            driver.get(link)
+
+            sel = scrapy.Selector(Response(text=driver.page_source, url=link))
+            not_exist = sel.xpath(
+                "//h1[(text() = 'Такой страницы нет') or "
+                "(text() = 'This page does not exist')]"
+            )
+
+            if len(not_exist) > 0:
+                return driver
+
+            WebDriverWait(driver, time_out).until(
+                expected_conditions.presence_of_element_located(
+                    (By.XPATH, "//div[@id = 'content_anchor']")
+                    )
+                )
+            try:
+                if sp_conf.get('browser_language', 'ru') == 'en':
+                    driver.execute_script(
+                        TO_EN_SCRIPT
+                    )
+                    WebDriverWait(driver, 15).until(
+                        expected_conditions.presence_of_element_located(
+                            (By.XPATH,
+                            "//div[@id = 'content_anchor']/h2[text() = 'Description']") # noqa: E501
+                        )
+                    )
+            except (TimeoutException, WebDriverException):
+                continue
+            WebDriverWait(driver, time_out).until(
+                expected_conditions.presence_of_element_located(
+                    (By.XPATH, "//div[@id = 'characteristics_anchor']")
+                )
+            )
+            successful = True
+            break
+        except (TimeoutException, WebDriverException):
+            capcha_sel = scrapy.Selector(Response(driver.page_source, link))
+            capcha_sel = capcha_sel.xpath(
+                "//div[@class = 'scratch-captcha-title']"
+            ).getall()
+            if len(capcha_sel) > 0:
+                driver.execute_script("localStorage = {}")
+                driver.delete_all_cookies()
+            time_out += 5
+            continue
+
+    if not successful:
+        driver.delete_all_cookies()
+        raise Exception(
+            "After several attempts, the page did not load correctly. Check "
+            f"that the link is valid: {link}"
+        )
+    driver.delete_all_cookies()
+    return driver.page_source, get_cards(driver)
 
 @processor()
-def scrape_aliexpress(
-    scrape_links: DF[ScrapeLinks],
-    context: Context
-    ):
+def scrape_aliexpress( scrape_links: DF[ScrapeLinks], context: Context):
     """Scrapes aliexpress.
 
     [Input Format]
@@ -20,10 +177,10 @@ def scrape_aliexpress(
 
     [Output Format]
 
-        A dataframe with three columns:
-            text: json string or text string depending on output_type option
-            properties: product properties
-            images: product image links
+        A dataframe with a column named `result` containing the results.
+        There is not distinction between results from different links. The
+        number of rows in the output dataframe is equal to the number of
+        results or is exactly one if `squash_results` option is set.
 
     [Available Options]
         - allowed_domains (a list of strings)
@@ -242,62 +399,91 @@ def scrape_aliexpress(
         context: The configuration dictionary. See [Available Options] for more information.
 
     Returns:
-        A dataframe with three columns:
-            text: json string or text depending on output_type option
-            properties: product properties
-            images: product image links
+        A dataframe with a textual column named `result`
     """ # noqa: E501
-    context.app_cfg['spider'] = 'aliexpress'
-    if 'timeout' not in context.app_cfg.keys():
-        context.app_cfg['timeout'] = 120
+    sp_conf = context.app_cfg.get('spider_cfg', {})
+    max_results = context.app_cfg.get('max_results', None)
 
-    context.app_cfg['links_are_independent'] = True
-    procs, ids = run_spider(scrape_links, context)
-    results = []
-    timeout = context.app_cfg.get('timeout', 15)
-    for proc_, _id in zip(procs, ids):
-        proc_.join(timeout * len(procs) if timeout > 0 else None)
-        # Raise if proc failed
-        if proc_.exitcode != 0:
-            # print exception in proc
-            proc_.terminate()
-            raise Exception(f'''
-                            Scraping failed. Exception: {proc_.exception}
-                            1. Make sure, that links are valid
-                            2. Most likely we faced CAPTCHA. Try again after 1-3 minutes
-                            ''')
+    processes = []
+    with ProcessPoolExecutor(multiprocessing.cpu_count()) as executor:
+        for link in scrape_links['link'].to_list():
+            task = executor.submit(get_page, link=link, sp_conf=sp_conf)
+            processes.append((link, task))
 
-        assert os.path.exists(f'output-{_id}.json'), (
-                "Scraper failed to save the results. "
-                "Try descresing `max_results` or `timeout` options"
-            )  # noqa: E501
+        text_df = []
+        image_df = []
+        errors_df = []
+        card_df = []
+        props_df = []
+        for link, task in processes:
+            page, cards = task.result()
 
-        with open(f'output-{_id}.json') as f:
-            max_results = context.app_cfg.get('max_results', None)
-            data = json.loads(f.read())
-            spider_cfg = context.app_cfg.get('spider_cfg', {})
-            for d in data:
-                result_ = []
-                result_.append(
-                    d['text'] if
-                    spider_cfg.get('output_type', 'json') == 'text'
-                    else d['json']
-                )
-                json_data = json.loads(d['json'])
-                result_.append(json_data['properties'])
-                result_.append('\n'.join(json_data['images'][:max_results]))
-                multicard = ""
-                multicard_json = json_data['multicards']
-                for key in json_data['multicards']:
-                    multicard += (
-                        f"{key}\n" + '\n'.join(multicard_json[key]) + "\n\n"
-                    )
-                result_.append(multicard)
-                results.append(
-                    pd.DataFrame(
-                        [result_],
-                        columns=['text', 'properties', 'images', 'versions']
-                    )
-                )
-    results = pd.concat(results, ignore_index=True)
-    return results
+            sel = scrapy.Selector(Response(page, link))
+
+            not_found = sel.xpath("//h1/text()").getall()
+            if (
+                "Такой страницы нет" in not_found
+                or "This page does not exist" in not_found
+                ):
+                errors_df.append(link)
+                continue
+
+            title = ' '.join(sel.xpath('//h1/text()').getall())
+            description = "" + ' '.join(sel.xpath(
+                "//div[@id = 'content_anchor']//*[not(self::img) and not(self::script) \
+                and not(self::div)]/text()"
+            ).getall())
+
+            keys = sel.xpath(
+                "//div[@id = 'characteristics_anchor']//span[contains(@class, 'title')]/text()"  # noqa: E501
+            ).getall()
+            values = sel.xpath(
+                "//div[@id = 'characteristics_anchor']//span[contains(@class, 'value')]/text()" # noqa: E501
+            ).getall()
+
+            properties = {}
+            for key, val in zip(keys, values):
+                if key not in properties.keys():
+                    properties[key] = val
+
+            images = sel.xpath("//div[@class = 'gallery_Gallery__picList__1gsooe']//picture//img/@src").getall()   # noqa: E501
+            images.extend(sel.xpath("//div[@id = 'content_anchor']//img/@src").getall())
+
+            text_df.append([
+                link,
+                f'Title:\n{title}\n\n' +
+                f'Description:\n{description}\n\n' +
+                f'Properties:\n{properties}\n\n' +
+                'Images:\n' + '\n'.join(images[:max_results])
+            ])
+
+            for image in images[:max_results]:
+                image_df.append([link, image])
+
+            for key in cards.keys():
+                for val in cards[key]:
+                    card_df.append([link, key, val])
+
+            for key in properties.keys():
+                for val in properties[key]:
+                    props_df.append([link, key, val])
+
+
+    return_df = []
+
+    if sp_conf.get('only_images', False):
+        return_df.append(pd.DataFrame(image_df, columns=["link", "image"]))
+
+    elif sp_conf.get('only_properties', False):
+        return_df.append(pd.DataFrame(props_df, columns=["link", "key", "val"]))
+
+    else:
+        return_df.extend([
+            pd.DataFrame(text_df, columns=["link", "text"]),
+            pd.DataFrame(image_df, columns=["link", "image"]),
+            pd.DataFrame(card_df, columns=["link", "name", "value"])
+        ])
+
+    return_df.append(pd.DataFrame(errors_df, columns=["link"]))
+
+    return return_df
