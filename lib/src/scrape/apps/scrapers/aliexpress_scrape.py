@@ -1,5 +1,4 @@
 import multiprocessing
-import time
 from concurrent.futures import ProcessPoolExecutor
 
 import pandas as pd
@@ -32,9 +31,11 @@ TO_EN_SCRIPT = """
         """  # noqa: E501
 
 class Response:
-    def __init__(self, text, url) -> None:
+    def __init__(self, text, url, cards={}, captcha=False) -> None:
         self.text = text
         self.url = url
+        self.cards = cards
+        self.captcha = captcha
 
 @scheme()
 class ScrapeLinks(BaseModel):
@@ -107,6 +108,7 @@ def get_page(link, sp_conf):
     driver = init_driver()
     driver.delete_all_cookies()
     successful = False
+    captcha = False
     time_out = 5
     for _ in range(5):
         try:
@@ -114,12 +116,11 @@ def get_page(link, sp_conf):
 
             sel = scrapy.Selector(Response(text=driver.page_source, url=link))
             not_exist = sel.xpath(
-                "//h1[(text() = 'Такой страницы нет') or "
-                "(text() = 'This page does not exist')]"
+                "//h1[contains(@class, 'PageNotFound')]"
             )
 
             if len(not_exist) > 0:
-                return driver
+                return Response(driver.page_source, link, {})
 
             WebDriverWait(driver, time_out).until(
                 expected_conditions.presence_of_element_located(
@@ -151,20 +152,18 @@ def get_page(link, sp_conf):
             capcha_sel = capcha_sel.xpath(
                 "//div[@class = 'scratch-captcha-title']"
             ).getall()
+            captcha = False
             if len(capcha_sel) > 0:
                 driver.execute_script("localStorage = {}")
                 driver.delete_all_cookies()
+                captcha = True
             time_out += 5
             continue
 
     if not successful:
         driver.delete_all_cookies()
-        raise Exception(
-            "After several attempts, the page did not load correctly. Check "
-            f"that the link is valid: {link}"
-        )
-    driver.delete_all_cookies()
-    return driver.page_source, get_cards(driver)
+        return Response(driver.page_source, link, captcha=captcha)
+    return Response(driver.page_source, link, get_cards(driver))
 
 @processor()
 def scrape_aliexpress( scrape_links: DF[ScrapeLinks], context: Context):
@@ -416,16 +415,16 @@ def scrape_aliexpress( scrape_links: DF[ScrapeLinks], context: Context):
         card_df = []
         props_df = []
         for link, task in processes:
-            page, cards = task.result()
+            response = task.result()
+            cards = response.cards
+            sel = scrapy.Selector(response)
 
-            sel = scrapy.Selector(Response(page, link))
-
-            not_found = sel.xpath("//h1/text()").getall()
-            if (
-                "Такой страницы нет" in not_found
-                or "This page does not exist" in not_found
-                ):
-                errors_df.append(link)
+            not_found = sel.xpath("//h1[contains(@class, 'PageNotFound')]").getall()
+            if len(not_found) > 0:
+                errors_df.append([link, "404"])
+                continue
+            elif response.captcha:
+                errors_df.append([link, "captcha"])
                 continue
 
             title = ' '.join(sel.xpath('//h1/text()').getall())
@@ -446,7 +445,7 @@ def scrape_aliexpress( scrape_links: DF[ScrapeLinks], context: Context):
                 if key not in properties.keys():
                     properties[key] = val
 
-            images = sel.xpath("//div[@class = 'gallery_Gallery__picList__1gsooe']//picture//img/@src").getall()   # noqa: E501
+            images = sel.xpath("//div[@class = 'gallery_Gallery__picList']//picture//img/@src").getall()   # noqa: E501
             images.extend(sel.xpath("//div[@id = 'content_anchor']//img/@src").getall())
 
             text_df.append([
@@ -465,8 +464,7 @@ def scrape_aliexpress( scrape_links: DF[ScrapeLinks], context: Context):
                     card_df.append([link, key, val])
 
             for key in properties.keys():
-                for val in properties[key]:
-                    props_df.append([link, key, val])
+                props_df.append([link, key, properties[key]])
 
 
     return_df = []
@@ -481,9 +479,10 @@ def scrape_aliexpress( scrape_links: DF[ScrapeLinks], context: Context):
         return_df.extend([
             pd.DataFrame(text_df, columns=["link", "text"]),
             pd.DataFrame(image_df, columns=["link", "image"]),
+            pd.DataFrame(props_df, columns=["link", "name", "value"]),
             pd.DataFrame(card_df, columns=["link", "name", "value"])
         ])
 
-    return_df.append(pd.DataFrame(errors_df, columns=["link"]))
+    return_df.append(pd.DataFrame(errors_df, columns=["link", "error"]))
 
     return return_df
