@@ -177,7 +177,7 @@ def scrape_aliexpress( scrape_links: DF[ScrapeLinks], context: Context):
     [Output Format]
 
         A dataframe with three columns:
-        
+
             text: json string or text string depending on output_type option
             properties: product properties
             images: product image links
@@ -446,7 +446,7 @@ def scrape_aliexpress( scrape_links: DF[ScrapeLinks], context: Context):
                 if key not in properties.keys():
                     properties[key] = val
 
-            images = sel.xpath("//div[@class = 'gallery_Gallery__picList']//picture//img/@src").getall()   # noqa: E501
+            images = sel.xpath("//div[contains(@class, 'gallery_Gallery__picList')]//picture//img/@src").getall()   # noqa: E501
             images.extend(sel.xpath("//div[@id = 'content_anchor']//img/@src").getall())
 
             text_df.append([
