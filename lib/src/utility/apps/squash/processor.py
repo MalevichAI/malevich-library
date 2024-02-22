@@ -102,7 +102,7 @@ def squash(df: DF[Any], context: Context):
     return squash_rows(df, context)
 
 
-@processor
+@processor()
 def squash_columns(df: DF[Any], context: Context):
     """Squash multiple columns into one column.
 
