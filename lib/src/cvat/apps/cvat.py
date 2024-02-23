@@ -13,6 +13,7 @@ class TaskImages(BaseModel):
     task: str
     image: str
 
+
 @scheme()
 class UploadResult(BaseModel):
     task: str
@@ -20,58 +21,60 @@ class UploadResult(BaseModel):
     status: str
 
 def upload_to_s3(
-        key_id,
-        secret_key,
-        path,
-        bucket_name,
-        bucket_path,
-        endpoint_url=None
-    ):
+    key_id,
+    secret_key,
+    path,
+    bucket_name,
+    bucket_path,
+    endpoint_url=None
+):
 
     client = boto3.client(
         's3',
-        aws_access_key_id = key_id,
-        aws_secret_access_key = secret_key,
-        endpoint_url = endpoint_url
+        aws_access_key_id=key_id,
+        aws_secret_access_key=secret_key,
+        endpoint_url=endpoint_url
     )
 
     client.upload_file(path, bucket_name, bucket_path)
+
 
 @processor()
 def upload_images_to_task(df: DF[TaskImages], context: Context):
     """
         Creates task (if does not exists) and upload images to the task.
 
-        Input:
-            DF [TaskImages]:
-                DataFrame which contains 2 columns:
-                    - task: Name of the task where image should be uploaded
-                    - image: Name of the image file
+    ## Input
 
-        Configuration:
-        -  `cvat_user`, `cvat_password` - CVAT account credentials
+        A dataframe with two columns:
 
-        - `cvat_org` - CVAT organization. By default uses personal workspace
+        - task (string): Name of the task where image should be uploaded
+        - image (string): Name of the image file
 
-        -  `cvat_url` - URL of your CVAT server
+    ## Configuration
 
-        -  `project_id` - ID of CVAT project
-
+        -  `cvat_url`: string. URL of your CVAT server
+        - `cvat_user`: string. Account user name on CVAT.
+        - `cvat_password`: string. Account user password on CVAT.
+        - `cvat_org`: string. CVAT organization. By default uses personal workspace.
+        - `cvat_url`: string. URL of your CVAT server.
+        - `project_id`: string. ID of CVAT project.
+        - `cloud_id`: string. ID of cloud storage.
+        - `aws_access_key_id`: string. AWS credentials.
+        - `aws_secret_access_key`: string. AWS credentials.
+        - `endpoint_url`: string, default is AWS S3 endpoint.
+                URL endpoint of the cloud storage (S3).
+        - `bucket_name`: string, default "cvat". Name of S3 bucket.
         - `cloud_id` - ID of cloud storage
 
-        - `aws_access_key_id`, `aws_secret_access_key` - AWS credentials
+    ## Output
 
-        - `endpoint_url` - If you use another cloud, specify endpoint_url
+        A dataframe with three columns:
+        - task (string): Name of the task where image should be uploaded
+        - image (string): Name of the image file
+        - status (string): Upload Status Code
 
-        - `bucket_name` - Name of S3 bucket
-
-
-        Output:
-            DF [UploadResult]:
-                DataFrame which contains 3 columns:
-                    task: Name of the task where image should be uploaded
-                    image: Name of the image file
-                    status: Upload Status Code
+    -----
         Args:
             TaskImages: DF[TaskImages]:
                 A DataFrame with image and corresponding task
@@ -126,11 +129,11 @@ def upload_images_to_task(df: DF[TaskImages], context: Context):
                 path = context.get_share_path(image)
                 executor.submit(
                     upload_to_s3,
-                    key_id = aws_access_key_id,
-                    secret_key = aws_secret_access_key,
-                    path = path,
-                    bucket_name = bucket_name,
-                    bucket_path = f"{task_name}/{image}",
+                    key_id=aws_access_key_id,
+                    secret_key=aws_secret_access_key,
+                    path=path,
+                    bucket_name=bucket_name,
+                    bucket_path=f"{task_name}/{image}",
                     endpoint_url=endpoint_url
                 )
                 image_set.append(f"{task_name}/{image}")

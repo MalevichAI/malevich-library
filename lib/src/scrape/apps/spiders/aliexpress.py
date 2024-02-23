@@ -29,8 +29,17 @@ class AliexpSpider(scrapy.Spider):
             yield scrapy.Request(url=url, callback=self.parse)
 
 
-    def parse(self, response:scrapy.http.Response):
+    def parse(self, response: scrapy.http.Response):
         sel = scrapy.Selector(Response(response.body.decode(), response.url))
+
+        not_found = sel.xpath("//h1/text()").getall()
+        if "Такой страницы нет" in not_found:
+            return {
+                'text': "",
+                'json': json.dumps({}, ensure_ascii=False),
+                'status': 404
+            }
+
         title = ' '.join(sel.xpath('//h1/text()').getall())
         description = "" + ' '.join(sel.xpath(
             "//div[@id = 'content_anchor']//*[not(self::img) and not(self::script) \
@@ -56,11 +65,15 @@ class AliexpSpider(scrapy.Spider):
         json_data['description'] = description
         json_data['properties'] = properties
         json_data['images'] = images
+        json_data['multicards'] = response.cards
         data = ''
-        data += f'Title:\n{title}\n\n' +\
-            f'Description:\n{description}\n\n' +\
+        data += (
+            f'Title:\n{title}\n\n'
+            f'Description:\n{description}\n\n'
             f'Properties:\n{properties}\n\n'
+        )
         yield {
                 'text': data,
-                'json': json.dumps(json_data, ensure_ascii=False)
-            }
+                'json': json.dumps(json_data, ensure_ascii=False),
+                'status': 200
+        }
