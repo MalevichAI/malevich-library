@@ -20,7 +20,6 @@ class UploadResult(BaseModel):
     image: str
     status: str
 
-
 def upload_to_s3(
     key_id,
     secret_key,
@@ -43,7 +42,7 @@ def upload_to_s3(
 @processor()
 def upload_images_to_task(df: DF[TaskImages], context: Context):
     """
-    Creates task (if does not exists) and upload images to the task.
+        Creates task (if does not exists) and upload images to the task.
 
     ## Input
 
@@ -76,14 +75,13 @@ def upload_images_to_task(df: DF[TaskImages], context: Context):
         - status (string): Upload Status Code
 
     -----
+        Args:
+            TaskImages: DF[TaskImages]:
+                A DataFrame with image and corresponding task
 
-    Args:
-        TaskImages: DF[TaskImages]:
-            A DataFrame with image and corresponding task
-
-    Returns:
-        DF[UploadResult]:
-            A DataFrame with status code of each image upload
+        Returns:
+            DF[UploadResult]:
+                A DataFrame with status code of each image upload
     """  # noqa: E501
     login = context.app_cfg.get('cvat_user', None)
     password = context.app_cfg.get('cvat_password', None)
