@@ -1,0 +1,2 @@
+malevich_space>=0.4.12
+malevich>=0.2.2

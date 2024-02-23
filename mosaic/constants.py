@@ -1,0 +1,2 @@
+SPACE_CONFIG_INJECTION_KEY = '__space__'
+CORE_CONFIG_INJECTION_KEY = '__core__'
