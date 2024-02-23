@@ -1,4 +1,5 @@
 import os
+from hashlib import sha256
 from typing import Any
 
 import pandas as pd
@@ -11,6 +12,9 @@ class FilenameS3Key(BaseModel):
     filename: str
     s3key: str
 
+@scheme()
+class S3Key(BaseModel):
+    s3key: str
 
 @scheme()
 class Filename(BaseModel):
@@ -305,13 +309,13 @@ def s3_download_files(files: DF['FilenameS3Key'], context: Context):
             The file is downloaded from S3 and shared under the key `file1.csv`.
 
     Output:
-        The same as the input.
+        The dataframe with downloaded filenames.
 
     Args:
         files: DF containing filenames to be downloaded.
 
     Returns:
-        The same dataframe as the input.
+        The dataframe with downloaded filenames.
     """
 
     s3_helper: S3Helper = context.app_cfg['s3_helper']
@@ -329,3 +333,57 @@ def s3_download_files(files: DF['FilenameS3Key'], context: Context):
     })
 
 
+@processor()
+def s3_download_files_auto(keys: DF[S3Key], context: Context):
+    """Downloads files from S3 to local file system.
+
+    ## Input:
+        A dataframe with a column named 's3key' which
+        contains the S3 key for each file.
+
+    ## Configuration:
+
+        The app's only configuration is the connection to S3:
+
+            - aws_access_key_id (str):
+                AWS access key ID.
+
+            - aws_secret_access_key (str):
+                AWS secret access key.
+
+            - bucket_name (str):
+                Name of the S3 bucket.
+
+            - endpoint_url (str) [optional]:
+                Endpoint URL of the S3 bucket.
+
+            - aws_region (str) [optional]:
+                AWS region of the S3 bucket.
+
+    ## Output:
+        A dataframe with columns:
+            - s3key (str): S3 key of the file
+            - filename (str): The name of the file
+
+    Args:
+        keys: DF containing keys of the files to be downloaded.
+
+    Returns:
+        A dataframe with columns:
+            - s3key (str): S3 key of the file
+            - filename (str): The name of the file
+    """
+    s3_helper: S3Helper = context.app_cfg['s3_helper']
+
+    output_files = []
+    for s3_key in keys['s3key'].to_list():
+        fbytes = s3_helper.get_object(s3_key)
+        extension = os.path.splitext(s3_key)[1]
+        file = context.run_id + '-' + sha256(s3_key.encode()).hexdigest() + extension
+        with open(os.path.join(APP_DIR, file), 'wb+') as f:
+            f.write(fbytes.read())
+            context.share(file)
+            output_files.append([s3_key, file])
+    return pd.DataFrame(
+        output_files, columns = ['s3_key', 'filename']
+    )
