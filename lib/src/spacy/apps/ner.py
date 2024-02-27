@@ -19,10 +19,11 @@ def extract_named_entities(
 ):
     """Extracts named entities from text.
 
-    Input:
-        A dataframe with a column named `text` containing text.
+    ## Input:
+        A dataframe with a column:
+        - `text` (str): containins text.
 
-    Output:
+    ## Output:
         The format of dataframe depends on the configuration provided.
 
         If `output_format` is `list`, the output will be a dataframe
@@ -42,22 +43,25 @@ def extract_named_entities(
         ```
         The `label` is the tag specification of the named entity.
 
+    ---
+
         If `output_format` is `table`, the output will be a dataframe with the following
         columns:
-        - `text`: The text of the named entity.
-        - `start_char`: The starting character of the named entity.
-        - `end_char`: The ending character of the named entity.
-        - `label`: The tag specification of the named entity.
+        - `text` (str): The text of the named entity.
+        - `start_char` (str): The starting character of the named entity.
+        - `end_char` (str): The ending character of the named entity.
+        - `label` (str): The tag specification of the named entity.
 
-    Configuration:
+    ## Configuration:
 
-        - output_format: str, default "list".
+        - `output_format`: str, default "list".
             The format of the output. Valid values are "list", "struct", and "table".
-        - model_name: str, default "en_core_web_sm".
+        - `model_name`: str, default "en_core_web_sm".
             The name of the model to use. See https://spacy.io/models for available models.
-        - filter_labels: list[str], default None.
+        - `filter_labels`: list[str], default None.
             A list of labels to filter the named entities by. If None, all named entities will be returned.
 
+    -----
 
     Args:
         df (DF):
