@@ -43,16 +43,16 @@ def upload_images_to_task(df: DF[TaskImages], context: Context):
     """
         Creates task (if does not exists) and upload images to the task.
 
-    ## Input
+    ## Input:
 
         A dataframe with two columns:
 
         - task (string): Name of the task where image should be uploaded
         - image (string): Name of the image file
 
-    ## Configuration
+    ## Configuration:
 
-        -  `cvat_url`: string. URL of your CVAT server
+        - `cvat_url`: string. URL of your CVAT server
         - `cvat_user`: string. Account user name on CVAT.
         - `cvat_password`: string. Account user password on CVAT.
         - `cvat_org`: string. CVAT organization. By default uses personal workspace.
@@ -66,7 +66,7 @@ def upload_images_to_task(df: DF[TaskImages], context: Context):
         - `bucket_name`: string, default "cvat". Name of S3 bucket.
         - `cloud_id` - ID of cloud storage
 
-    ## Output
+    ## Output:
 
         A dataframe with three columns:
         - task (string): Name of the task where image should be uploaded
