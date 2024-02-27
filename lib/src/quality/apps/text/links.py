@@ -15,7 +15,7 @@ def assert_links(df: DF[Links], context: Context) -> pd.DataFrame:
 
     ## Input:
         A dataframe that contains a column:
-            - link: link to be validated
+            - `link` (str): link to be validated
 
     ## Output:
         The format of dataframe depends on the configuration provided.
@@ -27,10 +27,10 @@ def assert_links(df: DF[Links], context: Context) -> pd.DataFrame:
         `error` containing invalid links.
 
     ## Configuration:
-        - filter_links: bool, optional, default False.
+        - `filter_links`: bool, default False.
             If set to True, will filter the dataframe and exclude invalid links.
 
-    ---
+    -----
 
     Args:
         df (DF[Links]): A dataframe with a column named `link` containing links.
