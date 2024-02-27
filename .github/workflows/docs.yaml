@@ -1,0 +1,21 @@
+name: Check processors' documentation
+on: [push, workflow_dispatch]
+jobs:
+    doc:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+            
+            - name: Install python
+              uses: actions/setup-python@v4
+              with:
+                python-version: '3.11'
+            
+            - name: Install malevich
+              run: pip install -U https://github.com/MalevichAI/malevich/archive/dev/unstable.zip
+
+            - name: Check docs
+              run: |
+                json=$(malevich dev list-procs ./lib/) || { echo "::warning::No command found. Make sure you use latest version of malevich" ; exit 0 ;} 
+                python .github/workflows/doc.py --procs="${json}"

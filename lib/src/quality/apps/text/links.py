@@ -44,8 +44,8 @@ def assert_links(df: DF[Links], context: Context) -> pd.DataFrame:
     _filter = context.app_cfg.get('filter_links', False)
     for link in df['link'].to_list():
         try:
+            response = requests.get(link)
             response = requests.get(link, allow_redirects=True)
-            print(f'Link: {link} status {response.status_code}')
             if (response.status_code < 400) == _filter:
                 result = (
                     link

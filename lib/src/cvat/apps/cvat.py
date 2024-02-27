@@ -13,7 +13,6 @@ class TaskImages(BaseModel):
     task: str
     image: str
 
-
 @scheme()
 class UploadResult(BaseModel):
     task: str
