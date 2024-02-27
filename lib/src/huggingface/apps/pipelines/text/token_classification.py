@@ -31,33 +31,41 @@ def token_classification(text: DF[TokenClassificationInput], context: Context):
 
     ## Input:
 
-        A dataframe with a column `text` containing text to be classified.
+        A dataframe with a column:
+        - `text` (str): text to be classified.
 
     ## Output:
 
         A dataframe with columns:
 
-        - `sentence_index` (optional) - index of the sentence in the input dataframe
-        - `entity` - entity name (according to the model)
-        - `score` - confidence score
-        - `index` - index of the token in the sentence
-        - `word` - token text (according to the model)
-        - `start` - start index of the token in the sentence (might be absent)
-        - `end` - end index of the token in the sentence (might be absent)
+        - `sentence_index` (str, optional): index of the sentence in the input dataframe
+        - `entity` (str): entity name (according to the model)
+        - `score` (float): confidence score
+        - `index` (int): index of the token in the sentence
+        - `word` (str): token text (according to the model)
+        - `start` (int): start index of the token in the sentence (might be absent)
+        - `end` (int): end index of the token in the sentence (might be absent)
 
     ## Configuration:
 
-        - `ignore_labels` - list of labels to ignore (e.g. `["O"]`)
-        - `keep_text` - whether to keep the input text in the output dataframe
-        - `keep_sentence_index` - whether to keep the sentence index in the output dataframe
-        - `model` - model name (e.g. `dbmdz/bert-large-cased-finetuned-conll03-english`)
-        - `tokenizer` - tokenizer name (e.g. `bert-base-cased`)
-        - `device` - device to run the model on (`cpu` or `gpu`)
-        - `batch_size` - batch size to use for inference
-        - `aggregation_strategy` - aggregation strategy to use for multiple entities per token.
-            See [Aggregation strategy](https://huggingface.co/docs/transformers/v4.36.1/en/main_classes/pipelines#transformers.TokenClassificationPipeline.aggregation_strategy)
+        - `ignore_labels`: list.
+            List of labels to ignore (e.g. `["O"]`).
+        - `keep_text`: bool.
+            Whether to keep the input text in the output dataframe.
+        - `keep_sentence_index`: bool.
+            Whether to keep the sentence index in the output dataframe.
+        - `model`: str.
+            Model name (e.g. `dbmdz/bert-large-cased-finetuned-conll03-english`).
+        - `tokenizer`: str.
+            Tokenizer name (e.g. `bert-base-cased`).
+        - `device`: str.
+            Device to run the model on (`cpu` or `gpu`).
+        - `batch_size`: int.
+            Batch size to use for inference.
+        - `aggregation_strategy`: str.
+            Aggregation strategy to use for multiple entities per token. See [Aggregation strategy](https://huggingface.co/docs/transformers/v4.36.1/en/main_classes/pipelines#transformers.TokenClassificationPipeline.aggregation_strategy)
 
-    ---
+    -----
 
     Args:
         text (TokenClassificationInput): input dataframe with text to classify
