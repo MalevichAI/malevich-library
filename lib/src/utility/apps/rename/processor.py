@@ -7,11 +7,14 @@ from malevich.square import DF, Context, processor
 def rename(df: DF[Any], context: Context):
     """Renames columns in a dataframe.
 
-    Input:
-        - DataFrame with the columns to be renamed.
+    ## Input:
+        DataFrame with the columns to be renamed.
 
-    Configuration:
-        - Provides mapping of old column names to their new names.
+    ## Output:
+        DataFrame with renamed column
+
+    ## Configuration:
+        Provides mapping of old column names to their new names.
 
         For example, if the dataframe has columns 'a', 'b', 'c' and we want to rename
         'a' to 'A', 'b' to 'B', and 'c' to 'C', the configuration should be:
@@ -22,10 +25,15 @@ def rename(df: DF[Any], context: Context):
             'c': 'C'
         }
 
-    Details:
+        - `old_column_name`: string.
+        Provides mapping of old column names to their new names. For example 'a': 'A'.
+
+    ## Details:
         This processor renames columns in the dataframe based on provided mappings.
         User needs to provide a dictionary in the configuration hat specifies old
         column names as keys and new column names as values.
+
+    -----
 
     Args:
         df: DataFrame in which to rename columns.

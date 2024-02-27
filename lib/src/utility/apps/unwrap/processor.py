@@ -34,24 +34,24 @@ def unwrap(
     | 2  | B    | c    |
 
 
-    Inputs:
+    ## Input:
 
         An arbitrary dataframe with columns that contain multiple values.
 
-    Outputs:
+    ## Output:
 
         A dataframe with the same columns as the input dataframe, but with
         multiple rows for each input row.
 
-    Configuration:
+    ## Configuration:
 
-        columns (list of str): The columns to unwrap. If not specified, all
-            columns will be unwrapped.
+        - `columns`: list[str].
+            The columns to unwrap. If not specified, all columns will be unwrapped.
 
-        delimiter (str): The delimiter used to separate values in the columns. If
-            not specified, the default delimiter is a comma (,).
+        - `delimiter`: str.
+            The delimiter used to separate values in the columns. If not specified, the default delimiter is a comma (,).
 
-    Notes:
+    ## Notes:
 
         Be careful when using this processor with columns that contain
         non-text values. For example, if a column contains a list of numbers,
@@ -71,6 +71,7 @@ def unwrap(
     | 1  | B    | 1       |
     | 1  | B    | 2       |
 
+    -----
 
     Args:
 
@@ -82,7 +83,7 @@ def unwrap(
 
         The same dataframe as the input dataframe, but with multiple rows for
         each input row.
-    """
+    """  # noqa: E501
 
     pop_columns = context.app_cfg.get('columns', df.columns)
     delim = context.app_cfg.get('delimiter', ',')

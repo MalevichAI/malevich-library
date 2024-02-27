@@ -32,6 +32,16 @@ def match_pattern(dataframe: DF, context: Context) -> pd.DataFrame:
 
     They are later joined with a certain symbol and saved in an analogue cell
 
+    ## Input:
+
+        An arbitrary DataFrame
+
+    ## Output:
+
+        Result DataFrame
+
+    -----
+
     Args:
         dataframe: the input
         context: the usual Malevich context, we expect the field 'pattern' from it.

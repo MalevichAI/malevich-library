@@ -17,15 +17,19 @@ class Links(BaseModel):
 def download(links: DF[Links], context: Context):
     """Download files from the internet
 
-    Inputs:
-        A dataframe with a single column `link` containing links to files to download.
+    ## Input:
+        A dataframe with a column:
+        - `link` (str): links to files to download.
 
-    Outputs:
-        A dataframe with a single column `file` containing paths to downloaded files.
+    ## Output:
+        A dataframe with a column:
+        - `file` (str): containing paths to downloaded files.
 
-    Configuration:
-        prefix (str, optional): a prefix to add to the paths of downloaded files.
-            If not specified, files will be downloaded to the root of the app directory.
+    ## Configuration:
+        - `prefix`: str.
+        A prefix to add to the paths of downloaded files. If not specified, files will be downloaded to the root of the app directory.
+
+    -----
 
     Args:
         links (DF[Links]): Dataframe with links to download
@@ -33,7 +37,7 @@ def download(links: DF[Links], context: Context):
 
     Returns:
         Dataframe with paths to downloaded files
-    """
+    """  # noqa: E501
     prefix = context.app_cfg.get("prefix", "")
     try:
         os.makedirs(os.path.join(APP_DIR, prefix))

@@ -22,13 +22,13 @@ def combine_vertical(
     dataframe1: pd.DataFrame, dataframe2: pd.DataFrame, context: Context):
     """Concatenates two dataframes vertically.
 
-    Input:
-        - Two Pandas dataframes of equal column length.
+    ## Input:
+        Two Pandas dataframes of equal column length.
 
-    Output:
-        - The concatenated dataframe with adjusted column names.
+    ## Output:
+        The concatenated dataframe with adjusted column names.
 
-    Details:
+    ## Details:
         The function takes in two equally sized
         dataframes and concatenates them vertically.
 
@@ -40,25 +40,26 @@ def combine_vertical(
         If `ignore_col_names` is set to False, shared column names are preserved,
         while mismatched names are replaced by `default_name_i`.
 
-    Note:
+    ## Note:
         The function raises a ValueError if the dataframes
         do not share the same number of columns.
 
-    Configuration:
-        - ignore_col_names (bool):
+    ## Configuration:
+        - `ignore_col_names`: bool.
             determines whether to ignore current column names, defaults to False.
-        - default_name (str):
+        - `default_name`: str.
             name template for generic columns names, defaults to 'col'.
-        - ignore_index (bool):
-            determines whether to ignore dataframe indexes during concatenation,
-            defaults to False.
+        - `ignore_index`: bool.
+            determines whether to ignore dataframe indexes during concatenation, defaults to False.
+
+    -----
 
     Args:
         dataframe1, dataframe2 (pd.DataFrame): Dataframes to be merged.
 
     Returns:
         The concatenated dataframe (pd.DataFrame).
-    """
+    """  # noqa: E501
     # check the condition of equal number of columns
     if len(dataframe1.columns) != len(dataframe2.columns):
         raise ValueError(

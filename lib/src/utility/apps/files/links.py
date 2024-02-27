@@ -8,16 +8,18 @@ from malevich.square import APP_DIR, DF, Context, processor
 def get_links_to_files(df: DF, ctx: Context):
     """Get links to files produced during the workflow execution.
 
-    Input:
+    ## Input:
         An arbitrary dataframe.
 
-    Output:
+    ## Output:
         The same dataframe, but with all file paths replaced
         with openable links to the files.
 
-    Configuration:
-        - expiration (int): The number of seconds after which the link
-            will expire. Defaults to 6 hours. Maximum is 24 hours.
+    ## Configuration:
+        - `expiration`: int.
+        The number of seconds after which the link will expire. Defaults to 6 hours. Maximum is 24 hours.
+
+    -----
 
     Args:
         df (DF):
@@ -29,7 +31,7 @@ def get_links_to_files(df: DF, ctx: Context):
         DF:
             The same dataframe, but with all file paths replaced
             with openable links to the files.
-    """
+    """  # noqa: E501
 
     _expire_secs = ctx.app_cfg.get('expiration', 6 * 3600)
     _expire_secs = min(_expire_secs, 24 * 3600)

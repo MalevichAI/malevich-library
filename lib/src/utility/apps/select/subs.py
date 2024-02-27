@@ -8,18 +8,17 @@ from malevich.square import DFS, Context, M, processor
 def subset(dfs: DFS[M[Any]], context: Context):
     r"""Select a subset of dataframes from the list of dataframes.
 
-    Input:
+    ## Input:
         A number of dataframes.
 
-    Output:
+    ## Output:
         A subset of dataframes or a single dataframe.
 
-    Configuration:
-        expr: str
-            A comma-separated list of integers or slices, e.g. `0,1:3,5:7,6,9:10`.
-            The first dataframe has index 0.
+    ## Configuration:
+        - `expr`: str.
+            A comma-separated list of integers or slices, e.g. `0,1:3,5:7,6,9:10`. The first dataframe has index 0.
 
-    Details:
+    ## Details:
         The `expr` field should be a comma-separated list of integers or slices,
         e.g. `0,1:3,5:7,6,9:10`.
 
@@ -31,13 +30,15 @@ def subset(dfs: DFS[M[Any]], context: Context):
         If the expression contains only one element, a single dataframe is
         returned. Otherwise, a slice of dataframes is returned.
 
+    -----
+
     Args:
         dfs: A number of arbitrary dataframes.
 
     Returns:
         A subset of dataframes or a single dataframe if the subset contains
         a single index.
-    """
+    """  # noqa: E501
     # Parse `expr` field of the configuration
     expr = context.app_cfg.get("expr", None)
     if expr is None:
