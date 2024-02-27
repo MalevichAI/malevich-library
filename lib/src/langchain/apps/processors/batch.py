@@ -30,7 +30,7 @@ def send_messages_batch(input_variables: DF[Any], ctx: Context):
 
     ## Output:
         A dataframe with the following columns:
-            - result: AI Chatbot response to the input message
+            - result (str): AI Chatbot response to the input message
 
     ## Example:
         Let's assume you want to come up with a name for your company services. You have
