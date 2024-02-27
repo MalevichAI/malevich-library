@@ -19,27 +19,26 @@ def translate_texts(
 ):
     """Translate texts from one language to another
 
-    Input:
+    ## Input:
         A dataframe with the following columns:
-            - text: text to translate
-            - from_language: language code to translate from
-            - to_language: language code to translate to
+            - `text` (str): text to translate
+            - `from_language` (str): language code to translate from
+            - `to_language` (str): language code to translate to
 
-    Configuration:
-        The app is not configurable
-
-    Output:
+    ## Output:
         A dataframe with the following columns:
-            - text: original text
-            - from_language: language code to translate from
-            - to_language: language code to translate to
-            - translation: translated text in the target language
+            - `text` (str): original text
+            - `from_language` (str): language code to translate from
+            - `to_language` (str): language code to translate to
+            - `translation` (str): translated text in the target language
 
-    Details:
+    ## Details:
         The app utilizes Google Translate API to translate texts.
 
         Columns `text`, `from_language`, and `to_language` are copied
         from the input dataframe without any modification.
+
+    -----
 
     Args:
         docs (DF[TextWithLanguageTranslationPairs]):
