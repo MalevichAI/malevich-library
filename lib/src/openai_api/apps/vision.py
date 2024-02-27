@@ -18,24 +18,29 @@ async def completion_with_vision(variables: DF[Any], ctx: Context):
 
     The model is set to 'gpt-4-vision-preview' by default.
 
-    Configuration:
+    ## Configuration:
 
-        - openai_api_key (str, required): your OpenAI API key
-        - user_prompt (str, required): the prompt for the user
-        - image_column (str, default: 'images'): the column with images
-        - max_tokens (int, default: 2048): the maximum number of tokens
-        - top_p (float, default: 1.0): the probability of the model
-            returning a next token that is in the top P tokens
-        - temperature (float, default: 1.0): the higher the value,
-            the more random the generated text
-        - frequency_penalty (float, default: 0.0): the higher the value,
-            the less likely the model is to repeat the same word
-        - presence_penalty (float, default: 0.0): the higher the value,
-            the less likely the model is to talk about the same topic again
-        - model (str, default: 'gpt-4-vision-preview'): the model to use
+        - `openai_api_key`: str.
+            Your OpenAI API key.
+        - `user_prompt`: str.
+            The prompt for the user.
+        - `image_column`: str, default 'images'.
+            The column with images.
+        - `max_tokens`: int, default 2048.
+            The maximum number of tokens.
+        - `top_p`: float, default 1.0.
+            The probability of the model returning a next token that is in the top P tokens.
+        - `temperature`: float, default 1.0.
+            The higher the value, the more random the generated text.
+        - `frequency_penalty`: float, default 0.0.
+            The higher the value, the less likely the model is to repeat the same word.
+        - `presence_penalty`: float, default 0.0.
+            The higher the value, the less likely the model is to talk about the same topic again.
+        - `model`: str, default 'gpt-4-vision-preview'.
+            The model to use.
 
 
-    Inputs:
+    ## Input:
 
         A dataframe with variables to be used in the prompts and an extra
         column with images files or urls.
@@ -51,12 +56,12 @@ async def completion_with_vision(variables: DF[Any], ctx: Context):
         You have to have a column `someone` in the input dataframe. For each
         of such variables you should have a separate column.
 
-    Outputs:
+    ## Output:
 
         A dataframe with following columns:
             - content (str): the content of the model response
 
-    Supported file types:
+    ## Supported file types:
 
         - png
         - jpg
@@ -67,13 +72,15 @@ async def completion_with_vision(variables: DF[Any], ctx: Context):
         - tif
         - webp
 
+    -----
+
     Args:
         variables (DF[Any]): a dataframe with variables
         ctx (Context): context
 
     Returns:
         A dataframe with model responses
-    """
+    """  # noqa: E501
 
 
     image_column = ctx.app_cfg.get("image_column", "images")

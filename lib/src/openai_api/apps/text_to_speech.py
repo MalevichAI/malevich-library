@@ -21,22 +21,26 @@ async def text_to_speech(variables: DF[Any], ctx: Context):
 
     Scroll down to see the full list of parameters.
 
-    Inputs:
+    ## Input:
 
-        A dataframe with a single column `text` containing the text
-        to be converted to speech
+        A dataframe with a column:
+        - `text` (str): the text to be converted to speech
 
-    Outputs:
+    ## Output:
 
-        A dataframe with following columns:
-            - filename (str): a key of shared .mp3 files for each input
+        A dataframe with a column:
+            - `filename` (str): a key of shared .mp3 files for each input
 
-    Configuration:
+    ## Configuration:
 
-        - openai_api_key (str, required): your OpenAI API key
-        - model (str, default: 'tts-1'): the model to use
-        - voice (str, default: 'alloy'): the voice to use. One of
-            'alloy', 'echo', 'fable', 'onyx', 'nova', and 'shimmer'
+        - `openai_api_key`: str.
+            Your OpenAI API key.
+        - `model`: str, default 'tts-1'.
+            The model to use.
+        - `voice`: str, default 'alloy'.
+            The voice to use. One of 'alloy', 'echo', 'fable', 'onyx', 'nova', and 'shimmer'
+
+    -----
 
     Args:
         variables (DF[Any]): the variables to use in the prompts
@@ -44,7 +48,7 @@ async def text_to_speech(variables: DF[Any], ctx: Context):
 
     Returns:
         DF[Any]: the chat messages
-    """
+    """  # noqa: E501
 
     try:
         conf = ctx.app_cfg["conf"]
