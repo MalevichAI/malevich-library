@@ -169,24 +169,30 @@ def get_page(link, sp_conf):
 def scrape_aliexpress( scrape_links: DF[ScrapeLinks], context: Context):
     """Scrapes aliexpress.
 
-    [Input Format]
+    ## Input:
 
-        A dataframe with a column named `link` containing web links
-        to be scraped
+        A dataframe with a column:
+        - `link` (str): containing web links to be scraped
 
-    [Output Format]
+    ## Output:
 
-        A dataframe with three columns:
+        Depends on the configuration, processor returns from 2 to 5 DataFrames.
 
-            text: json string or text string depending on output_type option
-            properties: product properties
-            images: product image links
+        By default, it returns 5 DataFrames: text, images, properties, cards and errors.
 
-    [Available Options]
-        - allowed_domains (a list of strings)
+        Each DataFrame has a `link` column. And depend on the DataFrame, it has its own columns.
+        For example: Image DataFrame has two columns: `link` and `image`.
 
-            A list of allowed domains to scrape. If not provided, all domains
-            are allowed, so the app will traverse the entire web. Otherwise,
+        ---
+
+        If `properties_only` is True, processor will return 2 DataFrames: properties and errors.
+        Same situation when `images_only` will be set to True.
+
+
+    ## Configuration:
+        - `allowed_domains`: list[str].
+            A list of allowed domains to scrape.
+            If not provided, all domains are allowed, so the app will traverse the entire web. Otherwise,
             the scraper won't visit external links.
 
             Example:
@@ -213,10 +219,9 @@ def scrape_aliexpress( scrape_links: DF[ScrapeLinks], context: Context):
                 app will traverse the entire web.
 
 
-        - max_depth (integer):
-
-            The maximum depth to traverse the web. If not provided, the app
-            will traverse the entire web.
+        - `max_depth`: integer.
+            The maximum depth to traverse the web.
+            If not provided, the app will traverse the entire web.
 
             Example:
 
@@ -236,17 +241,15 @@ def scrape_aliexpress( scrape_links: DF[ScrapeLinks], context: Context):
                 In case (3), the app will visit links from the provided links
                 and links found in the given ones.
 
-        - spider_cfg (dict):
-
-            A dictionary of configuration options for the spider. If not
-            provided, the app will use the default configuration for each
+        - `spider_cfg`: dict.
+            A dictionary of configuration options for the spider.
+            If not provided, the app will use the default configuration for each
             spider. See [Available Spiders] for more information.
 
 
-        - max_results (integer):
-
-            The maximum number of results to return. If not provided, the app
-            will return all results.
+        - `max_results`: integer.
+            The maximum number of results to return.
+            If not provided, the app will return all results.
 
             Example:
 
@@ -260,10 +263,8 @@ def scrape_aliexpress( scrape_links: DF[ScrapeLinks], context: Context):
                 is then unbounded.
 
 
-        - timeout (int):
-
-            The maximum number of seconds to wait for collecting responses
-            from the spiders.
+        - `timeout`: int.
+            The maximum number of seconds to wait for collecting responses from the spiders.
 
             Example:
 
@@ -284,10 +285,8 @@ def scrape_aliexpress( scrape_links: DF[ScrapeLinks], context: Context):
                 to finish.
 
 
-        - squash_results (bool):
-
-            If set, the app will squash the results into a single string separated
-            by the `squash_delimiter` option.
+        - `squash_results`: bool.
+            If set, the app will squash the results into a single string separated by the `squash_delimiter` option.
 
             Example:
 
@@ -327,8 +326,7 @@ def scrape_aliexpress( scrape_links: DF[ScrapeLinks], context: Context):
                 |   c    |
 
 
-        - delimiter (str):
-
+        - `delimiter`: str.
             The delimiter to use when squashing the results or when using independent crawl.
             See `squash_results` and `links_are_independent` option for more information.
 
@@ -337,13 +335,13 @@ def scrape_aliexpress( scrape_links: DF[ScrapeLinks], context: Context):
                 By default, the app will use the newline character as the
                 delimiter.
 
-        - links_are_independent (bool):
+        - `links_are_independent`: bool.
 
             If set, the app will crawl each link independently. Otherwise, the app
             will assume all links comprise a single corpus and will crawl them
             together.
 
-    [Spider Options]
+    ## Spider Options:
 
         - output_type (str):
             The output can be in 2 types:
@@ -394,6 +392,9 @@ def scrape_aliexpress( scrape_links: DF[ScrapeLinks], context: Context):
                 'ru' for Russian
 
             Default value is 'ru'
+
+    -----
+
     Args:
         scrape_links (DF[ScrapeLinks]): A dataframe with a column named `link` containing web links.
         context: The configuration dictionary. See [Available Options] for more information.
