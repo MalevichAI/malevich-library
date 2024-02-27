@@ -26,6 +26,33 @@ class Prompt:
 def generate_audio(prompt: DF[Prompt], context: Context) -> str:
     """
     Generate audio from text.
+
+    ## Input:
+        A dataframe with column:
+        - `text` (str): prompt to generate audio.
+
+    ## Output:
+        A dataframe with columns:
+        - `audio_path` (str): path to the audio.
+        - `description` (str): description of the audio.
+
+    ## Configuration:
+
+        - `replicate_api_key`: string.
+
+            [Replicate](https://replicate.com/) API key.
+
+        - `save_prefix`: string.
+
+            Prefix path to save the audio in.
+
+    -----
+
+    Args:
+        prompt: Dataframe with prompts.
+
+    Returns:
+        A DataFrame with audio info.
     """
     if "replicate_api_key" not in context.app_cfg:
         raise ValueError("replicate_api_key not set in configuration")
