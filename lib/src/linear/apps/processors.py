@@ -166,7 +166,7 @@ def get_issues(df: DF[GetObjects], context: Context):
 
         - `team_key` (str): Team key (example 'ABC')
 
-    Output:
+    ## Output:
         A dataframe with columns:
 
         - `team_key` (str): Team Key

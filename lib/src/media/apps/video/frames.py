@@ -15,16 +15,16 @@ class Videos(BaseModel):
 def split_on_frames(videos: DF['Videos'], context: Context):
     """Splits videos on frames
 
-    Input:
+    ## Input:
         An arbitrary dataframe with the following columns:
-            - videos: the path to the input video in the shared storage
+            - `videos` (str): the path to the input video in the shared storage
 
-    Output:
+    ## Output:
         The same dataframe with the following columns:
-            - videos: the path to the output video in the shared storage
-            - frames: the path to the output frames in the shared storage
+            - `videos` (str): the path to the output video in the shared storage
+            - `frames` (str): the path to the output frames in the shared storage
 
-    Details:
+    ## Details:
         The video is split into frames using OpenCV. By default, produced frames
         are saved as PNG images in the folder with the same name as
         the video file with `.d `extension.
@@ -36,10 +36,11 @@ def split_on_frames(videos: DF['Videos'], context: Context):
         The value in the that columns are copied as is and duplicated for each
         frame of the video.
 
-    Configuration:
-        - fps (int or float) [optional, default is 1]:
-            Frames per second. If float is used then it is
-            used as a percentage of the original fps.
+    ## Configuration:
+        - `fps`: int(float), default 1.
+            Frames per second. If float is used then it is used as a percentage of the original fps.
+
+    -----
 
     Args:
         videos: a DataFrame with the following columns:
@@ -50,7 +51,7 @@ def split_on_frames(videos: DF['Videos'], context: Context):
             - videos: the path to the output video
             - frames: the path to the output frames
             - *: the same columns as in the input dataframe
-    """
+    """  # noqa: E501
     # Convert the 'video' column of the input dataframe to a list
     try:
         video_list = videos.video.tolist()
