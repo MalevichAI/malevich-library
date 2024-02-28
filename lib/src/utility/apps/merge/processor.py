@@ -47,45 +47,43 @@ def merge_dfs(dfs: List[DF[Any]], context: Context):
 def merge(dfs: Sink[Any], context: Context):
     """Merges multiple dataframes into one
 
-    Input:
-        dfs: An iterable containing multiple datafr ames to be merged.
+    ## Input:
+        An iterable containing multiple dataframes to be merged.
 
-    Configuration:
-        - how (str) [optional, default is 'inner']:
+    ## Configuration:
+        - `how`: str, default 'inner'.
             The type of merge to be performed.
 
             Possible values:
-                - 'inner':
+                'inner':
                     Use intersection of keys from both frames,
                     similar to a SQL inner join;
-                - 'outer':
+                'outer':
                     Use union of keys from both frames,
                     similar to a SQL full outer join;
-                - 'left':
+                'left':
                     Use only keys from left frame,
                     similar to a SQL left outer join;
-                - 'right':
+                'right':
                     Use only keys from right frame,
                     similar to a SQL right outer join;
-                - 'cross':
+                'cross':
                     Create a cartesian product from both frames,
                     similar to a SQL cross join.
-        - both_on (str or tuple) [optional]:
-            Column name or 'index' to merge on.
-            If 'index', the index of the dataframe will be used.
-            If column name, the column should be present in all dataframes
-        - left_on (str or list) [optional]:
-            Column name or 'index' to join on in the left DataFrame.
-            If 'index', the index of the dataframe will be used.
-            If column name, the column should be present in all but last dataframes
-        - right_on (str or list) [optional]:
-            Column name or 'index' to join on in the right DataFrame.
-            If 'index', the index of the dataframe will be used.
-            If column name, the column should be present in all but first dataframes
-        - suffixes (tuple) [optional, default is ('_0', '_1')]:
-            Suffix to apply to overlapping column names in the left and right dataframes
 
-    Notes:
+        - `both_on`: str(tuple).
+            Column name or 'index' to merge on. If 'index', the index of the dataframe will be used. If column name, the column should be present in all dataframes.
+        - `left_on`: str(list).
+            Column name or 'index' to join on in the left DataFrame. If 'index', the index of the dataframe will be used. If column name, the column should be present in all but last dataframes.
+        - `right_on`: str(list).
+            Column name or 'index' to join on in the right DataFrame. If 'index', the index of the dataframe will be used. If column name, the column should be present in all but first dataframes.
+        - `suffixes`: tuple, default ('_0', '_1').
+            Suffix to apply to overlapping column names in the left and right dataframes.
+
+    ## Output:
+        Merged DataFrame
+
+    ## Notes:
         If both 'both_on' and 'left_on/right_on' are provided,
         'both_on' will be ignored.
 
@@ -97,12 +95,14 @@ def merge(dfs: Sink[Any], context: Context):
         If using right_on column, all dataframes except
         the first one should have the column.
 
+    -----
+
     Args:
         dfs: DFS containing DataFrames to be merged.
 
     Returns:
         The merged dataframe
-    """
+    """  # noqa: E501
     return merge_dfs(list(iter(dfs)), context)
 
 
@@ -111,45 +111,44 @@ def merge(dfs: Sink[Any], context: Context):
 def merge_two(df_1: DF[Any], df_2: DF[Any], context: Context):
     """Merges multiple dataframes into one
 
-    Input:
+    ## Input:
         Two dataframes to be merged.
 
-    Configuration:
-        - how (str) [optional, default is 'inner']:
+    ## Configuration:
+        - `how`: str, default 'inner'.
             The type of merge to be performed.
 
             Possible values:
-                - 'inner':
+                Possible values:
+                'inner':
                     Use intersection of keys from both frames,
                     similar to a SQL inner join;
-                - 'outer':
+                'outer':
                     Use union of keys from both frames,
                     similar to a SQL full outer join;
-                - 'left':
+                'left':
                     Use only keys from left frame,
                     similar to a SQL left outer join;
-                - 'right':
+                'right':
                     Use only keys from right frame,
                     similar to a SQL right outer join;
-                - 'cross':
+                'cross':
                     Create a cartesian product from both frames,
                     similar to a SQL cross join.
-        - both_on (str or tuple) [optional]:
-            Column name or 'index' to merge on.
-            If 'index', the index of the dataframe will be used.
-            If column name, the column should be present in all dataframes
-        - left_on (str or list) [optional]:
-            Column name or 'index' to join on in the left DataFrame.
-            If 'index', the index of the dataframe will be used.
-            If column name, the column should be present in the left dataframe
-        - right_on (str or list) [optional]:
-            Column name or 'index' to join on in the right DataFrame.
-            If 'index', the index of the dataframe will be used.
-            If column name, the column should be present in the right dataframe
-        - suffixes (tuple) [optional, default is ('_0', '_1')]:
-            Suffix to apply to overlapping column names in the left and right dataframes
 
-    Notes:
+        - `both_on`: str(tuple).
+            Column name or 'index' to merge on. If 'index', the index of the dataframe will be used. If column name, the column should be present in all dataframes.
+        - `left_on`: str(list).
+            Column name or 'index' to join on in the left DataFrame. If 'index', the index of the dataframe will be used. If column name, the column should be present in all but last dataframes.
+        - `right_on`: str(list).
+            Column name or 'index' to join on in the right DataFrame. If 'index', the index of the dataframe will be used. If column name, the column should be present in all but first dataframes.
+        - `suffixes`: tuple, default ('_0', '_1').
+            Suffix to apply to overlapping column names in the left and right dataframes.
+
+    ## Output:
+        Merged DataFrame
+
+    ## Notes:
         If both 'both_on' and 'left_on/right_on' are provided,
         'both_on' will be ignored.
 
@@ -161,13 +160,15 @@ def merge_two(df_1: DF[Any], df_2: DF[Any], context: Context):
         If using right_on column, all dataframes except
         the first one should have the column.
 
+    -----
+
     Args:
         df_1: Left dataframe
         df_2: Right dataframe
 
     Returns:
         The merged dataframe
-    """
+    """  # noqa: E501
     return merge_dfs([(df_1,), (df_2,)], context)
 
 
@@ -175,45 +176,43 @@ def merge_two(df_1: DF[Any], df_2: DF[Any], context: Context):
 def merge_three(df_1: DF[Any], df_2: DF[Any], df_3: DF[Any], context: Context):
     """Merges multiple dataframes into one
 
-    Input:
+    ## Input:
         Three dataframes to be merged.
 
-    Configuration:
-        - how (str) [optional, default is 'inner']:
+    ## Configuration:
+        - `how`: str, default 'inner'.
             The type of merge to be performed.
 
             Possible values:
-                - 'inner':
+                'inner':
                     Use intersection of keys from both frames,
                     similar to a SQL inner join;
-                - 'outer':
+                'outer':
                     Use union of keys from both frames,
                     similar to a SQL full outer join;
-                - 'left':
+                'left':
                     Use only keys from left frame,
                     similar to a SQL left outer join;
-                - 'right':
+                'right':
                     Use only keys from right frame,
                     similar to a SQL right outer join;
-                - 'cross':
+                'cross':
                     Create a cartesian product from both frames,
                     similar to a SQL cross join.
-        - both_on (str or tuple) [optional]:
-            Column name or 'index' to merge on.
-            If 'index', the index of the dataframe will be used.
-            If column name, the column should be present in all dataframes
-        - left_on (str or list) [optional]:
-            Column name or 'index' to join on in the left DataFrame.
-            If 'index', the index of the dataframe will be used.
-            If column name, the column should be present in all but last dataframes
-        - right_on (str or list) [optional]:
-            Column name or 'index' to join on in the right DataFrame.
-            If 'index', the index of the dataframe will be used.
-            If column name, the column should be present in all but first dataframes
-        - suffixes (tuple) [optional, default is ('_0', '_1')]:
-            Suffix to apply to overlapping column names in the left and right dataframes
 
-    Notes:
+        - `both_on`: str(tuple).
+            Column name or 'index' to merge on. If 'index', the index of the dataframe will be used. If column name, the column should be present in all dataframes.
+        - `left_on`: str(list).
+            Column name or 'index' to join on in the left DataFrame. If 'index', the index of the dataframe will be used. If column name, the column should be present in all but last dataframes.
+        - `right_on`: str(list).
+            Column name or 'index' to join on in the right DataFrame. If 'index', the index of the dataframe will be used. If column name, the column should be present in all but first dataframes.
+        - `suffixes`: tuple, default ('_0', '_1').
+            Suffix to apply to overlapping column names in the left and right dataframes.
+
+    ## Output:
+        Merged DataFrame
+
+    ## Notes:
         If both 'both_on' and 'left_on/right_on' are provided,
         'both_on' will be ignored.
 
@@ -225,12 +224,14 @@ def merge_three(df_1: DF[Any], df_2: DF[Any], df_3: DF[Any], context: Context):
         If using right_on column, all dataframes except
         the first one should have the column.
 
+    -----
+
     Args:
         df_1: Left dataframe
         df_2: Right dataframe
 
     Returns:
         The merged dataframe
-    """
+    """  # noqa: E501
     return merge_dfs([(df_1,), (df_2,), (df_3,)], context)
 

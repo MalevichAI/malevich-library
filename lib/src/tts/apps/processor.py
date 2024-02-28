@@ -11,6 +11,25 @@ from pydantic import BaseModel
 
 @processor()
 def text_to_speech(texts: DF['TextWithLanguageCode'], context: Context):
+    """Convert text to speech
+
+    ## Input:
+        A dataframe with columns:
+        - `text` (str): text to be converted.
+        - `language` (str, optional): language of the text, will use english by default
+
+    ## Output:
+        A dataframe with a column:
+        - `speech` (str): path to converted audio.
+
+    -----
+
+    Args:
+        - texts (DF[TextWithLanguageCode]): DataFrame with text
+
+    Returns:
+        A DataFrame with audio filenames.
+    """
     def process_row(row):  # noqa: ANN202
         language = 'en' if 'language' not in row else row['language']
         tts = gTTS(text=row['text'], lang=language)

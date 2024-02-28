@@ -15,17 +15,21 @@ class Filename(BaseModel):
 def convert_pdf_to_markdown(files: DF[Filename], context: Context):
     """Convert PDF files to markdown.
 
-    Input:
-        A dataframe with a column named `filename` containing PDF files.
+    ## Input:
+        A dataframe with columns:
+        - `filename` (str): containing PDF files.
 
-    Configuration:
-        - write_contents (bool):
-            If true, contents of the file will be produced in the
-            output rather than just the path to the file.
+    ## Configuration:
+        - `write_contents`: bool.
 
-    Output:
-        The same dataframe with a column named `markdown` attached to the
-        end. The column contains the path to the converted markdown files.
+            If true, contents of the file will be produced in the output rather than just the path to the file.
+
+    ## Output:
+        The same dataframe with columns:
+        - `filename` (str): containing PDF files.
+        - `markdown` (str): paths to converted markdown files.
+
+    -----
 
     Args:
         files (DF[Filename]):
@@ -35,7 +39,7 @@ def convert_pdf_to_markdown(files: DF[Filename], context: Context):
         DF[Filename]:
             The same dataframe with a column named `markdown` attached to the
             end. The column contains the path to the converted markdown files.
-    """
+    """  # noqa: E501
     outputs = []
     start_page = context.app_cfg.get('start_page', 0)
     page_num = context.app_cfg.get('page_num', None)

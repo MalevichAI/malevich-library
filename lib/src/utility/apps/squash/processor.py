@@ -40,19 +40,21 @@ def _squash_column_df(
 def squash_rows(df: DF[Any], context: Context):
     """Squash multiple rows into one row.
 
-    Inputs:
+    ## Input:
         An arbitrary dataframe with columns that contain multiple values.
 
-    Outputs:
+    ## Output:
         A dataframe with the same columns as the input dataframe, but with
         multiple rows for each input row.
 
-    Configuration:
-        by (str): The column to group by. If not specified, all
-            columns will be squashed.
+    ## Configuration:
+        - `by`: str.
+            The column to group by. If not specified, all columns will be squashed.
 
-        delim (str): The delimiter used to separate values in the columns. If
-            not specified, the default delimiter is a comma (,).
+        - `delim`: str.
+            The delimiter used to separate values in the columns. If not specified, the default delimiter is a comma (,).
+
+    -----
 
     Args:
         df (DF[Any]): Dataframe
@@ -60,7 +62,7 @@ def squash_rows(df: DF[Any], context: Context):
 
     Returns:
         Dataframe with squashed rows
-    """
+    """  # noqa: E501
     squash_by = context.app_cfg.get("by", None)
     squash_delim = context.app_cfg.get("delim", ",")
 
@@ -78,19 +80,21 @@ def squash_rows(df: DF[Any], context: Context):
 def squash(df: DF[Any], context: Context):
     """Squash multiple rows into one row.
 
-    Inputs:
+    ## Input:
         An arbitrary dataframe with columns that contain multiple values.
 
-    Outputs:
+    ## Output:
         A dataframe with the same columns as the input dataframe, but with
         multiple rows for each input row.
 
-    Configuration:
-        by (str): The column to group by. If not specified, all
-            columns will be squashed.
+    ## Configuration:
+        - `by`: str.
+            The column to group by. If not specified, all columns will be squashed.
 
-        delim (str): The delimiter used to separate values in the columns. If
-            not specified, the default delimiter is a comma (,).
+        - `delim`: str.
+            The delimiter used to separate values in the columns. If not specified, the default delimiter is a comma (,).
+
+    -----
 
     Args:
         df (DF[Any]): Dataframe
@@ -98,7 +102,7 @@ def squash(df: DF[Any], context: Context):
 
     Returns:
         Dataframe with squashed rows
-    """
+    """  # noqa: E501
     return squash_rows(df, context)
 
 
@@ -106,22 +110,22 @@ def squash(df: DF[Any], context: Context):
 def squash_columns(df: DF[Any], context: Context):
     """Squash multiple columns into one column.
 
-    Inputs:
+    ## Input:
         An arbitrary dataframe.
 
-    Outputs:
+    ## Output:
         A dataframe with the same rows as the input dataframe, but with
         specified columns squashed into one column.
 
-    Configuration:
-        - columns (list[str]): The columns to squash. If not specified, all
-            columns will be squashed.
-        - result_column_name (str): The name of the resulting column. If not
-            specified, the default name is the concatenation of the column names.
-        - drop (bool): Whether to drop the original columns. If not specified,
-            the default value is False.
-        - delim (str): The delimiter used to separate values in the columns. If
-            not specified, the default delimiter is a comma (,).
+    ## Configuration:
+        - `columns`: list[str].
+            The columns to squash. If not specified, all columns will be squashed.
+        - `result_column_name`: str.
+            The name of the resulting column. If not specified, the default name is the concatenation of the column names.
+        - `drop`: bool.
+            Whether to drop the original columns. If not specified, the default value is False.
+        - `delim`: str.
+            The delimiter used to separate values in the columns. If not specified, the default delimiter is a comma (,).
 
     -----
 
@@ -131,7 +135,7 @@ def squash_columns(df: DF[Any], context: Context):
 
     Returns:
         Dataframe with squashed columns
-    """
+    """  # noqa: E501
     return _squash_column_df(
         df,
         context.app_cfg.get("columns", None),

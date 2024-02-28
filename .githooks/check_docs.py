@@ -21,21 +21,29 @@ files = check_output(
     ).decode().strip("\n ").split('\n')
 
 procs = []
+results = []
 
 for file in files:
     if file.endswith(".py"):
         d = os.path.dirname(os.path.join("./", file))
-        procs.extend(
-            json.loads(
+        results.append(
                 check_output(
                     ["malevich", "dev", "list-procs", d]
                 ).decode()
-            )
         )
-if len(procs) == 0:
+if len(results) == 0:
     print("No modified procs to check. Exiting...")
     print("==========================================\n")
     exit(0)
+
+results = list(set(results))
+
+for result in results:
+    procs.extend(
+        json.loads(
+            result
+        )
+    )
 
 errors = []
 

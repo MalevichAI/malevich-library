@@ -25,37 +25,37 @@ class Filename(BaseModel):
 def s3_save(dfs: DFS[M[Any]], context: Context):
     """Saves dataframes to S3.
 
-    Input:
+    ## Input:
         dfs: Multiple dataframes to be saved.
 
-    Configuration:
-        - names (list of str or str) [optional]:
+    ## Configuration:
+        - `names`: list[str].
             Names of the dataframes to be saved. If a list is provided, it should
             have the same length as the number of dataframes. If a string is provided,
             it is used as a format string to generate the names of the dataframes.
             Available format variables:
-                - {ID}: index of the dataframe
+                {ID}: index of the dataframe
             If the number of dataframes is greater than the length of the list or
             the number of format variables in the string, default names are used
             for the remaining dataframes.
-        - append_run_id (bool) [optional, default is False]:
+        - `append_run_id`: bool, default False.
             If True, the run_id is appended to the names of the dataframes.
-        - extra_str (str) [optional]:
+        - `extra_str`: str.
             If provided, it is appended to the names of the dataframes.
 
         Also, the app should be provided with parameters to connect to S3:
-            - aws_access_key_id (str):
+            - `aws_access_key_id`: str.
                 AWS access key ID.
-            - aws_secret_access_key (str):
+            - `aws_secret_access_key`: str.
                 AWS secret access key.
-            - bucket_name (str):
+            - `bucket_name`: str.
                 Name of the S3 bucket.
-            - endpoint_url (str) [optional]:
+            - `endpoint_url`: str.
                 Endpoint URL of the S3 bucket.
-            - aws_region (str) [optional]:
+            - `aws_region`: str.
                 AWS region of the S3 bucket.
 
-    Details:
+    ## Details:
         This processor saves dataframes to S3. User can provide names for the
         dataframes to be saved. If no names are provided, default names are used.
         If the number of dataframes is greater than the length of the list of names
@@ -75,8 +75,10 @@ def s3_save(dfs: DFS[M[Any]], context: Context):
 
             train/<RUN_ID>/<NAME>
 
-    Output:
+    ## Output:
         The same as the input.
+
+    -----
 
     Args:
         dfs: DFS containing DataFrames to be saved.
@@ -136,31 +138,30 @@ def s3_save(dfs: DFS[M[Any]], context: Context):
 def s3_save_files_auto(files: DF['Filename'], context: Context):
     """Saves files from local file system to S3 preserving the original names.
 
-    Input:
-         files:
-            A dataframe with one column:
-                - 'filename' (str):
-                    Contains the names of the files to be saved.
+    ## Input:
 
-    Configuration:
-        - append_run_id (bool) [optional, default is False]:
+        A dataframe with one column:
+            - `filename` (str): Contains the names of the files to be saved.
+
+    ## Configuration:
+        - `append_run_id`: bool, default is False.
             If True, the run_id is appended to the names of the files.
-        - extra_str (str) [optional]:
+        - `extra_str`: str.
             If provided, it is appended to the names of the files.
 
         Also, the app should be provided with parameters to connect to S3:
-            - aws_access_key_id (str):
+            - `aws_access_key_id`: str.
                 AWS access key ID.
-            - aws_secret_access_key (str):
+            - `aws_secret_access_key`: str.
                 AWS secret access key.
-            - bucket_name (str):
+            - `bucket_name`: str.
                 Name of the S3 bucket.
-            - endpoint_url (str) [optional]:
+            - `endpoint_url`: str.
                 Endpoint URL of the S3 bucket.
-            - aws_region (str) [optional]:
+            - `aws_region`: str.
                 AWS region of the S3 bucket.
 
-    Details:
+    ## Details:
         Files are expected to be in the share folder e.g. should be shared with
         `context.share(<FILE>)` before by a previous processor.
 
@@ -173,8 +174,10 @@ def s3_save_files_auto(files: DF['Filename'], context: Context):
 
                 train/<RUN_ID>/<SHARED_FILE_NAME>
 
-    Output:
+    ## Output:
         The same as the input.
+
+    -----
 
     Args:
         files: DF containing filenames to be saved.
@@ -206,29 +209,28 @@ def s3_save_files_auto(files: DF['Filename'], context: Context):
 def s3_save_files(files: DF['FilenameS3Key'], context: Context):
     """Saves files from local file system to S3.
 
-    Input:
-        files:
-            A dataframe with two columns: 'filename' and 's3key'. 'filename' contains
-            the names of the files to be saved. 's3key' contains the S3 key for each
-            file.
+    ## Input:
+        A dataframe with columns:
+        - `filename` (str): the names of the files to be saved.
+        - `s3key` (str): the S3 key for each file.
 
-    Configuration:
-        - append_run_id (bool) [optional, default is False]:
+    ## Configuration:
+        - `append_run_id`: bool, default is False.
             If True, the run_id is appended to the names of the files.
 
         Also, the app should be provided with parameters to connect to S3:
-            - aws_access_key_id (str):
+            - `aws_access_key_id`: str.
                 AWS access key ID.
-            - aws_secret_access_key (str):
+            - `aws_secret_access_key`: str.
                 AWS secret access key.
-            - bucket_name (str):
+            - `bucket_name`: str.
                 Name of the S3 bucket.
-            - endpoint_url (str) [optional]:
+            - `endpoint_url`: str.
                 Endpoint URL of the S3 bucket.
-            - aws_region (str) [optional]:
+            - `aws_region`: str.
                 AWS region of the S3 bucket.
 
-    Details:
+    ## Details:
         Files are expected to be in the share folder e.g. should be shared with
         `context.share(<FILE>)` before by a previous processor.
 
@@ -249,8 +251,10 @@ def s3_save_files(files: DF['FilenameS3Key'], context: Context):
         For example, if the S3 key is 'train/{RUN_ID}/{FILE}', file name is 'file.csv',
         run_id is 'run_1', the file will be saved to 'train/run_1/file.csv'.
 
-    Output:
+    ## Output:
         The same as the input.
+
+    -----
 
     Args:
         files: DF containing filenames to be saved.
@@ -276,27 +280,25 @@ def s3_save_files(files: DF['FilenameS3Key'], context: Context):
 def s3_download_files(files: DF['FilenameS3Key'], context: Context):
     """Downloads files from S3 to local file system.
 
-    Input:
-        files:
-            A dataframe with two columns: 'filename' and 's3key'. 'filename' contains
-            the names of the files to be downloaded. 's3key'
-            contains the S3 key for each file.
+    ## Input:
+        A dataframe with columns:
+        - `filename` (str): the names of the files to be saved.
+        - `s3key` (str): the S3 key for each file.
 
-    Configuration:
+    ## Configuration:
 
         The app's only configuration is the connection to S3:
-            - aws_access_key_id (str):
+            - `aws_access_key_id`: str.
                 AWS access key ID.
-            - aws_secret_access_key (str):
+            - `aws_secret_access_key`: str.
                 AWS secret access key.
-            - bucket_name (str):
+            - `bucket_name`: str.
                 Name of the S3 bucket.
-            - endpoint_url (str) [optional]:
+            - `endpoint_url`: str.
                 Endpoint URL of the S3 bucket.
-            - aws_region (str) [optional]:
+            - `aws_region`: str.
                 AWS region of the S3 bucket.
-
-    Details:
+    ## Details:
        Files are downloaded by their S3 keys. The files are shared across processors
        under keys specified by `filename` column.
 
@@ -308,8 +310,10 @@ def s3_download_files(files: DF['FilenameS3Key'], context: Context):
             The file is assumed to be in S3 under the key `path/to/some_file.csv`.
             The file is downloaded from S3 and shared under the key `file1.csv`.
 
-    Output:
+    ## Output:
         The dataframe with downloaded filenames.
+
+    -----
 
     Args:
         files: DF containing filenames to be downloaded.
@@ -338,32 +342,29 @@ def s3_download_files_auto(keys: DF[S3Key], context: Context):
     """Downloads files from S3 to local file system.
 
     ## Input:
-        A dataframe with a column named 's3key' which
-        contains the S3 key for each file.
+        A dataframe with columns:
+        - `s3key` (str): the S3 key for each file.
 
     ## Configuration:
 
         The app's only configuration is the connection to S3:
-
-            - aws_access_key_id (str):
+            - `aws_access_key_id`: str.
                 AWS access key ID.
-
-            - aws_secret_access_key (str):
+            - `aws_secret_access_key`: str.
                 AWS secret access key.
-
-            - bucket_name (str):
+            - `bucket_name`: str.
                 Name of the S3 bucket.
-
-            - endpoint_url (str) [optional]:
+            - `endpoint_url`: str.
                 Endpoint URL of the S3 bucket.
-
-            - aws_region (str) [optional]:
+            - `aws_region`: str.
                 AWS region of the S3 bucket.
 
     ## Output:
         A dataframe with columns:
             - s3key (str): S3 key of the file
             - filename (str): The name of the file
+
+    -----
 
     Args:
         keys: DF containing keys of the files to be downloaded.

@@ -15,22 +15,25 @@ class ImageSchema(BaseModel):
 def resize(df: DF[ImageSchema], context: Context):
     """Resizes images and reformats them
 
-    Input:
-        A dataframe with a column named `filename` containing image path.
+    ## Input:
+        A dataframe with a column:
+        - `filename` (str): Image path.
 
-    Output:
-        A dataframe with a column named `filename` containing image path.
+    ## Output:
+        A dataframe with a column:
+        - `filename` (str): Output image path.
 
-    Configuration:
-        - width: int, default None.
+    ## Configuration:
+        - `width`: int, default None.
             The width of the resized image.
-        - height: int, default None.
+        - `height`: int, default None.
             The height of the resized image.
-        - preserve_ratio: bool, default True.
+        - `preserve_ratio`: bool, default True.
             If True, the aspect ratio of the image will be preserved.
-        - image_type: str, default "jpg".
-            The type of the image. Beware that some
-            reformats may not support transparency.
+        - `image_type`: str, default "jpg".
+            The type of the image. Beware that some reformats may not support transparency.
+
+    -----
 
     Args:
         df (DF[ImageSchema]):
@@ -40,7 +43,7 @@ def resize(df: DF[ImageSchema], context: Context):
 
     Returns:
         A dataframe with a column named `filename` containing image path.
-    """
+    """  # noqa: E501
     width = context.app_cfg.get('width', None)
     height = context.app_cfg.get('height', None)
     preserve_ratio = context.app_cfg.get('preserve_ratio', True)

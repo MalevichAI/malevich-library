@@ -23,7 +23,7 @@ async def text_to_image(
     - `openai_api_key`: Your OpenAI API key. Get it here: https://platform.openai.com/api-keys
     - `user_prompt`: The prompt for the user
 
-    Inputs:
+    ## Input:
 
         A dataframe with variables to be used in the prompts. Each row of the
         dataframe will be used to generate a prompt. For example, if your prompt
@@ -34,7 +34,7 @@ async def text_to_image(
         You have to have a column `someone` in the input dataframe. For each
         of such variables you should have a separate column.
 
-    Outputs:
+    ## Output:
 
         The format of the output depends on the configuration.
 
@@ -44,13 +44,20 @@ async def text_to_image(
         Otherwise, an output dataframe will contain a column `link`
         with links to the images provided directly by Open AI.
 
-    Configuration:
+    ## Configuration:
 
-        - openai_api_key (str, required): your OpenAI API key
-        - user_prompt (str, required): the prompt for the user
-        - model (str, default: 'dall-e-3'): the model to use
-        - download (bool, default: false): whether to download images
-        - n (int, default: 1): amount of images to generate for each request
+        - `openai_api_key`: str.
+            Your OpenAI API key.
+        - `user_prompt`: str.
+            The prompt for the user.
+        - `model`: str, default 'dall-e-3'.
+            The model to use.
+        - `download`: bool, default false.
+            Whether to download images.
+        - `n`: int, default 1.
+            Amount of images to generate for each request.
+
+    -----
 
     Args:
         variables (DF[ImageLinks]): Dataframe with variables

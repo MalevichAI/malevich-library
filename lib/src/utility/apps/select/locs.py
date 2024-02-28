@@ -8,31 +8,44 @@ from malevich.square import DF, Context, processor
 def locs(df: DF[Any], context: Context):
     """ Locate Statically - Extracts a subset of the dataframe
 
-    Input:
+    ## Input:
         A DataFrame to be processed.
 
-    Configuration:
+    ## Output:
+        A DataFrame with requested columns
+
+    ## Configuration:
         The app configuration should contain at least one of the following fields:
 
-        - column (str): The column to be extracted.
-        - columns (list[str]): The columns to be extracted.
-        - column_idx (int): The column index to be extracted.
-        - column_idxs (list[int]): The column indexes to be extracted.
-        - row (int): The row to be extracted.
-        - rows (list[int]): The rows to be extracted.
-        - row_idx (int): The row index to be extracted.
-        - row_idxs (list[int]): The row indexes to be extracted.
+        - `column`: str.
+          The column to be extracted.
+        - `columns`: list[str].
+          The columns to be extracted.
+        - `column_idx`: int.
+            The column index to be extracted.
+        - `column_idxs`: list[int].
+            The column indexes to be extracted.
+        - `row`: int.
+            The row to be extracted.
+        - `rows`: list[int].
+            The rows to be extracted.
+        - `row_idx`: int.
+            The row index to be extracted.
+        - `row_idxs`: list[int].
+            The row indexes to be extracted.
 
         Multiple fields may be provided and in such case,
         the function will extract the intersection of the fields.
 
-    Notes:
+    ## Notes:
         At least one of the above fields should be provided for the function to work.
 
         Moreover, the dataframe is processed in column first then row order.
         Queries are executed from the most specific to the least within each category.
         If both specific and general conditions are given, the function prioritizes
         the specific ones to maintain consistency.
+
+    -----
 
     Args:
         df (pd.DataFrame): The DataFrame to be processed.

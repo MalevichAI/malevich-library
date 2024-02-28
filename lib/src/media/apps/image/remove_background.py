@@ -16,14 +16,15 @@ class ImagePaths(BaseModel):
 def remove_background(images: DF[ImagePaths], context: Context):
     """Removes background from image.
 
-    Input:
-        A dataframe with a column named `path_to_image` containing image path.
+    ## Input:
+        A dataframe with a column:
+        - `path_to_image` (str): Image path.
 
-    Output:
-        A dataframe with a column named `no_background_image` containing image path.
+    ## Output:
+        A dataframe with a column:
+        - `no_background_image` (str): Image path.
 
-    Configuration:
-        The app does not require any configuration.
+    -----
 
     Args:
         images: A dataframe with a column named `path_to_image` containing image path.

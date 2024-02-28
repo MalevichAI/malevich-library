@@ -18,16 +18,19 @@ class GoogleDriveLink(BaseModel):
 def download_from_google_drive(links: DF[GoogleDriveLink], context: Context):
     """Download files from google drive.
 
-    Input:
-        A dataframe with a column named `link` containing google drive links.
+    ## Input:
+        A dataframe with a column:
+        - `link` (str): google drive links.
 
-    Configuration:
+    ## Configuration:
         - fail_on_error: bool, default False.
             If True, the app will fail if any of the links are invalid.
 
-    Output:
-        A dataframe with a column named `filename` containing the downloaded files
-        shared across all apps.
+    ## Output:
+        A dataframe with a column:
+        - `filename` (str): the downloaded files shared across all apps.
+
+    -----
 
     Args:
         links (DF[GoogleDriveLink]):
