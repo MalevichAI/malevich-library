@@ -57,7 +57,7 @@ def get_links_to_files(df: DF, ctx: Context):
         )
 
     def _get(_obj: str) -> tuple[str, str]:
-        if _exst(_obj, all_runs=False) or (is_asset := _exst_obj(_obj)):
+        if (is_asset := _exst_obj(_obj)) or _exst(_obj, all_runs=False):
             # /FOLDER/FILE.EXT -> /FOLDER/FILE__RUNID.EXT
             _fbase = os.path.basename(_obj)
             _fext = os.path.splitext(_fbase)[1]
