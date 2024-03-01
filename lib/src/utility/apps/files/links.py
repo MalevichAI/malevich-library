@@ -1,4 +1,5 @@
 import os
+import re
 import shutil
 
 from malevich.square import APP_DIR, DF, Context, processor
@@ -44,6 +45,17 @@ def get_links_to_files(df: DF, ctx: Context):
             )
         )
 
+    def _exst_obj(path: str) -> bool:
+        return (
+            os.path.exists(path) and
+            ctx.has_object(
+                re.search(
+                    r"\/mnt_obj\/(?P<USERNAME>\w+\/)(?P<KEY>.+)",
+                    path
+                ).group("KEY")
+            )
+        )
+
     def _get(_obj: str) -> tuple[str, str]:
         if _exst(_obj, all_runs=False):
             # /FOLDER/FILE.EXT -> /FOLDER/FILE__RUNID.EXT
@@ -63,6 +75,19 @@ def get_links_to_files(df: DF, ctx: Context):
             return _fbase, ctx.get_share_path(_fbase, all_runs=True)
         elif _exst(_obj, all_runs=True):
             return _obj, ctx.get_share_path(_obj, all_runs=True)
+        elif _exst_obj(_obj):
+            _fbase = os.path.basename(_obj)
+            _path = os.path.join(
+                APP_DIR,
+                _fbase
+            )
+            shutil.move(
+                _obj,
+                _path
+            )
+            ctx.share(_fbase, all_runs=True)
+            ctx.synchronize([_fbase], all_runs=True)
+            return _fbase, ctx.get_share_path(_fbase, all_runs=True)
         else:
             return None
 
