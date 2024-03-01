@@ -37,7 +37,6 @@ def get_links_to_files(df: DF, ctx: Context):
     _expire_secs = ctx.app_cfg.get('expiration', 6 * 3600)
     _expire_secs = min(_expire_secs, 24 * 3600)
     _expire_secs = max(_expire_secs, 0)
-    is_asset = True if 'path' in df.columns else False
 
     def _exst(path: str, all_runs=False) -> bool:
         return os.path.exists(
@@ -58,7 +57,7 @@ def get_links_to_files(df: DF, ctx: Context):
         )
 
     def _get(_obj: str) -> tuple[str, str]:
-        if _exst(_obj, all_runs=False) or (_exst_obj(_obj) and is_asset):
+        if _exst(_obj, all_runs=False) or _exst_obj(_obj):
             # /FOLDER/FILE.EXT -> /FOLDER/FILE__RUNID.EXT
             _fbase = os.path.basename(_obj)
             _fext = os.path.splitext(_fbase)[1]
@@ -66,10 +65,16 @@ def get_links_to_files(df: DF, ctx: Context):
             _fbase += '__' + ctx.run_id + _fext
             _ffull = os.path.join(APP_DIR, _fbase)
 
-            shutil.move(
-                _obj if is_asset else ctx.get_share_path(_obj, all_runs=False),
-                _ffull
-            )
+            if _exst_obj(_obj):
+                shutil.move(
+                    _obj,
+                    _ffull
+                )
+            else:
+                shutil.move(
+                    ctx.get_share_path(_obj, all_runs=False),
+                    _ffull
+                )
 
             ctx.share(_fbase, all_runs=True)
             ctx.synchronize([_fbase], all_runs=True)
