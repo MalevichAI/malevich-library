@@ -1,4 +1,5 @@
 import os
+import re
 import shutil
 
 from malevich.square import APP_DIR, DF, Context, processor
@@ -36,6 +37,7 @@ def get_links_to_files(df: DF, ctx: Context):
     _expire_secs = ctx.app_cfg.get('expiration', 6 * 3600)
     _expire_secs = min(_expire_secs, 24 * 3600)
     _expire_secs = max(_expire_secs, 0)
+    is_asset = True if 'path' in df.columns else False
 
     def _exst(path: str, all_runs=False) -> bool:
         return os.path.exists(
@@ -44,8 +46,19 @@ def get_links_to_files(df: DF, ctx: Context):
             )
         )
 
+    def _exst_obj(path: str) -> bool:
+        return (
+            os.path.exists(path) and
+            ctx.has_object(
+                re.search(
+                    r"\/mnt_obj\/(?P<USERNAME>\w+\/)(?P<KEY>.+)",
+                    path
+                ).group("KEY")
+            )
+        )
+
     def _get(_obj: str) -> tuple[str, str]:
-        if _exst(_obj, all_runs=False):
+        if _exst(_obj, all_runs=False) or (_exst_obj(_obj) and is_asset):
             # /FOLDER/FILE.EXT -> /FOLDER/FILE__RUNID.EXT
             _fbase = os.path.basename(_obj)
             _fext = os.path.splitext(_fbase)[1]
@@ -54,7 +67,7 @@ def get_links_to_files(df: DF, ctx: Context):
             _ffull = os.path.join(APP_DIR, _fbase)
 
             shutil.move(
-                ctx.get_share_path(_obj, all_runs=False),
+                _obj if is_asset else ctx.get_share_path(_obj, all_runs=False),
                 _ffull
             )
 
