@@ -57,7 +57,7 @@ def get_links_to_files(df: DF, ctx: Context):
         )
 
     def _get(_obj: str) -> tuple[str, str]:
-        if (is_asset := _exst_obj(_obj)) or _exst(_obj, all_runs=False):
+        if _exst(_obj, all_runs=False):
             # /FOLDER/FILE.EXT -> /FOLDER/FILE__RUNID.EXT
             _fbase = os.path.basename(_obj)
             _fext = os.path.splitext(_fbase)[1]
@@ -65,22 +65,29 @@ def get_links_to_files(df: DF, ctx: Context):
             _fbase += '__' + ctx.run_id + _fext
             _ffull = os.path.join(APP_DIR, _fbase)
 
-            if is_asset:
-                shutil.move(
-                    _obj,
-                    _ffull
-                )
-            else:
-                shutil.move(
-                    ctx.get_share_path(_obj, all_runs=False),
-                    _ffull
-                )
+            shutil.move(
+                ctx.get_share_path(_obj, all_runs=False),
+                _ffull
+            )
 
             ctx.share(_fbase, all_runs=True)
             ctx.synchronize([_fbase], all_runs=True)
             return _fbase, ctx.get_share_path(_fbase, all_runs=True)
         elif _exst(_obj, all_runs=True):
             return _obj, ctx.get_share_path(_obj, all_runs=True)
+        elif _exst_obj(_obj):
+            _fbase = os.path.basename(_obj)
+            _path = os.path.join(
+                APP_DIR,
+                _fbase
+            )
+            shutil.move(
+                _obj,
+                _path
+            )
+            ctx.share(_fbase, all_runs=True)
+            ctx.synchronize([_fbase], all_runs=True)
+            return _fbase, ctx.get_share_path(_fbase, all_runs=True)
         else:
             return None
 
