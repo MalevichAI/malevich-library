@@ -30,9 +30,9 @@ def s3_save(dfs: DFS[M[Any]], context: Context):
 
     ## Configuration:
         - `names`: list[str].
-            Names of the dataframes to be saved. If a list is provided, it should
-            have the same length as the number of dataframes. If a string is provided,
-            it is used as a format string to generate the names of the dataframes.
+            Names of the dataframes to be saved.
+            If a list is provided, it should have the same length as the number of dataframes.
+            If a string is provided, it is used as a format string to generate the names of the dataframes.
             Available format variables:
                 {ID}: index of the dataframe
             If the number of dataframes is greater than the length of the list or
@@ -86,7 +86,7 @@ def s3_save(dfs: DFS[M[Any]], context: Context):
     Returns:
         The same dataframes as the input.
 
-    """
+    """  # noqa: E501
     # Initializing an object to interact with S3
     s3_helper: S3Helper = context.app_cfg['s3_helper']
 
@@ -368,7 +368,7 @@ def s3_download_files_auto(keys: DF[S3Key], context: Context):
             - `endpoint_url`: str.
                 Endpoint URL of the S3 bucket.
 
-            - `aws_region`: str.
+            - `aws_region`: str, default 'us-east-1'.
                 AWS region of the S3 bucket.
 
     ## Output:
