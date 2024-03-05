@@ -18,7 +18,7 @@ def send_messages_batch(input_variables: DF[Any], ctx: Context):
         a constant string defined in the app configuration.
 
     ## Configuration:
-        - `prompt_template`: string.
+        - `prompt_template`: str.
         A string with the prompt template. The template might contain variables in the following format: {variable_name}. The variables will be replaced with the values from the `input_variables` dataframe for each row.
 
     ## Details:
