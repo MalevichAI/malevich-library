@@ -7,6 +7,7 @@ from malevich.square import APP_DIR, DF, Context, processor, scheme
 from pydantic import BaseModel
 
 # from mosaic.files.assertfile import assertfile
+from .models import DownloadFromGoogleDrive
 
 
 @scheme()
@@ -15,7 +16,9 @@ class GoogleDriveLink(BaseModel):
 
 # @assertfile(output_column="filename")
 @processor()
-def download_from_google_drive(links: DF[GoogleDriveLink], context: Context):
+def download_from_google_drive(
+    links: DF[GoogleDriveLink], context: Context[DownloadFromGoogleDrive]
+    ):
     """Download files from google drive.
 
     ## Input:

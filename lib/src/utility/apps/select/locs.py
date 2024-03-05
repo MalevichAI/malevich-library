@@ -3,9 +3,11 @@ from typing import Any
 import pandas as pd
 from malevich.square import DF, Context, processor
 
+from .models import Locs
+
 
 @processor(id='locs')
-def locs(df: DF[Any], context: Context):
+def locs(df: DF[Any], context: Context[Locs]):
     """ Locate Statically - Extracts a subset of the dataframe
 
     ## Input:

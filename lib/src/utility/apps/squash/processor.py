@@ -3,6 +3,8 @@ from typing import Any
 import pandas as pd
 from malevich.square import DF, Context, processor
 
+from .models import Squash, SquashColumns, SquashRows
+
 
 def _squash_row_df(df: pd.DataFrame, key: str, delm: str = ",") -> pd.DataFrame:
     data_ = {
@@ -37,7 +39,7 @@ def _squash_column_df(
 
 
 @processor()
-def squash_rows(df: DF[Any], context: Context):
+def squash_rows(df: DF[Any], context: Context[SquashRows]):
     """Squash multiple rows into one row.
 
     ## Input:
@@ -77,7 +79,7 @@ def squash_rows(df: DF[Any], context: Context):
 
 
 @processor()
-def squash(df: DF[Any], context: Context):
+def squash(df: DF[Any], context: Context[Squash]):
     """Squash multiple rows into one row.
 
     ## Input:
@@ -107,7 +109,7 @@ def squash(df: DF[Any], context: Context):
 
 
 @processor()
-def squash_columns(df: DF[Any], context: Context):
+def squash_columns(df: DF[Any], context: Context[SquashColumns]):
     """Squash multiple columns into one column.
 
     ## Input:

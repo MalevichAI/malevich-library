@@ -5,6 +5,8 @@ import pandas as pd
 from malevich.square import APP_DIR, DF, Context, processor, scheme
 from pydantic import BaseModel
 
+from .models import ConvertPdfToMarkdown
+
 
 @scheme()
 class Filename(BaseModel):
@@ -12,7 +14,9 @@ class Filename(BaseModel):
 
 
 @processor()
-def convert_pdf_to_markdown(files: DF[Filename], context: Context):
+def convert_pdf_to_markdown(
+    files: DF[Filename], context: Context[ConvertPdfToMarkdown]
+    ):
     """Convert PDF files to markdown.
 
     ## Input:

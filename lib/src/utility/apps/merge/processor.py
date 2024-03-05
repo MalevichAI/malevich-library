@@ -3,6 +3,8 @@ from typing import Any, List
 import pandas as pd
 from malevich.square import DF, Context, Sink, processor
 
+from .models import Merge, MergeThree, MergeTwo
+
 
 def merge_dfs(dfs: List[DF[Any]], context: Context):
     # TODO: Document code
@@ -44,7 +46,7 @@ def merge_dfs(dfs: List[DF[Any]], context: Context):
 
 
 @processor()
-def merge(dfs: Sink[Any], context: Context):
+def merge(dfs: Sink[Any], context: Context[Merge]):
     """Merges multiple dataframes into one
 
     ## Input:
@@ -71,11 +73,11 @@ def merge(dfs: Sink[Any], context: Context):
                     Create a cartesian product from both frames,
                     similar to a SQL cross join.
 
-        - `both_on`: str|tuple.
+        - `both_on`: str|tuple, default ''.
             Column name or 'index' to merge on. If 'index', the index of the dataframe will be used. If column name, the column should be present in all dataframes.
-        - `left_on`: str|list.
+        - `left_on`: str|list, default ''.
             Column name or 'index' to join on in the left DataFrame. If 'index', the index of the dataframe will be used. If column name, the column should be present in all but last dataframes.
-        - `right_on`: str|list.
+        - `right_on`: str|list, default ''.
             Column name or 'index' to join on in the right DataFrame. If 'index', the index of the dataframe will be used. If column name, the column should be present in all but first dataframes.
         - `suffixes`: tuple, default ('_0', '_1').
             Suffix to apply to overlapping column names in the left and right dataframes.
@@ -108,7 +110,7 @@ def merge(dfs: Sink[Any], context: Context):
 
 
 @processor()
-def merge_two(df_1: DF[Any], df_2: DF[Any], context: Context):
+def merge_two(df_1: DF[Any], df_2: DF[Any], context: Context[MergeTwo]):
     """Merges multiple dataframes into one
 
     ## Input:
@@ -136,11 +138,11 @@ def merge_two(df_1: DF[Any], df_2: DF[Any], context: Context):
                     Create a cartesian product from both frames,
                     similar to a SQL cross join.
 
-        - `both_on`: str|tuple.
+        - `both_on`: str|tuple, default ''.
             Column name or 'index' to merge on. If 'index', the index of the dataframe will be used. If column name, the column should be present in all dataframes.
-        - `left_on`: str|list.
+        - `left_on`: str|list, default ''.
             Column name or 'index' to join on in the left DataFrame. If 'index', the index of the dataframe will be used. If column name, the column should be present in all but last dataframes.
-        - `right_on`: str|list.
+        - `right_on`: str|list, default ''.
             Column name or 'index' to join on in the right DataFrame. If 'index', the index of the dataframe will be used. If column name, the column should be present in all but first dataframes.
         - `suffixes`: tuple, default ('_0', '_1').
             Suffix to apply to overlapping column names in the left and right dataframes.
@@ -173,7 +175,12 @@ def merge_two(df_1: DF[Any], df_2: DF[Any], context: Context):
 
 
 @processor()
-def merge_three(df_1: DF[Any], df_2: DF[Any], df_3: DF[Any], context: Context):
+def merge_three(
+    df_1: DF[Any],
+    df_2: DF[Any],
+    df_3: DF[Any],
+    context: Context[MergeThree]
+    ):
     """Merges multiple dataframes into one
 
     ## Input:
@@ -200,11 +207,11 @@ def merge_three(df_1: DF[Any], df_2: DF[Any], df_3: DF[Any], context: Context):
                     Create a cartesian product from both frames,
                     similar to a SQL cross join.
 
-        - `both_on`: str|tuple.
+        - `both_on`: str|tuple, default ''.
             Column name or 'index' to merge on. If 'index', the index of the dataframe will be used. If column name, the column should be present in all dataframes.
-        - `left_on`: str|list.
+        - `left_on`: str|list, default ''.
             Column name or 'index' to join on in the left DataFrame. If 'index', the index of the dataframe will be used. If column name, the column should be present in all but last dataframes.
-        - `right_on`: str|list.
+        - `right_on`: str|list, default ''.
             Column name or 'index' to join on in the right DataFrame. If 'index', the index of the dataframe will be used. If column name, the column should be present in all but first dataframes.
         - `suffixes`: tuple, default ('_0', '_1').
             Suffix to apply to overlapping column names in the left and right dataframes.

@@ -7,6 +7,8 @@ from cvat_sdk.api_client import ApiClient, Configuration, models
 from malevich.square import DF, Context, processor, scheme
 from pydantic import BaseModel
 
+from .models import UploadImagesToTask
+
 
 @scheme()
 class TaskImages(BaseModel):
@@ -39,7 +41,7 @@ def upload_to_s3(
 
 
 @processor()
-def upload_images_to_task(df: DF[TaskImages], context: Context):
+def upload_images_to_task(df: DF[TaskImages], context: Context[UploadImagesToTask]):
     """
         Creates task (if does not exists) and upload images to the task.
 
@@ -79,7 +81,7 @@ def upload_images_to_task(df: DF[TaskImages], context: Context):
         - `aws_secret_access_key`: str.
 			AWS credentials.
 
-        - `endpoint_url`: str, default is AWS S3 endpoint.
+        - `endpoint_url`: str, default 'AWS S3 endpoint'.
             URL endpoint of the cloud storage (S3).
 
         - `bucket_name`: str, default "cvat".

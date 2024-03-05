@@ -2,9 +2,11 @@ from typing import Any
 
 from malevich.square import DF, Context, processor
 
+from .models import Rename
+
 
 @processor()
-def rename(df: DF[Any], context: Context):
+def rename(df: DF[Any], context: Context[Rename]):
     """Renames columns in a dataframe.
 
     ## Input:

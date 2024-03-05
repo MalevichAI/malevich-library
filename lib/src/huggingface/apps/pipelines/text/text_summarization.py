@@ -4,6 +4,8 @@ import torch
 from malevich.square import DF, Context, processor, scheme
 from transformers import pipeline
 
+from .models import SummarizeText
+
 
 @scheme()
 class TextInput:
@@ -18,7 +20,7 @@ class TextSummarizationConfig(pydantic.BaseModel):
 
 
 @processor()
-def summarize_text(text: DF[TextInput], context: Context):
+def summarize_text(text: DF[TextInput], context: Context[SummarizeText]):
     """
     Summarize text with HuggingFace Transformers.
 

@@ -4,6 +4,8 @@ import torch
 from malevich.square import DF, Context, processor, scheme
 from transformers import Conversation, pipeline
 
+from .models import AnswerQuestions
+
 
 @scheme()
 class QuestionInput:
@@ -18,7 +20,7 @@ class ConversationalPipelineConfig(pydantic.BaseModel):
 
 
 @processor()
-def answer_questions(questions: DF[QuestionInput], context: Context):
+def answer_questions(questions: DF[QuestionInput], context: Context[AnswerQuestions]):
     """
     Answers questions using HuggingFace Transformers.
 

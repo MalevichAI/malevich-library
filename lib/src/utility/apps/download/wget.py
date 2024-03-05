@@ -6,6 +6,7 @@ import wget
 from malevich.square import APP_DIR, DF, Context, processor, scheme
 from pydantic import BaseModel
 
+from .models import Download
 
 @scheme()
 class Links(BaseModel):

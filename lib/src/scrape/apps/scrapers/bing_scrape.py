@@ -5,11 +5,13 @@ import pandas as pd
 from apps.scrape_web import ScrapeLinks, run_spider
 from malevich.square import DF, Context, processor
 
+from .models import ScrapeBingSearch
+
 
 @processor()
 def scrape_bing_search(
 scrape_links: DF[ScrapeLinks],
-    context: Context
+    context: Context[ScrapeBingSearch]
     ):
     """
         The bing spider extracts links from bing search results.

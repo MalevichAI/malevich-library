@@ -1,8 +1,10 @@
 from malevich.square import DF, Any, Context, processor
 
+from .models import Filter
+
 
 @processor()
-def filter(df: DF[Any], context: Context):
+def filter(df: DF[Any], context: Context[Filter]):
     """Filters rows by a number of conditions
 
     ## Input:

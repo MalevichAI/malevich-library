@@ -8,6 +8,8 @@ import replicate
 import wget
 from malevich.square import APP_DIR, DF, Context, processor, scheme
 
+from .models import GenerateAudio
+
 
 @scheme()
 class Prompt:
@@ -23,7 +25,7 @@ class Prompt:
 
 
 @processor()
-def generate_audio(prompt: DF[Prompt], context: Context) -> str:
+def generate_audio(prompt: DF[Prompt], context: Context[GenerateAudio]) -> str:
     """
     Generate audio from text.
 

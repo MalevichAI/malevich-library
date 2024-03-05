@@ -9,6 +9,8 @@ from subprocess import (
     check_output,
 )
 
+from malevich.commands import get_processor_docstring, parse_docstring
+
 print("===== Malevich Git Pre-commit Hook =======")
 
 ps = Popen(("git", "status", "-uno", "-s"), stdout=PIPE)
@@ -48,15 +50,10 @@ for result in results:
 errors = []
 
 for proc in procs:
-    doc = check_output(
-        ["malevich", "dev" ,"get-doc", proc['name'], proc["path"]]
-    ).decode().strip()
+    doc = get_processor_docstring(proc['name'], proc['path'])
     try:
-        check_call(
-            ["malevich", "dev" ,"parse-doc", f"\"{doc}\""],
-            stderr=DEVNULL,
-        )
-    except CalledProcessError:
+        parse_docstring(doc)
+    except Exception:
         errors.append(proc['name'])
 
 if len(errors) != 0:

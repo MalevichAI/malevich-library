@@ -6,6 +6,8 @@ import pydantic
 from malevich.square import DF, Context, processor, scheme
 from transformers import TokenClassificationPipeline, pipeline
 
+from .models import TokenClassification
+
 
 @scheme()
 class TokenClassificationInput:
@@ -24,7 +26,9 @@ class TokenClassificationConfig(pydantic.BaseModel):
 
 
 @processor()
-def token_classification(text: DF[TokenClassificationInput], context: Context):
+def token_classification(
+    text: DF[TokenClassificationInput], context: Context[TokenClassification]
+    ):
     """Token classification using HuggingFace Transformers"
 
     The processor solves a problem of token classification using HuggingFace pipeline.

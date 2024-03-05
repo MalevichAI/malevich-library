@@ -7,6 +7,8 @@ the outputs of different applications saved as Dataframe objects.
 import pandas as pd
 from malevich.square import Context, processor
 
+from .models import CombineVertical
+
 # This list represents the expected arguments in the configuration of `combine_vertical`
 # processor
 __CV_FIELDS = ['ignore_col_names', 'default_name', 'ignore_index']
@@ -19,7 +21,10 @@ __DEFAULT_DEFAULT_NAME = 'col'
 
 @processor(id=__COMBINE_V_ID)
 def combine_vertical(
-    dataframe1: pd.DataFrame, dataframe2: pd.DataFrame, context: Context):
+    dataframe1: pd.DataFrame,
+    dataframe2: pd.DataFrame,
+    context: Context[CombineVertical]
+    ):
     """Concatenates two dataframes vertically.
 
     ## Input:

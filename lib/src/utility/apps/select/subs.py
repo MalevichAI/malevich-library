@@ -3,9 +3,11 @@ from typing import Any
 
 from malevich.square import DFS, Context, M, processor
 
+from .models import Subset
+
 
 @processor(id='subset')
-def subset(dfs: DFS[M[Any]], context: Context):
+def subset(dfs: DFS[M[Any]], context: Context[Subset]):
     r"""Select a subset of dataframes from the list of dataframes.
 
     ## Input:

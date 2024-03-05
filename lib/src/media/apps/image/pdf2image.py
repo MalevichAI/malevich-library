@@ -5,13 +5,15 @@ from malevich.square import APP_DIR, DF, Context, processor, scheme
 from pdf2image import convert_from_path
 from pydantic import BaseModel
 
+from .models import ConvertPdfToJpeg
+
 
 @scheme()
 class Filename(BaseModel):
     filename:str
 
 @processor()
-def convert_pdf_to_jpeg(files: DF[Filename], context: Context):
+def convert_pdf_to_jpeg(files: DF[Filename], context: Context[ConvertPdfToJpeg]):
     """Converts PDF to JPEG
 
     ## Input:

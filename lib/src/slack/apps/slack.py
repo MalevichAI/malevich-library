@@ -2,6 +2,8 @@ from malevich.square import DF, Context, processor, scheme
 from pydantic import BaseModel
 from slack_sdk import WebClient
 
+from .models import SendMessage
+
 
 @scheme()
 class SlackInput(BaseModel):
@@ -9,7 +11,7 @@ class SlackInput(BaseModel):
     message: str
 
 @processor()
-def send_message(df: DF[SlackInput], context: Context):
+def send_message(df: DF[SlackInput], context: Context[SendMessage]):
     """Sends message to specified Slack channel
 
     ## Input:

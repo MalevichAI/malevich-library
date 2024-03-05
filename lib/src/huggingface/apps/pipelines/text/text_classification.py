@@ -4,6 +4,8 @@ import torch
 from malevich.square import DF, Context, processor, scheme
 from transformers import pipeline
 
+from .models import ClassifyText
+
 
 @scheme()
 class TextInput:
@@ -37,7 +39,7 @@ class TextClassificationConfig(pydantic.BaseModel):
 
 
 @processor()
-def classify_text(text: DF[TextInput], context: Context):
+def classify_text(text: DF[TextInput], context: Context[ClassifyText]):
     """
     Classify text with HuggingFace Transformers.
 

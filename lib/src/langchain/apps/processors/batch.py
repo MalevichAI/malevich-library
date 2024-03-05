@@ -3,10 +3,11 @@ from typing import Any
 from malevich.square import DF, Context, processor
 
 from ..functions import df_prompt_format
+from .models import SendMessagesBatch
 
 
 @processor()
-def send_messages_batch(input_variables: DF[Any], ctx: Context):
+def send_messages_batch(input_variables: DF[Any], ctx: Context[SendMessagesBatch]):
     """Send formatted messages to the AI Chatbot in a batch.
 
     ## Input:

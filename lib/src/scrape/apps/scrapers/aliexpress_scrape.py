@@ -12,6 +12,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.ui import WebDriverWait
 
+from .models import ScrapeAliexpress
+
 TO_EN_SCRIPT = """
         var ru_xp = "//div[text() = 'RU']"
         var eng_xp = "//li/div/span/span[text() = 'English']"
@@ -166,7 +168,9 @@ def get_page(link, sp_conf):
     return Response(driver.page_source, link, get_cards(driver))
 
 @processor()
-def scrape_aliexpress( scrape_links: DF[ScrapeLinks], context: Context):
+def scrape_aliexpress(
+        scrape_links: DF[ScrapeLinks], context: Context[ScrapeAliexpress]
+    ):
     """Scrapes aliexpress.
 
     ## Input:

@@ -6,6 +6,14 @@ import pandas as pd
 from malevich.square import APP_DIR, DF, DFS, Context, M, S3Helper, processor, scheme
 from pydantic import BaseModel
 
+from .models import (
+    S3DownloadFiles,
+    S3DownloadFilesAuto,
+    S3Save,
+    S3SaveFiles,
+    S3SaveFilesAuto,
+)
+
 
 @scheme()
 class FilenameS3Key(BaseModel):
@@ -22,7 +30,7 @@ class Filename(BaseModel):
 
 
 @processor()
-def s3_save(dfs: DFS[M[Any]], context: Context):
+def s3_save(dfs: DFS[M[Any]], context: Context[S3Save]):
     """Saves dataframes to S3.
 
     ## Input:
@@ -135,7 +143,7 @@ def s3_save(dfs: DFS[M[Any]], context: Context):
 
 
 @processor()
-def s3_save_files_auto(files: DF['Filename'], context: Context):
+def s3_save_files_auto(files: DF['Filename'], context: Context[S3SaveFilesAuto]):
     """Saves files from local file system to S3 preserving the original names.
 
     ## Input:
@@ -144,7 +152,7 @@ def s3_save_files_auto(files: DF['Filename'], context: Context):
             - `filename` (str): Contains the names of the files to be saved.
 
     ## Configuration:
-        - `append_run_id`: bool, default is False.
+        - `append_run_id`: bool, default False.
             If True, the run_id is appended to the names of the files.
         - `extra_str`: str.
             If provided, it is appended to the names of the files.
@@ -206,7 +214,7 @@ def s3_save_files_auto(files: DF['Filename'], context: Context):
 
 
 @processor()
-def s3_save_files(files: DF['FilenameS3Key'], context: Context):
+def s3_save_files(files: DF['FilenameS3Key'], context: Context[S3SaveFiles]):
     """Saves files from local file system to S3.
 
     ## Input:
@@ -215,7 +223,7 @@ def s3_save_files(files: DF['FilenameS3Key'], context: Context):
         - `s3key` (str): the S3 key for each file.
 
     ## Configuration:
-        - `append_run_id`: bool, default is False.
+        - `append_run_id`: bool, default False.
             If True, the run_id is appended to the names of the files.
 
         Also, the app should be provided with parameters to connect to S3:
@@ -277,7 +285,7 @@ def s3_save_files(files: DF['FilenameS3Key'], context: Context):
 
 
 @processor()
-def s3_download_files(files: DF['FilenameS3Key'], context: Context):
+def s3_download_files(files: DF['FilenameS3Key'], context: Context[S3DownloadFiles]):
     """Downloads files from S3 to local file system.
 
     ## Input:
@@ -345,7 +353,7 @@ def s3_download_files(files: DF['FilenameS3Key'], context: Context):
 
 
 @processor()
-def s3_download_files_auto(keys: DF[S3Key], context: Context):
+def s3_download_files_auto(keys: DF[S3Key], context: Context[S3DownloadFilesAuto]):
     """Downloads files from S3 to local file system.
 
     ## Input:

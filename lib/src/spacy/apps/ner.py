@@ -4,6 +4,7 @@ import pandas as pd
 from malevich.square import DF, Context, processor, scheme
 from pydantic import BaseModel
 
+from .models import ExtractNamedEntities
 from .types import SpaCy
 
 
@@ -15,7 +16,7 @@ class Text(BaseModel):
 @processor()
 def extract_named_entities(
     df: DF[Text],
-    context: Context,
+    context: Context[ExtractNamedEntities],
 ):
     """Extracts named entities from text.
 
