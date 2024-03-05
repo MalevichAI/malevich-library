@@ -1,1 +1,1 @@
-from get_links_to_files_model import GetLinksToFiles
+from .get_links_to_files_model import GetLinksToFiles

@@ -1,1 +1,1 @@
-from upload_images_to_task_model import UploadImagesToTask
+from .upload_images_to_task_model import UploadImagesToTask

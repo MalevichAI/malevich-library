@@ -8,12 +8,13 @@ import requests
 from malevich.square import APP_DIR, DF, Context, processor
 
 from ..lib.image import exec_image
+from .models import TextToImage
 
 
 @processor()
 async def text_to_image(
     variables: DF[Any],
-    ctx: Context
+    ctx: Context[TextToImage]
 ):
     """Use Text to Image feature from OpenAI
 
@@ -52,7 +53,7 @@ async def text_to_image(
             The prompt for the user.
         - `model`: str, default 'dall-e-3'.
             The model to use.
-        - `download`: bool, default false.
+        - `download`: bool, default False.
             Whether to download images.
         - `n`: int, default 1.
             Amount of images to generate for each request.

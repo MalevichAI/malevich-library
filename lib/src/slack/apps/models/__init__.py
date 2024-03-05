@@ -1,1 +1,1 @@
-from send_message_model import SendMessage
+from .send_message_model import SendMessage

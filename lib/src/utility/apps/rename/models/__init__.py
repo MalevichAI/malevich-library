@@ -1,1 +1,1 @@
-from rename_model import Rename
+from .rename_model import Rename

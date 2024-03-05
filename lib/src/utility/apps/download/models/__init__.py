@@ -1,1 +1,1 @@
-from download_model import Download
+from .download_model import Download

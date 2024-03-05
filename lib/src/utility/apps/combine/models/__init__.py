@@ -1,1 +1,1 @@
-from combine_vertical_model import CombineVertical
+from .combine_vertical_model import CombineVertical

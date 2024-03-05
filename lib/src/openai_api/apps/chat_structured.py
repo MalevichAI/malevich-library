@@ -8,10 +8,13 @@ from malevich.square import DF, Context, processor
 
 from ..lib.broadcast import broadcast
 from ..lib.chat import exec_structured_chat
+from .models import StructuredPromptCompletion
 
 
 @processor(id="structured_prompt_completion")
-async def structured_prompt_completion(variables: DF[Any], ctx: Context):
+async def structured_prompt_completion(
+    variables: DF[Any], ctx: Context[StructuredPromptCompletion]
+):
     """Use Chat Completions feature from OpenAI
 
     Chat completions enable you to chat with OpenAI
@@ -48,21 +51,20 @@ async def structured_prompt_completion(variables: DF[Any], ctx: Context):
 
     ## Configuration:
 
-         - `openai_api_key`: str.
+        - `openai_api_key`: str.
             Your OpenAI API key.
         - `user_prompt`: str.
             The prompt for the user.
-         - `model`: str, default 'gpt-3.5-turbo'.
+        - `model`: str, default 'gpt-3.5-turbo'.
             The model to use.
         - `organization`: str, default None.
             The organization to use.
-         - `max_retries`: int, default 3.
+        - `max_retries`: int, default 3.
             The maximum number of retries.
         - `temperature`: float, default 0.9.
             The temperature.
         - `max_tokens`: int, default 150.
             The maximum number of tokens.
-        - top_p (float, default: 1.0): the top p
         - `top_p`: float, default 1.0.
             The top p.
         - `frequency_penalty`: float, default 0.0.
@@ -77,10 +79,10 @@ async def structured_prompt_completion(variables: DF[Any], ctx: Context):
             The number of completions to generate.
         - `response_format`: str, default None.
             The response format.
-        - `fields`: list(dict), default empty.
-            A list of fields to parse the output. Each field is a dict that contains fields `name`, `description` and `type`
+        - `fields`: list|dict, default None.
+            A list of fields to parse the output. Each field is a dict that contains fields `name`, `description` and `type`.
         - `include_index`: bool, default False.
-            Whether to include the index in the output
+            Whether to include the index in the output.
 
     ## Notes:
         If `response_format` is set to 'json_object', the system prompt should

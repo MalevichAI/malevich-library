@@ -1,1 +1,1 @@
-from add_column_model import AddColumn
+from .add_column_model import AddColumn

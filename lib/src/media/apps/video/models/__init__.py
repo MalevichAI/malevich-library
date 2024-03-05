@@ -1,1 +1,1 @@
-from split_on_frames_model import SplitOnFrames
+from .split_on_frames_model import SplitOnFrames
