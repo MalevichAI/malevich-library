@@ -44,7 +44,7 @@ def answer_questions(questions: DF[QuestionInput], context: Context):
 
     ## Configuration:
 
-        - `model`: string. default "deepset/roberta-base-squad2".
+        - `model`: str. default "deepset/roberta-base-squad2".
             Name of the model to use in the pipeline
 
     -----

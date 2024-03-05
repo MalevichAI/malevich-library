@@ -55,8 +55,8 @@ def continue_conversation(message: DF[DialogMessageInput], context: Context):
 
     ## Configuration:
 
-        - `model`: string, default "facebook/blenderbot-400M-distill".
-            Name of the model to use in the pipeline
+        - `model`: str, default "facebook/blenderbot-400M-distill".
+            Name of the model to use in the pipeline.
         - `min_length_for_response`: int, default 32.
             The minimum length (in number of tokens) for a response.
         - `minimum_tokens`: int, default 10.

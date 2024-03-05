@@ -37,7 +37,7 @@ def summarize_text(text: DF[TextInput], context: Context):
 
     ## Configuration:
 
-        - `model`: string. default is default summary model at HF.
+        - `model`: str. default 'none'.
             Name of the model to use in the pipeline
 
     -----
