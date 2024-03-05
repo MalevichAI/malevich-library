@@ -23,7 +23,7 @@ def download_from_google_drive(links: DF[GoogleDriveLink], context: Context):
         - `link` (str): google drive links.
 
     ## Configuration:
-        -  `fail_on_error`: bool, default False.
+        - `fail_on_error`: bool, default False.
             If True, the app will fail if any of the links are invalid.
 
     ## Output:
