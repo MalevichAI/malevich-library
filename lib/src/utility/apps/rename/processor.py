@@ -25,7 +25,7 @@ def rename(df: DF[Any], context: Context):
             'c': 'C'
         }
 
-        - `old_column_name`: string.
+        - `old_column_name`: string, default "''".
         Provides mapping of old column names to their new names. For example 'a': 'A'.
 
     ## Details:

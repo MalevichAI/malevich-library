@@ -26,7 +26,7 @@ def download(links: DF[Links], context: Context):
         - `file` (str): containing paths to downloaded files.
 
     ## Configuration:
-        - `prefix`: str.
+        - `prefix`: str, default ''.
         A prefix to add to the paths of downloaded files. If not specified, files will be downloaded to the root of the app directory.
 
     -----

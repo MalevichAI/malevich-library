@@ -52,19 +52,41 @@ def upload_images_to_task(df: DF[TaskImages], context: Context):
 
     ## Configuration:
 
-        - `cvat_url`: string. URL of your CVAT server
-        - `cvat_user`: string. Account user name on CVAT.
-        - `cvat_password`: string. Account user password on CVAT.
-        - `cvat_org`: string. CVAT organization. By default uses personal workspace.
-        - `cvat_url`: string. URL of your CVAT server.
-        - `project_id`: string. ID of CVAT project.
-        - `cloud_id`: string. ID of cloud storage.
-        - `aws_access_key_id`: string. AWS credentials.
-        - `aws_secret_access_key`: string. AWS credentials.
-        - `endpoint_url`: string, default is AWS S3 endpoint.
-                URL endpoint of the cloud storage (S3).
-        - `bucket_name`: string, default "cvat". Name of S3 bucket.
-        - `cloud_id` - ID of cloud storage
+        - `cvat_url`: str.
+            URL of your CVAT server.
+
+        - `cvat_user`: str.
+            Account user name on CVAT.
+
+        - `cvat_password`: str.
+            Account user password on CVAT.
+
+        - `cvat_org`: str.
+            CVAT organization. By default uses personal workspace.
+
+        - `cvat_url`: str.
+			URL of your CVAT server.
+
+        - `project_id`: str.
+			ID of CVAT project.
+
+        - `cloud_id`: str.
+			ID of cloud storage.
+
+        - `aws_access_key_id`: str.
+			AWS credentials.
+
+        - `aws_secret_access_key`: str.
+			AWS credentials.
+
+        - `endpoint_url`: str, default is AWS S3 endpoint.
+            URL endpoint of the cloud storage (S3).
+
+        - `bucket_name`: str, default "cvat".
+			Name of S3 bucket.
+
+        - `cloud_id`: int.
+            ID of cloud storage.
 
     ## Output:
 

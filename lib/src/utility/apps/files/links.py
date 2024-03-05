@@ -17,7 +17,7 @@ def get_links_to_files(df: DF, ctx: Context):
         with openable links to the files.
 
     ## Configuration:
-        - `expiration`: int.
+        - `expiration`: int, default 21600.
         The number of seconds after which the link will expire. Defaults to 6 hours. Maximum is 24 hours.
 
     -----
