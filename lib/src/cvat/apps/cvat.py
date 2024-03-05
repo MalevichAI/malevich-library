@@ -53,7 +53,7 @@ def upload_images_to_task(df: DF[TaskImages], context: Context):
     ## Configuration:
 
         - `cvat_url`: str.
-            URL of your CVAT server
+            URL of your CVAT server.
 
         - `cvat_user`: str.
             Account user name on CVAT.
@@ -86,7 +86,7 @@ def upload_images_to_task(df: DF[TaskImages], context: Context):
 			Name of S3 bucket.
 
         - `cloud_id`: int.
-            ID of cloud storage
+            ID of cloud storage.
 
     ## Output:
 
