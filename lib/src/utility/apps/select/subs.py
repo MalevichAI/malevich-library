@@ -1,9 +1,8 @@
+from .models import Subset
 import re
 from typing import Any
 
 from malevich.square import DFS, Context, M, processor
-
-from .models import Subset
 
 
 @processor(id='subset')

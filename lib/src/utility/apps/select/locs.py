@@ -1,9 +1,8 @@
+from .models import Locs
 from typing import Any
 
 import pandas as pd
 from malevich.square import DF, Context, processor
-
-from .models import Locs
 
 
 @processor(id='locs')

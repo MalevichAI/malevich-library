@@ -1,6 +1,5 @@
-from malevich.square import DF, Any, Context, processor
-
 from .models import Filter
+from malevich.square import DF, Any, Context, processor
 
 
 @processor()
