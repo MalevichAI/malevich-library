@@ -20,7 +20,7 @@ def convert_pdf_to_jpg(files: DF[Filename], context: Context):
         - `filename` (str): containing PDF files.
 
     ## Configuration:
-        - `write_contents`: `bool`.
+        - `write_contents`: bool.
             If true, contents of the file will be produced in the output rather than just the path to the file.
 
     ## Output:

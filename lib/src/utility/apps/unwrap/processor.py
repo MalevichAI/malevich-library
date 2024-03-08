@@ -45,10 +45,10 @@ def unwrap(
 
     ## Configuration:
 
-        - `columns`: list[str].
+        - `columns`: list[str], default ['all'].
             The columns to unwrap. If not specified, all columns will be unwrapped.
 
-        - `delimiter`: str.
+        - `delimiter`: str, default ','.
             The delimiter used to separate values in the columns. If not specified, the default delimiter is a comma (,).
 
     ## Notes:

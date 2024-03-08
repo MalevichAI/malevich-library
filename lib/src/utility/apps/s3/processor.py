@@ -30,9 +30,9 @@ def s3_save(dfs: DFS[M[Any]], context: Context):
 
     ## Configuration:
         - `names`: list[str].
-            Names of the dataframes to be saved. If a list is provided, it should
-            have the same length as the number of dataframes. If a string is provided,
-            it is used as a format string to generate the names of the dataframes.
+            Names of the dataframes to be saved.
+            If a list is provided, it should have the same length as the number of dataframes.
+            If a string is provided, it is used as a format string to generate the names of the dataframes.
             Available format variables:
                 {ID}: index of the dataframe
             If the number of dataframes is greater than the length of the list or
@@ -86,7 +86,7 @@ def s3_save(dfs: DFS[M[Any]], context: Context):
     Returns:
         The same dataframes as the input.
 
-    """
+    """  # noqa: E501
     # Initializing an object to interact with S3
     s3_helper: S3Helper = context.app_cfg['s3_helper']
 
@@ -288,16 +288,22 @@ def s3_download_files(files: DF['FilenameS3Key'], context: Context):
     ## Configuration:
 
         The app's only configuration is the connection to S3:
+
             - `aws_access_key_id`: str.
                 AWS access key ID.
+
             - `aws_secret_access_key`: str.
                 AWS secret access key.
+
             - `bucket_name`: str.
                 Name of the S3 bucket.
+
             - `endpoint_url`: str.
                 Endpoint URL of the S3 bucket.
+
             - `aws_region`: str.
                 AWS region of the S3 bucket.
+
     ## Details:
        Files are downloaded by their S3 keys. The files are shared across processors
        under keys specified by `filename` column.
@@ -328,9 +334,10 @@ def s3_download_files(files: DF['FilenameS3Key'], context: Context):
     for file, s3_key in files[['filename', 's3key']].itertuples(index=False):
         fbytes = s3_helper.get_object(s3_key)
         with open(os.path.join(APP_DIR, file), 'wb+') as f:
-            f.write(fbytes.read())
-            context.share(file)
-            output_files.append(file)
+            for byte_ in fbytes:
+                f.write(byte_)
+        context.share(file)
+        output_files.append(file)
 
     return pd.DataFrame({
         'filename': output_files,
@@ -348,15 +355,20 @@ def s3_download_files_auto(keys: DF[S3Key], context: Context):
     ## Configuration:
 
         The app's only configuration is the connection to S3:
+
             - `aws_access_key_id`: str.
                 AWS access key ID.
+
             - `aws_secret_access_key`: str.
                 AWS secret access key.
+
             - `bucket_name`: str.
                 Name of the S3 bucket.
+
             - `endpoint_url`: str.
                 Endpoint URL of the S3 bucket.
-            - `aws_region`: str.
+
+            - `aws_region`: str, default 'us-east-1'.
                 AWS region of the S3 bucket.
 
     ## Output:
@@ -382,9 +394,10 @@ def s3_download_files_auto(keys: DF[S3Key], context: Context):
         extension = os.path.splitext(s3_key)[1]
         file = context.run_id + '-' + sha256(s3_key.encode()).hexdigest() + extension
         with open(os.path.join(APP_DIR, file), 'wb+') as f:
-            f.write(fbytes.read())
-            context.share(file)
-            output_files.append([s3_key, file])
+            for byte_ in fbytes:
+                f.write(byte_)
+        context.share(file)
+        output_files.append([s3_key, file])
     return pd.DataFrame(
         output_files, columns = ['s3_key', 'filename']
     )

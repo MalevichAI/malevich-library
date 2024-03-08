@@ -6,7 +6,7 @@ import pandas as pd
 # from audiocraft.models import MAGNeT
 import replicate
 import wget
-from malevich.square import APP_DIR, DF, OBJ, Context, init, processor, scheme
+from malevich.square import APP_DIR, DF, Context, processor, scheme
 
 
 @scheme()
@@ -38,11 +38,11 @@ def generate_audio(prompt: DF[Prompt], context: Context) -> str:
 
     ## Configuration:
 
-        - `replicate_api_key`: string.
+        - `replicate_api_key`: str.
 
             [Replicate](https://replicate.com/) API key.
 
-        - `save_prefix`: string.
+        - `save_prefix`: str.
 
             Prefix path to save the audio in.
 

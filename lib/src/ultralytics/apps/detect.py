@@ -58,11 +58,11 @@ def detect(yolo_inputs: DF[YOLOInputs], context: Context):
             Confidence threshold.
         - `iou`: float, default is 0.45.
             IoU threshold.
-        - `classes`: dict [int, str], default is {}.
+        - `classes`: dict, default is {}.
             A dictionary that maps class ids to class names.
         - `save_plots`: bool, default is False.
             Whether to save the output images.
-        - `save_path`: pattern.
+        - `save_path`: str.
             The pattern for the path to the output images.
         - `batch_size`: int, default is 1.
             The batch size.
@@ -189,7 +189,7 @@ def detect_raw(yolo_inputs: DF[YOLOInputs], context: Context):
             Confidence threshold.
         - `iou`: float, default is 0.45.
             IoU threshold.
-        - `classes`: dict [int, str], default is {}.
+        - `classes`: dict, default is {}.
             A dictionary that maps class ids to class names.
         - `save_plots`: bool, default is False.
             Whether to save the output images.

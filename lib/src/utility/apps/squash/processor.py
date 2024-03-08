@@ -48,10 +48,10 @@ def squash_rows(df: DF[Any], context: Context):
         multiple rows for each input row.
 
     ## Configuration:
-        - `by`: str.
+        - `by`: str, default 'all'.
             The column to group by. If not specified, all columns will be squashed.
 
-        - `delim`: str.
+        - `delim`: str, default ','.
             The delimiter used to separate values in the columns. If not specified, the default delimiter is a comma (,).
 
     -----
@@ -72,7 +72,9 @@ def squash_rows(df: DF[Any], context: Context):
     else:
         pds = []
         for _, group in df.groupby(squash_by):
-            pds.append(_squash_row_df(group, squash_by, squash_delim))
+            pds.append(
+                _squash_row_df(group, squash_by, squash_delim)
+            )
         return pd.concat(pds)
 
 
@@ -88,10 +90,10 @@ def squash(df: DF[Any], context: Context):
         multiple rows for each input row.
 
     ## Configuration:
-        - `by`: str.
+        - `by`: str, default 'all'.
             The column to group by. If not specified, all columns will be squashed.
 
-        - `delim`: str.
+        - `delim`: str, default ','.
             The delimiter used to separate values in the columns. If not specified, the default delimiter is a comma (,).
 
     -----
@@ -118,13 +120,13 @@ def squash_columns(df: DF[Any], context: Context):
         specified columns squashed into one column.
 
     ## Configuration:
-        - `columns`: list[str].
+        - `columns`: list[str], default ['all'].
             The columns to squash. If not specified, all columns will be squashed.
-        - `result_column_name`: str.
+        - `result_column_name`: str, default 'concat'.
             The name of the resulting column. If not specified, the default name is the concatenation of the column names.
-        - `drop`: bool.
+        - `drop`: bool, default False.
             Whether to drop the original columns. If not specified, the default value is False.
-        - `delim`: str.
+        - `delim`: str, default ','.
             The delimiter used to separate values in the columns. If not specified, the default delimiter is a comma (,).
 
     -----

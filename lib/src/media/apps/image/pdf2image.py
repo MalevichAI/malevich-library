@@ -25,9 +25,9 @@ def convert_pdf_to_jpeg(files: DF[Filename], context: Context):
         file. The converted file is shared in apps.
 
     ## Configuration:
-        - `start_page`: int.
+        - `start_page`: int, default 0.
         The number of the first page to convert. If not specified, converts from the first page.
-        - `page_num`: int.
+        - `page_num`: int, default None.
         The number of pages to convert. If not specified, converts all pages.
 
     -----

@@ -63,7 +63,8 @@ def token_classification(text: DF[TokenClassificationInput], context: Context):
         - `batch_size`: int.
             Batch size to use for inference.
         - `aggregation_strategy`: str.
-            Aggregation strategy to use for multiple entities per token. See [Aggregation strategy](https://huggingface.co/docs/transformers/v4.36.1/en/main_classes/pipelines#transformers.TokenClassificationPipeline.aggregation_strategy)
+            Aggregation strategy to use for multiple entities per token.
+            See [Aggregation strategy](https://huggingface.co/docs/transformers/v4.36.1/en/main_classes/pipelines#transformers.TokenClassificationPipeline.aggregation_strategy)
 
     -----
 

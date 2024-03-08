@@ -37,7 +37,7 @@ def split_on_frames(videos: DF['Videos'], context: Context):
         frame of the video.
 
     ## Configuration:
-        - `fps`: int(float), default 1.
+        - `fps`: int|float, default 1.
             Frames per second. If float is used then it is used as a percentage of the original fps.
 
     -----
