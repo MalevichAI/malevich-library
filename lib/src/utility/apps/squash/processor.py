@@ -4,14 +4,16 @@ import pandas as pd
 from malevich.square import DF, Context, processor
 
 
-def _squash_row_df(df: pd.DataFrame, key: str, delm: str = ",") -> pd.DataFrame:
+def _squash_row_df(
+    df: pd.DataFrame, key: str, value: str, delm: str = ","
+) -> pd.DataFrame:
     data_ = {
         x: [delm.join(map(str, df[x].to_list()))]
         for x in df.columns if x != key
     }
 
     if key:
-        data_[key] = [key]
+        data_[key] = [value]
 
     return pd.DataFrame(data_)
 
@@ -71,13 +73,14 @@ def squash_rows(df: DF[Any], context: Context):
 
     else:
         pds = []
-        for _, group in df.groupby(squash_by):
+        for val, group in df.groupby(squash_by):
             pds.append(
                 _squash_row_df(
                     group,
                     squash_by,
+                    val,
                     squash_delim
-                )
+                ).reset_index(drop=True)
             )
         return pd.concat(pds)
 
