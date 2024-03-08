@@ -82,7 +82,7 @@ def squash_rows(df: DF[Any], context: Context):
                     squash_delim
                 ).reset_index(drop=True)
             )
-        return pd.concat(pds)
+        return pd.concat(pds).reset_index(drop=True)
 
 
 @processor()
