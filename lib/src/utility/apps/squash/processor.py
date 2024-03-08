@@ -71,8 +71,8 @@ def squash_rows(df: DF[Any], context: Context):
 
     else:
         pds = []
-        for name, group in df.groupby(squash_by):
-            pds.append(_squash_row_df(group, name, squash_delim))
+        for _, group in df.groupby(squash_by):
+            pds.append(_squash_row_df(group, squash_by, squash_delim))
         return pd.concat(pds)
 
 
