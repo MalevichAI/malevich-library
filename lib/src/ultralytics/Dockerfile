@@ -1,7 +1,8 @@
 ARG mode=python
 ARG branch
 
-FROM pogrebnoijak/julius_export_python_torch:0.1
+FROM malevichai/app:python-torch_v0.1
+
 ARG DEBIAN_FRONTEND=noninteractive
 ENV TZ=Etc/UTC
 ENV GIT_BRANCH ${branch}
