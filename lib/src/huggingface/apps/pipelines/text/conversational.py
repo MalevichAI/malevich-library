@@ -6,6 +6,8 @@ import torch
 from malevich.square import DF, Context, processor, scheme
 from transformers import Conversation, pipeline
 
+from .models import ContinueConversation
+
 
 @scheme()
 class DialogMessageInput:
@@ -28,7 +30,9 @@ class ConversationalPipelineConfig(pydantic.BaseModel):
 
 
 @processor()
-def continue_conversation(message: DF[DialogMessageInput], context: Context):
+def continue_conversation(
+    message: DF[DialogMessageInput], context: Context[ContinueConversation]
+    ):
     """
     Starts or continues a conversation with the given messages using HuggingFace Transformers.
 
@@ -55,8 +59,8 @@ def continue_conversation(message: DF[DialogMessageInput], context: Context):
 
     ## Configuration:
 
-        - `model`: string, default "facebook/blenderbot-400M-distill".
-            Name of the model to use in the pipeline
+        - `model`: str, default "facebook/blenderbot-400M-distill".
+            Name of the model to use in the pipeline.
         - `min_length_for_response`: int, default 32.
             The minimum length (in number of tokens) for a response.
         - `minimum_tokens`: int, default 10.
@@ -73,7 +77,7 @@ def continue_conversation(message: DF[DialogMessageInput], context: Context):
     """  # noqa: E501
     try:
         config = ConversationalPipelineConfig(**context.app_cfg)
-    except pydantic.ValidationError as err: 
+    except pydantic.ValidationError as err:
         context.logger.error(
             "Got an error while trying to get the config. "
             '. '.join([

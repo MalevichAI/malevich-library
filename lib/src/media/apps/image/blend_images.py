@@ -6,7 +6,7 @@ from PIL import Image
 from pydantic import BaseModel
 
 
-def _blend_images(background_path, object_path, output_path):
+def _blend_images(background_path, object_path, output_path) -> None:
     # Open the images
     background = Image.open(background_path)
 
@@ -40,18 +40,21 @@ class TwoImages(BaseModel):
 def blend_images(images: DF[TwoImages], context: Context):
     """Roughly blends two images by overlaying one on top of another
 
-    Inputs:
-        A dataframe with two columns: `background_image_path` and `patch_image_path`.
+    ## Input:
+        A dataframe with two columns:
+        - `background_image_path` (str): Path to backround image which will be the background.
+        - `patch_image_path` (str): Path to image which will be the on top layer.
+
         Each row of the dataframe will be used to blend two images. For example, if your
         background image is `background.png` and your patch image is `patch.png`, then
         the output image will be an original background image with a patch image on top
         of it.
 
-    Outputs:
-        A dataframe with one column `blended` with paths to blended images.
+    ## Output:
+        A dataframe with one column:
+        - `blended` (str): paths to blended images.
 
-    Configuration:
-        There is no configuration for this processor.
+    -----
 
     Args:
         images (DF[TwoImages]): Dataframe with paths to images
@@ -59,7 +62,7 @@ def blend_images(images: DF[TwoImages], context: Context):
 
     Returns:
         Dataframe with paths to blended images
-    """
+    """  # noqa: E501
     outputs = []
     for _, row in images.iterrows():
         background_path = str(row['background_image_path'])
@@ -67,7 +70,7 @@ def blend_images(images: DF[TwoImages], context: Context):
         try:
             bg_real_path = context.get_share_path(background_path)
             patch_real_path = context.get_share_path(patch_path)
-        except Exception as e:
+        except Exception:
             raise Exception(
                 "Could not find files. Please, ensure that both columns contain files "
                 "previously shared within previous processors"

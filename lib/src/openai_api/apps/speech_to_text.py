@@ -8,13 +8,14 @@ import pandas as pd
 from malevich.square import DF, Context, processor
 
 from ..lib.whisper import exec_whisper
+from .models import SpeechToText
 
 
 @processor()
-async def speech_to_text(variables: DF[Any], ctx: Context):
+async def speech_to_text(variables: DF[Any], ctx: Context[SpeechToText]):
     """Use Speech-to-Text feature from OpenAI
 
-   Transcribe audio to text using OpenAI API
+    Transcribe audio to text using OpenAI API
 
     To use the model you should set the following parameters:
 
@@ -22,24 +23,28 @@ async def speech_to_text(variables: DF[Any], ctx: Context):
 
     Scroll down to see the full list of parameters.
 
-    Inputs:
+    ## Input:
 
-        A dataframe with a single column `filename` containing keys
-        to shared audio files
+        A dataframe with a column:
+        - `filename` (str): Contains keys to shared audio files
 
-    Outputs:
+    ## Output:
 
         A dataframe with following columns:
-            - content (str): audio transcription
+            - `content` (str): audio transcription
 
-    Configuration:
+    ## Configuration:
 
-        - openai_api_key (str, required): your OpenAI API key
-        - language (str, default: 'en'): the language to transcribe
-            audio to
-        - temperature (float, default: 0.9): the temperature
-        - prompt (str, default: None): a short optional prompt to
-            guide the model
+        - `openai_api_key`: str.
+           Your OpenAI API key.
+        - `language`: str, default 'en'.
+            The language to transcribe audio to.
+        - `temperature`: float, default 0.9.
+            The temperature.
+        - `prompt`: str, default None.
+            A short optional prompt to guide the model.
+
+    -----
 
     Args:
         variables (DF[Any]): the variables to use in the prompts

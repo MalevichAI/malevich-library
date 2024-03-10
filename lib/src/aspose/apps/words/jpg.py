@@ -5,6 +5,8 @@ import pandas as pd
 from malevich.square import APP_DIR, DF, Context, processor, scheme
 from pydantic import BaseModel
 
+from .models import ConvertPdfToJpg
+
 
 @scheme()
 class Filename(BaseModel):
@@ -12,20 +14,23 @@ class Filename(BaseModel):
 
 
 @processor()
-def convert_pdf_to_jpg(files: DF[Filename], context: Context):
+def convert_pdf_to_jpg(files: DF[Filename], context: Context[ConvertPdfToJpg]):
     """Convert PDF files to jpeg.
 
-    Input:
-        A dataframe with a column named `filename` containing PDF files.
+    ## Input:
+        A dataframe with columns:
+        - `filename` (str): containing PDF files.
 
-    Configuration:
-        - write_contents (bool):
-            If true, contents of the file will be produced in the
-            output rather than just the path to the file.
+    ## Configuration:
+        - `write_contents`: bool.
+            If true, contents of the file will be produced in the output rather than just the path to the file.
 
-    Output:
-        The same dataframe with a column named `jpeg` attached to the
-        end. The column contains the path to the converted jpeg files.
+    ## Output:
+        The same dataframe with columns:
+        - `filename` (str): containing PDF files.
+        - `jpeg` (str): converted images.
+
+    -----
 
     Args:
         files (DF[Filename]):
@@ -35,7 +40,7 @@ def convert_pdf_to_jpg(files: DF[Filename], context: Context):
         DF[Filename]:
             The same dataframe with a column named `jpeg` attached to the
             end. The column contains the path to the converted jpeg files.
-    """
+    """  # noqa: E501
     outputs = []
     start_page = context.app_cfg.get('start_page', 0)
     page_num = context.app_cfg.get('page_num', None)

@@ -7,6 +7,8 @@ from malevich.square import APP_DIR, DF, Context, input_true, processor, scheme
 from pydantic import BaseModel
 from ultralytics import YOLO
 
+from .models import Detect, DetectRaw
+
 
 @scheme()
 class YOLOInputs(BaseModel):
@@ -32,49 +34,51 @@ def eval_path(path: str, file: str, context: Context):
 
 
 @processor()
-def detect(yolo_inputs: DF[YOLOInputs], context: Context):
+def detect(yolo_inputs: DF[YOLOInputs], context: Context[Detect]):
     """Detects objects on images
 
-    Input:
+    ## Input:
         A dataframe with the following columns:
-            - source: the path to the input image in the shared storage
+            - `source` (str): the path to the input image in the shared storage
 
-    Output:
+    ## Output:
         A dataframe with the following columns:
-            key: the path to the input image in the shared storage
-            xyxy: the bounding boxes of the detected objects
-            cls_ids: the class ids of the detected objects
-            cls_names: the class names of the detected objects
-            plot: the path to the output image in the shared storage
+            - `key` (str): the path to the input image in the shared storage
+            - `xyxy` (str): the bounding boxes of the detected objects
+            - `cls_ids` (str): the class ids of the detected objects
+            - `cls_names` (str): the class names of the detected objects
+            - `plot` (str): the path to the output image in the shared storage
 
-    Details:
+    ## Details:
         Uses YOLOv8 Predict Operation to detect objects on images.
 
 
-    Configuration:
-        - weights (str) [optional, default is 'yolo.pt']:
+    ## Configuration:
+        - `weights`: str, default 'yolo.pt'.
             A path to the weights file in the shared storage.
-        - conf (float) [optional, default is 0.25]:
+        - `conf`: float, default 0.25.
             Confidence threshold.
-        - iou (float) [optional, default is 0.45]:
+        - `iou`: float, default 0.45.
             IoU threshold.
-        - classes (dict [int, str]) [optional, default is {}]:
+        - `classes`: dict, default {}.
             A dictionary that maps class ids to class names.
-        - save_plots (bool) [optional, default is False]:
+        - `save_plots`: bool, default False.
             Whether to save the output images.
-        - save_path (pattern) [optional]:
+        - `save_path`: str.
             The pattern for the path to the output images.
-        - batch_size (int) [optional, default is 1]:
+        - `batch_size`: int, default 1.
             The batch size.
 
-            Available variables:
-                - RUN_ID: the id of the current run
-                - OP_ID: the id of the current operation
-                - SRC_BASENAME: the basename of the input image
-                - SRC_DIR: the directory of the input image
+    ## Available variables:
+        - RUN_ID: the id of the current run
+        - OP_ID: the id of the current operation
+        - SRC_BASENAME: the basename of the input image
+        - SRC_DIR: the directory of the input image
 
-            Default value:
-                '{RUN_ID}/{SRC_BASENAME}'
+    ## Default value:
+        '{RUN_ID}/{SRC_BASENAME}'
+
+    -----
 
     Args:
         yolo_inputs: a DataFrame with the following columns:
@@ -86,7 +90,7 @@ def detect(yolo_inputs: DF[YOLOInputs], context: Context):
             - xyxy: the bounding boxes of the detected objects
             - cls_ids: the class ids of the detected objects
             - cls_names: the class names of the detected objects
-            - plot**: the path to the output image, if save_plots is True
+            - plot**: the path to the output image, if save_plots True
 
     Remarks:
         **: the column is present only if save_plots is True
@@ -164,44 +168,48 @@ def detect(yolo_inputs: DF[YOLOInputs], context: Context):
 
 
 @processor()
-def detect_raw(yolo_inputs: DF[YOLOInputs], context: Context):
+def detect_raw(yolo_inputs: DF[YOLOInputs], context: Context[DetectRaw]):
     """Detects objects on images and returns raw YOLOv8 results
 
-    Input:
+    ## Input:
         A dataframe with the following columns:
-            - source: the path to the input image in the shared storage
+            - `source` (str): the path to the input image in the shared storage
 
-    Output:
+    ## Output:
         A dataframe with the following columns:
-            key: the path to the input image in the shared storage
-            result: serialized YOLOv8 Result object
+            - `key` (str): the path to the input image in the shared storage
+            - `result` (str): serialized YOLOv8 Result object
 
-    Details:
+    ## Details:
         Uses YOLOv8 Predict Operation to detect objects on images.
 
 
-    Configuration:
-        - weights (str) [optional, default is 'yolo.pt']:
+    ## Configuration:
+        - `weights`: str, default 'yolo.pt'.
             A path to the weights file in the shared storage.
-        - conf (float) [optional, default is 0.25]:
+        - `conf`: float, default 0.25.
             Confidence threshold.
-        - iou (float) [optional, default is 0.45]:
+        - `iou`: float, default 0.45.
             IoU threshold.
-        - save_plots (bool) [optional, default is False]:
+        - `classes`: dict, default {}.
+            A dictionary that maps class ids to class names.
+        - `save_plots`: bool, default False.
             Whether to save the output images.
-        - save_path (pattern) [optional]:
+        - `save_path`: pattern.
             The pattern for the path to the output images.
-        - batch_size (int) [optional, default is 1]:
+        - `batch_size`: int, default 1.
             The batch size.
 
-            Available variables:
-                - RUN_ID: the id of the current run
-                - OP_ID: the id of the current operation
-                - SRC_BASENAME: the basename of the input image
-                - SRC_DIR: the directory of the input image
+    ## Available variables:
+        - RUN_ID: the id of the current run
+        - OP_ID: the id of the current operation
+        - SRC_BASENAME: the basename of the input image
+        - SRC_DIR: the directory of the input image
 
-            Default value:
-                '{RUN_ID}/{SRC_BASENAME}'
+    ## Default value:
+        '{RUN_ID}/{SRC_BASENAME}'
+
+    -----
 
     Args:
         yolo_inputs: a DataFrame with the following columns:

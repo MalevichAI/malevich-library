@@ -5,6 +5,8 @@ import pandas as pd
 from malevich.square import DF, Context, processor
 from pydantic import BaseModel, ValidationError
 
+from .models import AssertRegex
+
 
 class Index(BaseModel):
     start: Optional[Union[int, float]] = None
@@ -36,22 +38,23 @@ def _error_message(
 
 
 @processor()
-def assert_regex(df: DF, ctx: Context):
+def assert_regex(df: DF, ctx: Context[AssertRegex]):
     """Asserts that the values in a dataframe match a regex.
 
-    Input:
+    ## Input:
         An arbitrary dataframe.
 
-    Output:
-        A dataframe with a column named `errors` containing the errors
-        if any.
+    ## Output:
+        A dataframe with a column:
+        - `errors` (str): containing the errors if any.
 
-    Configuration:
-        - rules (list[dict], required): The rules to apply.
-        - raise_on_error (bool, default False): Whether to raise an exception
-            if an error is found.
+    ## Configuration:
+        - `rules`: list[dict].
+            The rules to apply.
+        - `raise_on_error`: bool, default False.
+            Whether to raise an exception if an error is found.
 
-    Rules:
+    ## Rules:
         A rule is a dictionary with the following keys:
             - regex (str): The regex to match the values against.
             - column (str or Index, default None): The column to apply the rule to.
@@ -73,7 +76,7 @@ def assert_regex(df: DF, ctx: Context):
         If a float is provided for the start, end, or step, the value will
         be interpreted as a percentage of the length of the dataframe.
 
-    Examples:
+    ## Example:
 
     {
         "rules": [
@@ -87,6 +90,8 @@ def assert_regex(df: DF, ctx: Context):
                 },
                 "invert": false
     }
+
+    -----
 
     Args:
         df (DF):

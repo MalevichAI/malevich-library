@@ -5,10 +5,11 @@ import pandas as pd
 from malevich.square import DF, Context, processor
 
 from ..lib.chat import exec_chat
+from .models import PromptCompletion
 
 
 @processor()
-async def prompt_completion(variables: DF[Any], ctx: Context):
+async def prompt_completion(variables: DF[Any], ctx: Context[PromptCompletion]):
     """Use Chat Completions feature from OpenAI
 
     Chat completions enable you to chat with OpenAI
@@ -23,7 +24,7 @@ async def prompt_completion(variables: DF[Any], ctx: Context):
 
     Scroll down to see the full list of parameters.
 
-    Inputs:
+    ## Input:
 
         A dataframe with variables to be used in the prompts. Each row of the
         dataframe will be used to generate a prompt. For example, if your prompt
@@ -34,30 +35,45 @@ async def prompt_completion(variables: DF[Any], ctx: Context):
         You have to have a column `someone` in the input dataframe. For each
         of such variables you should have a separate column.
 
-    Outputs:
+    ## Output:
 
         A dataframe with following columns:
             - content (str): the content of the model response
 
-    Configuration:
+    ## Configuration:
 
-        - openai_api_key (str, required): your OpenAI API key
-        - user_prompt (str, required): the prompt for the user
-        - system_prompt (str, optional): the prompt for the system
-        - model (str, default: 'gpt-3.5-turbo'): the model to use
-        - organization (str, default: None): the organization to use
-        - max_retries (int, default: 3): the maximum number of retries
-        - temperature (float, default: 0.9): the temperature
-        - max_tokens (int, default: 150): the maximum number of tokens
-        - top_p (float, default: 1.0): the top p
-        - frequency_penalty (float, default: 0.0): the frequency penalty
-        - presence_penalty (float, default: 0.0): the presence penalty
-        - stop (list, default: []]): the stop tokens
-        - stream (bool, default: False): whether to stream the response
-        - n (int, default: 1): the number of completions to generate
-        - response_format (str, default: None): the response format
+        - `openai_api_key`: str.
+            Your OpenAI API key.
+        - `user_prompt`: str.
+            The prompt for the user.
+        - `system_prompt`: str.
+            The prompt for the system.
+        - `model`: str, default 'gpt-3.5-turbo'.
+            The model to use.
+        - `organization`: str, default None.
+            The organization to use.
+        - `max_retries`: int, default 3.
+            The maximum number of retries.
+        - `temperature`: float, default 0.9.
+            The temperature.
+        - `max_tokens`: int, default 150.
+            The maximum number of tokens.
+        - `top_p`: float, default 1.0.
+            The top p.
+        - `frequency_penalty`: float, default 0.0.
+            The frequency penalty.
+        - `presence_penalty`: float, default 0.0.
+            The presence penalty.
+        - `stop`: list, default [].
+            The stop tokens.
+        - `stream`: bool, default False.
+            Whether to stream the response.
+        - `n`: int, default 1.
+            The number of completions to generate.
+        - `response_format`: str, default None.
+            The response format.
 
-    Notes:
+    ## Notes:
         If `response_format` is set to 'json_object', the system prompt should
         contain an instruction to return a JSON object, e.g.:
 
@@ -69,6 +85,8 @@ async def prompt_completion(variables: DF[Any], ctx: Context):
         ```
 
         JSON completion only works with Davinci models
+
+    -----
 
     Args:
         variables (DF[Any]): the variables to use in the prompts

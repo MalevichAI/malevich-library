@@ -5,34 +5,36 @@ import pandas as pd
 from apps.scrape_web import ScrapeLinks, run_spider
 from malevich.square import DF, Context, processor
 
+from .models import ScrapeBingSearch
+
 
 @processor()
 def scrape_bing_search(
 scrape_links: DF[ScrapeLinks],
-    context: Context
+    context: Context[ScrapeBingSearch]
     ):
     """
         The bing spider extracts links from bing search results.
         It traverses all links in the search results.
 
-    [Input Format]
+    ## Input:
 
-        A dataframe with a column named `link` containing web links
-        to be scraped
+        A dataframe with a column:
+        - `link` (str): containing web links to be scraped
 
-    [Output Format]
+    ## Output:
 
-        A dataframe with a column named `result` containing the results.
+        A dataframe with a column:
+        - `result` (str): containing the results.
+
         There is not distinction between results from different links. The
         number of rows in the output dataframe is equal to the number of
         results or is exactly one if `squash_results` option is set.
 
-    [Available Options]
-        - allowed_domains (a list of strings)
-
-            A list of allowed domains to scrape. If not provided, all domains
-            are allowed, so the app will traverse the entire web. Otherwise,
-            the scraper won't visit external links.
+    ## Configuration:
+         - `allowed_domains`: list[str], default None.
+            A list of allowed domains to scrape.
+            If not provided, all domains are allowed, so the app will traverse the entire web. Otherwise, the scraper won't visit external links.
 
             Example:
 
@@ -58,10 +60,9 @@ scrape_links: DF[ScrapeLinks],
                 app will traverse the entire web.
 
 
-        - max_depth (integer):
-
-            The maximum depth to traverse the web. If not provided, the app
-            will traverse the entire web.
+        - `max_depth`: int, default 0.
+            The maximum depth to traverse the web.
+            If not provided, the app will traverse the entire web.
 
             Example:
 
@@ -81,17 +82,15 @@ scrape_links: DF[ScrapeLinks],
                 In case (3), the app will visit links from the provided links
                 and links found in the given ones.
 
-        - spider_cfg (dict):
-
-            A dictionary of configuration options for the spider. If not
-            provided, the app will use the default configuration for each
+        - `spider_cfg`: dict, default {}.
+            A dictionary of configuration options for the spider.
+            If not provided, the app will use the default configuration for each
             spider. See [Available Spiders] for more information.
 
 
-        - max_results (integer):
-
-            The maximum number of results to return. If not provided, the app
-            will return all results.
+        - `max_results`: int, default None.
+            The maximum number of results to return.
+            If not provided, the app will return all results.
 
             Example:
 
@@ -105,10 +104,8 @@ scrape_links: DF[ScrapeLinks],
                 is then unbounded.
 
 
-        - timeout (int):
-
-            The maximum number of seconds to wait for collecting responses
-            from the spiders.
+        - `timeout`: int, default 0.
+            The maximum number of seconds to wait for collecting responses from the spiders.
 
             Example:
 
@@ -125,14 +122,12 @@ scrape_links: DF[ScrapeLinks],
 
             Default:
 
-                By default, the app will wait for 15 seconds for the spider
+                By default, the app will wait for 120 seconds for the spider
                 to finish.
 
 
-        - squash_results (bool):
-
-            If set, the app will squash the results into a single string separated
-            by the `squash_delimiter` option.
+        - `squash_results`: bool, default False.
+            If set, the app will squash the results into a single string separated by the `squash_delimiter` option.
 
             Example:
 
@@ -172,24 +167,20 @@ scrape_links: DF[ScrapeLinks],
                 |   c    |
 
 
-        - delimiter (str):
-
-            The delimiter to use when squashing the results or when using
-            independent crawl. See `squash_results` and `links_are_independent`
-            option for more information.
+        - `delimiter`: str, default "'\\n'".
+            The delimiter to use when squashing the results or when using independent crawl.
+            See `squash_results` and `links_are_independent` option for more information.
 
             Default:
 
                 By default, the app will use the newline character as the
                 delimiter.
 
-        - links_are_independent (bool):
+        - `links_are_independent`: bool, default False.
+            If set, the app will crawl each link independently.
+            Otherwise, the app will assume all links comprise a single corpus and will crawl them together.
 
-            If set, the app will crawl each link independently. Otherwise, the app
-            will assume all links comprise a single corpus and will crawl them
-            together.
-
-    [Spider Options]
+    ## Spider Options:
 
             The bing spider accepts the following configuration options:
 
@@ -200,6 +191,9 @@ scrape_links: DF[ScrapeLinks],
                     Default: false
 
                 - cut_to_domain (bool): whether to cut the links to the domain
+
+    -----
+
     Args:
         scrape_links (DF[ScrapeLinks]): A dataframe with a column named `link` containing web links.
         context: The configuration dictionary. See [Available Options] for more information.

@@ -3,19 +3,21 @@ import requests
 from malevich.square import DF, Context, processor, scheme
 from pydantic import BaseModel
 
+from .models import AssertLinks
+
 
 @scheme()
 class Links(BaseModel):
     link: str
 
 @processor()
-def assert_links(df: DF[Links], context: Context) -> pd.DataFrame:
+def assert_links(df: DF[Links], context: Context[AssertLinks]) -> pd.DataFrame:
     """
         Check if the links are valid (do not return error status codes)
 
     ## Input:
         A dataframe that contains a column:
-            - link: link to be validated
+            - `link` (str): link to be validated
 
     ## Output:
         The format of dataframe depends on the configuration provided.
@@ -27,10 +29,10 @@ def assert_links(df: DF[Links], context: Context) -> pd.DataFrame:
         `error` containing invalid links.
 
     ## Configuration:
-        - filter_links: bool, optional, default False.
+        - `filter_links`: bool, default False.
             If set to True, will filter the dataframe and exclude invalid links.
 
-    ---
+    -----
 
     Args:
         df (DF[Links]): A dataframe with a column named `link` containing links.
@@ -44,8 +46,8 @@ def assert_links(df: DF[Links], context: Context) -> pd.DataFrame:
     _filter = context.app_cfg.get('filter_links', False)
     for link in df['link'].to_list():
         try:
+            response = requests.get(link)
             response = requests.get(link, allow_redirects=True)
-            print(f'Link: {link} status {response.status_code}')
             if (response.status_code < 400) == _filter:
                 result = (
                     link

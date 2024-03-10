@@ -5,31 +5,34 @@ from malevich.square import APP_DIR, DF, Context, processor, scheme
 from pdf2image import convert_from_path
 from pydantic import BaseModel
 
+from .models import ConvertPdfToJpeg
+
 
 @scheme()
 class Filename(BaseModel):
     filename:str
 
 @processor()
-def convert_pdf_to_jpeg(files: DF[Filename], context: Context):
+def convert_pdf_to_jpeg(files: DF[Filename], context: Context[ConvertPdfToJpeg]):
     """Converts PDF to JPEG
 
-    Inputs:
-        A dataframe with a column `filename` that contains
-        names of the files. Files should be either downloaded
-        or shared in apps before
+    ## Input:
+        A dataframe with a column:
+        - `filename` (str): Names of the files.  Files should be either downloaded or shared in apps before.
 
-    Outputs:
+    ## Output:
         A dataframe with two columns: `filename` and `jpeg`.
         The `filename` column contains the name of the original
         file, the `jpeg` column contains the name of the converted
         file. The converted file is shared in apps.
 
-    Configuration:
-        - start_page (int): the number of the first page to convert.
-            If not specified, converts from the first page
-        - page_num (int): the number of pages to convert. If not
-            specified, converts all pages
+    ## Configuration:
+        - `start_page`: int, default 0.
+        The number of the first page to convert. If not specified, converts from the first page.
+        - `page_num`: int, default None.
+        The number of pages to convert. If not specified, converts all pages.
+
+    -----
 
     Args:
         files (DF[Filename]): a dataframe with a column `filename`
@@ -42,8 +45,7 @@ def convert_pdf_to_jpeg(files: DF[Filename], context: Context):
             The `filename` column contains the name of the original
             file, the `jpeg` column contains the name of the converted
             file. The converted file is shared in apps
-
-    """
+    """  # noqa: E501
     outputs = []
     start_page = context.app_cfg.get('start_page', 0)
     page_num = context.app_cfg.get('page_num', None)

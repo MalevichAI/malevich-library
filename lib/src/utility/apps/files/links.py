@@ -1,23 +1,28 @@
 import os
+import re
 import shutil
 
 from malevich.square import APP_DIR, DF, Context, processor
 
+from .models import GetLinksToFiles
+
 
 @processor()
-def get_links_to_files(df: DF, ctx: Context):
+def get_links_to_files(df: DF, ctx: Context[GetLinksToFiles]):
     """Get links to files produced during the workflow execution.
 
-    Input:
+    ## Input:
         An arbitrary dataframe.
 
-    Output:
+    ## Output:
         The same dataframe, but with all file paths replaced
         with openable links to the files.
 
-    Configuration:
-        - expiration (int): The number of seconds after which the link
-            will expire. Defaults to 6 hours. Maximum is 24 hours.
+    ## Configuration:
+        - `expiration`: int, default 21600.
+        The number of seconds after which the link will expire. Defaults to 6 hours. Maximum is 24 hours.
+
+    -----
 
     Args:
         df (DF):
@@ -29,7 +34,7 @@ def get_links_to_files(df: DF, ctx: Context):
         DF:
             The same dataframe, but with all file paths replaced
             with openable links to the files.
-    """
+    """  # noqa: E501
 
     _expire_secs = ctx.app_cfg.get('expiration', 6 * 3600)
     _expire_secs = min(_expire_secs, 24 * 3600)
@@ -39,6 +44,17 @@ def get_links_to_files(df: DF, ctx: Context):
         return os.path.exists(
             ctx.get_share_path(
                 path, not_exist_ok=True, all_runs=all_runs
+            )
+        )
+
+    def _exst_obj(path: str) -> bool:
+        return (
+            os.path.exists(path) and
+            ctx.has_object(
+                re.search(
+                    r"\/mnt_obj\/(?P<USERNAME>\w+\/)(?P<KEY>.+)",
+                    path
+                ).group("KEY")
             )
         )
 
@@ -61,6 +77,19 @@ def get_links_to_files(df: DF, ctx: Context):
             return _fbase, ctx.get_share_path(_fbase, all_runs=True)
         elif _exst(_obj, all_runs=True):
             return _obj, ctx.get_share_path(_obj, all_runs=True)
+        elif _exst_obj(_obj):
+            _fbase = os.path.basename(_obj)
+            _path = os.path.join(
+                APP_DIR,
+                _fbase
+            )
+            shutil.move(
+                _obj,
+                _path
+            )
+            ctx.share(_fbase, all_runs=True)
+            ctx.synchronize([_fbase], all_runs=True)
+            return _fbase, ctx.get_share_path(_fbase, all_runs=True)
         else:
             return None
 

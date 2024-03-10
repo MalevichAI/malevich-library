@@ -40,11 +40,17 @@ class GetObjects(BaseModel):
 def get_project(df: DF[GetProjectInputSchema], context: Context):
     """Get project by identifier
 
-    Input:
-        A dataframe with a column named `project_id` containing project id.
+    ## Input:
+        A dataframe with a column:
 
-    Output:
-        A dataframe with a column named `project` containing project.
+        - `project_id` (str): project id.
+
+    ## Output:
+        A dataframe with a column:
+
+        - `project` (str): containing project name.
+
+    -----
 
     Args:
         df (DF[GetProjectInputSchema]):
@@ -66,19 +72,22 @@ def create_issue(df: DF[CreateIssueSchema], context: Context):
     """
     Create issue and assign to user
 
-    Input:
+    ## Input:
         A dataframe with columns:
-            title: Title of the Issue
-            description: Description of the Issue
-            team_key: Team key, for example 'ABC'
-            project_name: Name of the project
-            priority:
-                Priority from 0 to 4
-                (0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low.)
-            state: State of the Issue
 
-    Output:
-        A dataframe with a column named `issue_id` containing issue ids.
+        - `title` (str): Title of the Issue
+        - `description` (str): Description of the Issue
+        - `team_key` (str): Team key, for example 'ABC'
+        - `project_name` (str): Name of the project
+        - `priority` (str): Priority from 0 to 4: (0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low.)
+        - `state` (str): State of the Issue
+
+    ## Output:
+        A dataframe with a column:
+
+        - `issue_id` (str): issue id.
+
+    -----
 
     Args:
         df (DF[GetProjectInputSchema]):
@@ -109,16 +118,20 @@ def assign_user(df: DF[AssignUserSchema], context: Context):
     """
     Assign user to the issue
 
-    Input:
+    ## Input:
         A dataframe with columns:
-            title: Title of an issue
-            email: Asignee email
 
-    Output:
+        - `title` (str): Title of an issue
+        - `email` (str): Asignee email
+
+    ## Output:
         A dataframe with columns:
-            title: Issue title
-            email: Assignee email
-            success: Was it success or not
+
+        - `title` (str): Issue title
+        - `email` (str): Assignee email
+        - `success` (str): Was it success or not
+
+    -----
 
     Args:
         df (DF[GetProjectInputSchema]):
@@ -148,19 +161,24 @@ def get_issues(df: DF[GetObjects], context: Context):
     """
     Get all issues in the team
 
-    Input:
-        A dataframe with a column named 'team_key' containing team key (example 'ABC')
+    ## Input:
+        A dataframe with a column:
 
-    Output:
+        - `team_key` (str): Team key (example 'ABC')
+
+    ## Output:
         A dataframe with columns:
-            team_key: Team Key
-            id: Issue id
-            title: Issue title
-            description: Issue description
-            priority: Issue priority from 0 to 4 (0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low.)
-            state: Issue state
-            assignee_name: Assignee name
-            assignee_email: Assignee email
+
+        - `team_key` (str): Team Key
+        - `id` (str): Issue id
+        - `title` (str): Issue title
+        - `description` (str): Issue description
+        - `priority` (str): Issue priority from 0 to 4 (0 = No priority, 1 = Urgent, 2 = High, 3 = Normal, 4 = Low.)
+        - `state` (str): Issue state
+        - `assignee_name` (str): Assignee name
+        - `assignee_email` (str): Assignee email
+
+    -----
 
     Args:
         df (DF[GetObjects]):
@@ -208,16 +226,21 @@ def get_projects(df: DF[GetObjects], context: Context):
     """
     Get all projects in the team
 
-    Input:
-        A dataframe with a column named 'team_key' containing team key (example 'ABC')
+    ## Input:
+        A dataframe with a column:
 
-    Output:
+        - `team_key` (str): Team key (example 'ABC')
+
+    ## Output:
         A dataframe with columns:
-            team_key: Team Key
-            project_id: ID of the project
-            project_name: Name of the project
-            member_name: Name of project member
-            member_email: Email of project member
+
+        - `team_key` (str): Team Key
+        - `project_id` (str): ID of the project
+        - `project_name` (str): Name of the project
+        - `member_name` (str): Name of project member
+        - `member_email` (str): Email of project member
+
+    -----
 
     Args:
         df (DF[GetObjects]):
@@ -261,14 +284,19 @@ def get_users(df: DF[GetObjects], context: Context):
     """
         Get all users in the team
 
-        Input:
-            A dataframe with a column named 'team_key' containing team key (example 'ABC')
+        ## Input:
+            A dataframe with a column:
 
-        Output:
+            - `team_key` (str): Team key (example 'ABC')
+
+        ## Output:
             A dataframe with columns:
-                team_key: Team key, for example 'ABC'
-                name: Name of user
-                email: Email of user
+
+            - `team_key` (str): Team key, for example 'ABC'
+            - `name` (str): Name of user
+            - `email` (str): Email of user
+
+        -----
 
         Args:
             df (DF[GetObjects]):

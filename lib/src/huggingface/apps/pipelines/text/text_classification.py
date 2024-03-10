@@ -4,6 +4,8 @@ import torch
 from malevich.square import DF, Context, processor, scheme
 from transformers import pipeline
 
+from .models import ClassifyText
+
 
 @scheme()
 class TextInput:
@@ -37,7 +39,7 @@ class TextClassificationConfig(pydantic.BaseModel):
 
 
 @processor()
-def classify_text(text: DF[TextInput], context: Context):
+def classify_text(text: DF[TextInput], context: Context[ClassifyText]):
     """
     Classify text with HuggingFace Transformers.
 
@@ -58,20 +60,26 @@ def classify_text(text: DF[TextInput], context: Context):
 
     ## Configuration:
 
-        - `model`: string. default "distilbert-base-uncased-finetuned-sst-2-english".
+        - `model`: str. default "distilbert-base-uncased-finetuned-sst-2-english".
             Name of the model to use in the pipeline
         - `top_k`: int. default 1.
             Number of top labels to return
-        - `functions_to_apply`: string. default "default".
+        - `functions_to_apply`: str. default "default".
             The function to apply to the model outputs in order to retrieve the scores.
+
             Accepts four different values:
-            - `"default"`: If this argument is not specified, then it will apply the
-                following functions according to the number of labels:
-                - If the model has a single label, will apply the sigmoid function on the output.
-                - If the model has several labels, will apply the softmax function on the output.
-            - `"sigmoid"`: Applies the sigmoid function on the output.
-            - `"softmax"`: Applies the softmax function on the output.
-            - `"none"`: Does not apply any function to the output.
+
+            `"default"`: If this argument is not specified, then it will apply the following functions according to the number of labels:
+
+                    If the model has a single label, will apply the sigmoid function on the output.
+
+                    If the model has several labels, will apply the softmax function on the output.
+
+            `"sigmoid"`: Applies the sigmoid function on the output.
+
+            `"softmax"`: Applies the softmax function on the output.
+
+            `"none"`: Does not apply any function to the output.
 
     -----
 

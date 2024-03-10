@@ -2,6 +2,8 @@ from malevich.square import DF, Context, processor, scheme
 from pydantic import BaseModel
 from slack_sdk import WebClient
 
+from .models import SendMessage
+
 
 @scheme()
 class SlackInput(BaseModel):
@@ -9,24 +11,27 @@ class SlackInput(BaseModel):
     message: str
 
 @processor()
-def send_message(df: DF[SlackInput], context: Context):
+def send_message(df: DF[SlackInput], context: Context[SendMessage]):
     """Sends message to specified Slack channel
 
-    Inputs:
+    ## Input:
 
-        A dataframe with a column `channel_id` that contains
-        ids of the channels and a column `message` that contains
-        messages to send. Each row is a separate message
+        A dataframe with a column:
+        - `channel_id` (str): contains ids of the channels.
+        - `message` (str): that contains messages to send. Each row is a separate message.
 
-    Outputs:
+    ## Output:
 
-        A dataframe with two columns: `channel_id` and `message`.
-        The `channel_id` column contains the id of the channel
-        and the `message` column contains the message that was sent.
+        A dataframe with a column:
+        - `channel_id` (str): contains ids of the channels.
+        - `message` (str): that contains messages that was sent. Each row is a separate message.
 
-    Configuration:
+    ## Configuration:
 
-        - token (str): Slack token
+        - `token`: str.
+            Slack token.
+
+    -----
 
     Args:
 
@@ -40,7 +45,7 @@ def send_message(df: DF[SlackInput], context: Context):
         DF[SlackInput]: a dataframe with two columns: `channel_id` and `message`.
             The `channel_id` column contains the id of the channel
             and the `message` column contains the message that was sent.
-    """
+    """  # noqa: E501
     token = context.app_cfg.get('token')
     client = WebClient(token=token)
     for _, row in df.iterrows():

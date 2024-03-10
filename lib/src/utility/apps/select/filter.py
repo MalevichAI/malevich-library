@@ -1,23 +1,31 @@
+from .models import Filter
 from malevich.square import DF, Any, Context, processor
 
 
 @processor()
-def filter(df: DF[Any], context: Context):
+def filter(df: DF[Any], context: Context[Filter]):
     """Filters rows by a number of conditions
 
-    Inputs:
+    ## Input:
         An arbitrary dataframe to filter rows from
 
-    Outputs:
+    ## Output:
         A filtered dataframe
 
-    A single condition is a dictionary with the following keys:
-    - column: the column to filter on
-    - operation: the operation to perform
-    - value: the value to filter on
-    - type: the type of the value to filter on (optional)
+    ## Configuration:
 
-    Example:
+        A single condition is a dictionary with the following keys:
+
+        - `column`: str.
+            The column to filter on.
+        - `operation`: str.
+            The operation to perform.
+        - `value`: any.
+            The value to filter on.
+        - `type`: str.
+            The type of the value to filter on (optional).
+
+    ## Example:
     {
         "conditions": [
             {
@@ -53,6 +61,8 @@ def filter(df: DF[Any], context: Context):
     - float
     - bool
     - str
+
+    -----
 
     Args:
         df: the dataframe to filter rows from

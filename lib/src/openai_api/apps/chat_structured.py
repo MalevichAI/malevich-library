@@ -8,10 +8,13 @@ from malevich.square import DF, Context, processor
 
 from ..lib.broadcast import broadcast
 from ..lib.chat import exec_structured_chat
+from .models import StructuredPromptCompletion
 
 
 @processor(id="structured_prompt_completion")
-async def structured_prompt_completion(variables: DF[Any], ctx: Context):
+async def structured_prompt_completion(
+    variables: DF[Any], ctx: Context[StructuredPromptCompletion]
+):
     """Use Chat Completions feature from OpenAI
 
     Chat completions enable you to chat with OpenAI
@@ -27,7 +30,7 @@ async def structured_prompt_completion(variables: DF[Any], ctx: Context):
 
     Scroll down to see the full list of parameters.
 
-    Inputs:
+    ## Input:
 
         A dataframe with variables to be used in the prompts. Each row of the
         dataframe will be used to generate a prompt. For example, if your prompt
@@ -38,35 +41,50 @@ async def structured_prompt_completion(variables: DF[Any], ctx: Context):
         You have to have a column `someone` in the input dataframe. For each
         of such variables you should have a separate column.
 
-    Outputs:
+    ## Output:
 
-        A dataframe with following column:
+        A dataframe with following columns:
         - index (int): the index of the variable. If `include_index` is set to
             True, the index will be included in the output, otherwise it will
             be omitted.
         - content (str): the content of the model response
 
-    Configuration:
+    ## Configuration:
 
-        - openai_api_key (str, required): your OpenAI API key
-        - user_prompt (str, required): the prompt for the user
-        - model (str, default: 'gpt-3.5-turbo'): the model to use
-        - organization (str, default: None): the organization to use
-        - max_retries (int, default: 3): the maximum number of retries
-        - temperature (float, default: 0.9): the temperature
-        - max_tokens (int, default: 150): the maximum number of tokens
-        - top_p (float, default: 1.0): the top p
-        - frequency_penalty (float, default: 0.0): the frequency penalty
-        - presence_penalty (float, default: 0.0): the presence penalty
-        - stop (list, default: []]): the stop tokens
-        - stream (bool, default: False): whether to stream the response
-        - n (int, default: 1): the number of completions to generate
-        - response_format (str, default: None): the response format
-        - fields (list of dict, default: empty): a list of fields to parse the output.
-            Each field is a dict that contains fields `name`, `description` and `type`
-        - include_index (bool, default: False): whether to include the index in the output
+        - `openai_api_key`: str.
+            Your OpenAI API key.
+        - `user_prompt`: str.
+            The prompt for the user.
+        - `model`: str, default 'gpt-3.5-turbo'.
+            The model to use.
+        - `organization`: str, default None.
+            The organization to use.
+        - `max_retries`: int, default 3.
+            The maximum number of retries.
+        - `temperature`: float, default 0.9.
+            The temperature.
+        - `max_tokens`: int, default 150.
+            The maximum number of tokens.
+        - `top_p`: float, default 1.0.
+            The top p.
+        - `frequency_penalty`: float, default 0.0.
+            The frequency penalty.
+        - `presence_penalty`: float, default 0.0.
+            The presence penalty.
+        - `stop`: list, default [].
+            The stop tokens.
+        - `stream`: bool, default False.
+            Whether to stream the response.
+        - `n`: int, default 1.
+            The number of completions to generate.
+        - `response_format`: str, default None.
+            The response format.
+        - `fields`: list|dict, default None.
+            A list of fields to parse the output. Each field is a dict that contains fields `name`, `description` and `type`.
+        - `include_index`: bool, default False.
+            Whether to include the index in the output.
 
-    Notes:
+    ## Notes:
         If `response_format` is set to 'json_object', the system prompt should
         contain an instruction to return a JSON object, e.g.:
 
@@ -79,7 +97,7 @@ async def structured_prompt_completion(variables: DF[Any], ctx: Context):
 
         JSON completion only works with Davinci models
 
-    Examples:
+    ## Example:
         user_prompt: "Write a search queries to find {something} on the Internet"
         fields: [
             {"name": "query", "description": "Google search query", "type": "List[string]"},
@@ -96,6 +114,8 @@ async def structured_prompt_completion(variables: DF[Any], ctx: Context):
         You will see repeated index and values if some of the variables are lists and
         others are not. This is because the output is a cartesian product of all the
         variables.
+
+    -----
 
     Args:
         variables (DF[Any]): the variables to use in the prompts
