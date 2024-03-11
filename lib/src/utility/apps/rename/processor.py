@@ -2,11 +2,9 @@ from typing import Any
 
 from malevich.square import DF, Context, processor
 
-from .models import Rename
-
 
 @processor()
-def rename(df: DF[Any], context: Context[Rename]):
+def rename(df: DF[Any], context: Context):
     """Renames columns in a dataframe.
 
     ## Input:
@@ -26,9 +24,6 @@ def rename(df: DF[Any], context: Context[Rename]):
             'b': 'B',
             'c': 'C'
         }
-
-        - `old_column_name`: string, default "''".
-        Provides mapping of old column names to their new names. For example 'a': 'A'.
 
     ## Details:
         This processor renames columns in the dataframe based on provided mappings.
