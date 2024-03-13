@@ -5,14 +5,16 @@ Author: Leonid Zelenskiy
 
 import pandas as pd
 from malevich.square import DF, Context, processor, scheme
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from .linear import LinearExecutor
 
 
 @scheme()
 class LinearModel(BaseModel):
-    linear_api_key: str
+    linear_api_key: str = Field(
+        ..., description='Linear API Key'
+    )
 
 @scheme()
 class GetProjectInputSchema(BaseModel):
