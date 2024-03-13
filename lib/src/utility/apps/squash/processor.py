@@ -120,9 +120,9 @@ def squash_columns(df: DF[Any], context: Context[SquashColumns]):
         specified columns squashed into one column.
 
     ## Configuration:
-        - `columns`: list[str], default ['all'].
+        - `columns`: list[str], default None.
             The columns to squash. If not specified, all columns will be squashed.
-        - `result_column_name`: str, default 'concat'.
+        - `result_column_name`: str, default None.
             The name of the resulting column. If not specified, the default name is the concatenation of the column names.
         - `drop`: bool, default False.
             Whether to drop the original columns. If not specified, the default value is False.

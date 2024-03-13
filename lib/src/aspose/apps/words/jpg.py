@@ -22,8 +22,11 @@ def convert_pdf_to_jpg(files: DF[Filename], context: Context[ConvertPdfToJpg]):
         - `filename` (str): containing PDF files.
 
     ## Configuration:
-        - `write_contents`: bool.
-            If true, contents of the file will be produced in the output rather than just the path to the file.
+        - `start_page`: int, default 0.
+            From which page to start.
+
+        - `page_num`: int, default 0.
+            Number of pages to retrieve.
 
     ## Output:
         The same dataframe with columns:

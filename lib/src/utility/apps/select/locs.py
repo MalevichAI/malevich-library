@@ -1,8 +1,9 @@
-from .models import Locs
 from typing import Any
 
 import pandas as pd
 from malevich.square import DF, Context, processor
+
+from .models import Locs
 
 
 @processor(id='locs')
@@ -18,21 +19,21 @@ def locs(df: DF[Any], context: Context[Locs]):
     ## Configuration:
         The app configuration should contain at least one of the following fields:
 
-        - `column`: str.
+        - `column`: str, default None.
           The column to be extracted.
-        - `columns`: list[str].
+        - `columns`: list[str], default None.
           The columns to be extracted.
-        - `column_idx`: int.
+        - `column_idx`: int, default None.
             The column index to be extracted.
-        - `column_idxs`: list[int].
+        - `column_idxs`: list[int], default None.
             The column indexes to be extracted.
-        - `row`: int.
+        - `row`: int, default None.
             The row to be extracted.
-        - `rows`: list[int].
+        - `rows`: list[int], default None.
             The rows to be extracted.
-        - `row_idx`: int.
+        - `row_idx`: int, default None.
             The row index to be extracted.
-        - `row_idxs`: list[int].
+        - `row_idxs`: list[int], default None.
             The row indexes to be extracted.
 
         Multiple fields may be provided and in such case,

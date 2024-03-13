@@ -1,3 +1,5 @@
+from .models import MatchPattern
+
 """
 This script contains the processor code for the pattern matching functionality
 
@@ -25,7 +27,7 @@ def _find_all_matches(text: str,
 
 
 @processor(id=__PATTERN_MATCH_ID)
-def match_pattern(dataframe: DF, context: Context) -> pd.DataFrame:
+def match_pattern(dataframe: DF, context: Context[MatchPattern]) -> pd.DataFrame:
     """
     This processor finds all the fragments
     that match a certain pattern within each cell.
@@ -35,6 +37,12 @@ def match_pattern(dataframe: DF, context: Context) -> pd.DataFrame:
     ## Input:
 
         An arbitrary DataFrame
+
+    ## Configuration:
+        - `pattern`: str.
+        A regular expression pattern to match.
+        - `join_char`: str, default ';'.
+        A character to join the matches with.
 
     ## Output:
 

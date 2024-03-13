@@ -64,7 +64,7 @@ def detect(yolo_inputs: DF[YOLOInputs], context: Context[Detect]):
             A dictionary that maps class ids to class names.
         - `save_plots`: bool, default False.
             Whether to save the output images.
-        - `save_path`: str.
+        - `save_path`: str, default 'default'.
             The pattern for the path to the output images.
         - `batch_size`: int, default 1.
             The batch size.
@@ -195,7 +195,7 @@ def detect_raw(yolo_inputs: DF[YOLOInputs], context: Context[DetectRaw]):
             A dictionary that maps class ids to class names.
         - `save_plots`: bool, default False.
             Whether to save the output images.
-        - `save_path`: pattern.
+        - `save_path`: str, default 'default'.
             The pattern for the path to the output images.
         - `batch_size`: int, default 1.
             The batch size.

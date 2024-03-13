@@ -39,8 +39,8 @@ def summarize_text(text: DF[TextInput], context: Context[SummarizeText]):
 
     ## Configuration:
 
-        - `model`: str. default 'none'.
-            Name of the model to use in the pipeline
+        - `model`: str, default 'none'.
+            Name of the model to use in the pipeline.
 
     -----
 

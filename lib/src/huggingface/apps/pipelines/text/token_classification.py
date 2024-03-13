@@ -52,21 +52,21 @@ def token_classification(
 
     ## Configuration:
 
-        - `ignore_labels`: list.
+        - `ignore_labels`: list, default ["0"].
             List of labels to ignore (e.g. `["O"]`).
-        - `keep_text`: bool.
+        - `keep_text`: bool, default False.
             Whether to keep the input text in the output dataframe.
-        - `keep_sentence_index`: bool.
+        - `keep_sentence_index`: bool, default True.
             Whether to keep the sentence index in the output dataframe.
-        - `model`: str.
+        - `model`: str, default None.
             Model name (e.g. `dbmdz/bert-large-cased-finetuned-conll03-english`).
-        - `tokenizer`: str.
+        - `tokenizer`: str, default None.
             Tokenizer name (e.g. `bert-base-cased`).
-        - `device`: str.
+        - `device`: str, default 'cpu'.
             Device to run the model on (`cpu` or `gpu`).
-        - `batch_size`: int.
+        - `batch_size`: int, default 1.
             Batch size to use for inference.
-        - `aggregation_strategy`: str.
+        - `aggregation_strategy`: str, default 'none'.
             Aggregation strategy to use for multiple entities per token.
             See [Aggregation strategy](https://huggingface.co/docs/transformers/v4.36.1/en/main_classes/pipelines#transformers.TokenClassificationPipeline.aggregation_strategy)
 

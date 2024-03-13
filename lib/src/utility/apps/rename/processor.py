@@ -25,6 +25,9 @@ def rename(df: DF[Any], context: Context):
             'c': 'C'
         }
 
+
+        Provides mapping of old column names to their new names. For example 'a': 'A'.
+
     ## Details:
         This processor renames columns in the dataframe based on provided mappings.
         User needs to provide a dictionary in the configuration hat specifies old

@@ -24,9 +24,11 @@ def convert_pdf_to_markdown(
         - `filename` (str): containing PDF files.
 
     ## Configuration:
-        - `write_contents`: bool.
+        - `start_page`: int, default 0.
+            From which page to start.
 
-            If true, contents of the file will be produced in the output rather than just the path to the file.
+        - `page_num`: int, default 0.
+            Number of pages to retrieve.
 
     ## Output:
         The same dataframe with columns:

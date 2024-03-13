@@ -60,11 +60,11 @@ def classify_text(text: DF[TextInput], context: Context[ClassifyText]):
 
     ## Configuration:
 
-        - `model`: str. default "distilbert-base-uncased-finetuned-sst-2-english".
-            Name of the model to use in the pipeline
-        - `top_k`: int. default 1.
-            Number of top labels to return
-        - `functions_to_apply`: str. default "default".
+        - `model`: str, default "distilbert-base-uncased-finetuned-sst-2-english".
+            Name of the model to use in the pipeline.
+        - `top_k`: int, default 1.
+            Number of top labels to return.
+        - `functions_to_apply`: str, default "default".
             The function to apply to the model outputs in order to retrieve the scores.
 
             Accepts four different values:

@@ -3,22 +3,21 @@
 #   timestamp: 2024-03-06T12:55:54+00:00
 
 from __future__ import annotations
+
+from typing import Any, Optional
+
 from malevich.square import scheme
-
-from typing import Any, Dict, List, Optional
-
 from pydantic import BaseModel, Field
-
 
 scheme()
 class ScrapeGoogleSearch(BaseModel):
-    allowed_domains: Optional[List[str]] = Field(
+    allowed_domains: Optional[list[str]] = Field(
         None, description='A list of allowed domains to scrape'
     )
     max_depth: Optional[int] = Field(
         0, description='The maximum depth to traverse the web'
     )
-    spider_cfg: Optional[Dict[str, Any]] = Field(
+    spider_cfg: Optional[dict[str, Any]] = Field(
         {}, description='A dictionary of configuration options for the spider'
     )
     max_results: Optional[int] = Field(

@@ -1,5 +1,4 @@
 # Author: Leonid Zelenskiy <pak55256@gmail.com>
-
 from itertools import product
 from typing import Any
 

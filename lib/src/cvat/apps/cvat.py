@@ -63,11 +63,8 @@ def upload_images_to_task(df: DF[TaskImages], context: Context[UploadImagesToTas
         - `cvat_password`: str.
             Account user password on CVAT.
 
-        - `cvat_org`: str.
+        - `cvat_org`: str, default ''.
             CVAT organization. By default uses personal workspace.
-
-        - `cvat_url`: str.
-			URL of your CVAT server.
 
         - `project_id`: str.
 			ID of CVAT project.
@@ -87,8 +84,6 @@ def upload_images_to_task(df: DF[TaskImages], context: Context[UploadImagesToTas
         - `bucket_name`: str, default "cvat".
 			Name of S3 bucket.
 
-        - `cloud_id`: int.
-            ID of cloud storage.
 
     ## Output:
 

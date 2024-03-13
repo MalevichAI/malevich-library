@@ -8,6 +8,7 @@ from pydantic import BaseModel
 
 from .models import Download
 
+
 @scheme()
 class Links(BaseModel):
     link: str
@@ -15,7 +16,7 @@ class Links(BaseModel):
 
 
 @processor()
-def download(links: DF[Links], context: Context):
+def download(links: DF[Links], context: Context[Download]):
     """Download files from the internet
 
     ## Input:

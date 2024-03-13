@@ -49,7 +49,7 @@ def assert_regex(df: DF, ctx: Context[AssertRegex]):
         - `errors` (str): containing the errors if any.
 
     ## Configuration:
-        - `rules`: list[dict].
+        - `rules`: list[dict], default [].
             The rules to apply.
         - `raise_on_error`: bool, default False.
             Whether to raise an exception if an error is found.

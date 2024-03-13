@@ -32,7 +32,7 @@ def textract_tables(files: DF[TextracTable], context: Context[TextractTables]):
             Your AWS access key ID.
         - `aws_secret_access_key`: str.
             Your AWS secret access key.
-        - `write_contents`: bool.
+        - `write_contents`: bool, default False.
             Whether to write the contents of the table to the output.
 
     -----
