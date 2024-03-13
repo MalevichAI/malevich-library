@@ -1,15 +1,10 @@
 from malevich.square import Context, init
-from pydantic import BaseModel
 
 from .linear import LinearExecutor
 
 
-class LinearModel(BaseModel):
-    linear_api_key: str
-
-
 @init()
-def init_linear_executor(context: Context[LinearModel]):
+def init_linear_executor(context: Context):
     if not context.app_cfg.get('linear_api_key'):
         raise RuntimeError('Please, provide a Linear API Key')
     headers = {

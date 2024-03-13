@@ -11,6 +11,10 @@ from .linear import LinearExecutor
 
 
 @scheme()
+class LinearModel(BaseModel):
+    linear_api_key: str
+
+@scheme()
 class GetProjectInputSchema(BaseModel):
     project_id: str
 
@@ -37,7 +41,7 @@ class GetObjects(BaseModel):
 
 
 @processor()
-def get_project(df: DF[GetProjectInputSchema], context: Context):
+def get_project(df: DF[GetProjectInputSchema], context: Context[LinearModel]):
     """Get project by identifier
 
     ## Input:
@@ -50,6 +54,8 @@ def get_project(df: DF[GetProjectInputSchema], context: Context):
 
         - `project` (str): containing project name.
 
+    ## Configuraion:
+        The only thing you need is Linear API Key
     -----
 
     Args:
@@ -68,7 +74,7 @@ def get_project(df: DF[GetProjectInputSchema], context: Context):
 
 
 @processor()
-def create_issue(df: DF[CreateIssueSchema], context: Context):
+def create_issue(df: DF[CreateIssueSchema], context: Context[LinearModel]):
     """
     Create issue and assign to user
 
@@ -87,6 +93,8 @@ def create_issue(df: DF[CreateIssueSchema], context: Context):
 
         - `issue_id` (str): issue id.
 
+    ## Configuraion:
+        The only thing you need is Linear API Key
     -----
 
     Args:
@@ -114,7 +122,7 @@ def create_issue(df: DF[CreateIssueSchema], context: Context):
 
 
 @processor()
-def assign_user(df: DF[AssignUserSchema], context: Context):
+def assign_user(df: DF[AssignUserSchema], context: Context[LinearModel]):
     """
     Assign user to the issue
 
@@ -131,6 +139,8 @@ def assign_user(df: DF[AssignUserSchema], context: Context):
         - `email` (str): Assignee email
         - `success` (str): Was it success or not
 
+    ## Configuraion:
+        The only thing you need is Linear API Key
     -----
 
     Args:
@@ -157,7 +167,7 @@ def assign_user(df: DF[AssignUserSchema], context: Context):
 
 
 @processor()
-def get_issues(df: DF[GetObjects], context: Context):
+def get_issues(df: DF[GetObjects], context: Context[LinearModel]):
     """
     Get all issues in the team
 
@@ -178,6 +188,8 @@ def get_issues(df: DF[GetObjects], context: Context):
         - `assignee_name` (str): Assignee name
         - `assignee_email` (str): Assignee email
 
+    ## Configuraion:
+        The only thing you need is Linear API Key
     -----
 
     Args:
@@ -240,6 +252,8 @@ def get_projects(df: DF[GetObjects], context: Context):
         - `member_name` (str): Name of project member
         - `member_email` (str): Email of project member
 
+    ## Configuraion:
+        The only thing you need is Linear API Key
     -----
 
     Args:
@@ -296,6 +310,8 @@ def get_users(df: DF[GetObjects], context: Context):
             - `name` (str): Name of user
             - `email` (str): Email of user
 
+        ## Configuraion:
+        The only thing you need is Linear API Key
         -----
 
         Args:
