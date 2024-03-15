@@ -1,8 +1,6 @@
 from collections import defaultdict
-from typing import Optional
 
 import pandas as pd
-import pydantic
 from malevich.square import DF, Context, processor, scheme
 from transformers import TokenClassificationPipeline, pipeline
 

@@ -1,5 +1,4 @@
 import pandas as pd
-import pydantic
 import torch
 from malevich.square import DF, Context, processor, scheme
 from transformers import pipeline

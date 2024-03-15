@@ -1,7 +1,6 @@
 import uuid
 
 import pandas as pd
-import pydantic
 import torch
 from malevich.square import DF, Context, processor, scheme
 from transformers import Conversation, pipeline
@@ -62,7 +61,7 @@ def continue_conversation(
 
     Returns:
         Collection with messages and responses
-    """
+    """  # noqa: E501
 
     p = pipeline(
         # https://huggingface.co/docs/transformers/v4.37.2/en/main_classes/pipelines#transformers.Conversation
