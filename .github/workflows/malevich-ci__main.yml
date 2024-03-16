@@ -62,7 +62,7 @@ jobs:
     
     - name: Build, Test and Push
       run: |
-        if [[ ${{vars.MAIN_CMT}} !=  '' ]];
+        if [[ ${{vars.MAIN_CMT}} !=  '' ]] && [[ $(git log ${{vars.MAIN_CMT}}) ]];
         then
           dirs=$(git log --name-only ${{vars.MAIN_CMT}}.. | grep '/' | cut -d '/' -f3 | sort -u)
         else
