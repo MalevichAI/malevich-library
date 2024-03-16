@@ -1,8 +1,8 @@
-from malevich.square import DF, processor
+from malevich.square import processor
 
 
 @processor()
-def pass_through(df: DF):
+def pass_through(df):
     """
     Passes df to the next app
 
