@@ -1,7 +1,6 @@
 import uuid
 
 import pandas as pd
-import pydantic
 import torch
 from malevich.square import DF, Context, processor, scheme
 from transformers import Conversation, pipeline
@@ -16,18 +15,6 @@ class DialogMessageInput:
     role: str
     """An identifier of the role of the message. It can be "user" or "assistant"."""
     # dialog_id: Optional[str] = None
-
-
-class ConversationalPipelineConfig(pydantic.BaseModel):
-    model: str = "facebook/blenderbot-400M-distill"
-    """Name of the model to use in the pipeline"""
-
-    min_length_for_response: int = 32
-    """(int, optional, defaults to 32) — The minimum length (in number of tokens) for a response."""  # noqa: E501
-
-    minimum_tokens: int = 10
-    """(int, optional, defaults to 10) — The minimum length of tokens to leave for a response."""  # noqa: E501
-
 
 @processor()
 def continue_conversation(
@@ -75,21 +62,10 @@ def continue_conversation(
     Returns:
         Collection with messages and responses
     """  # noqa: E501
-    try:
-        config = ConversationalPipelineConfig(**context.app_cfg)
-    except pydantic.ValidationError as err:
-        context.logger.error(
-            "Got an error while trying to get the config. "
-            '. '.join([
-                f"Field `{err['loc'][0]}` is not correct: {err['msg']}"
-                for err in err.errors()
-            ])
-        )
-        raise
 
     p = pipeline(
         # https://huggingface.co/docs/transformers/v4.37.2/en/main_classes/pipelines#transformers.Conversation
-        model=config.model,
+        model=context.app_cfg.model,
         task='conversational',
         device='cuda' if torch.cuda.is_available() else 'cpu',
     )

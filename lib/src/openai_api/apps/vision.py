@@ -11,7 +11,9 @@ from .models import CompletionWithVision
 
 
 @processor()
-async def completion_with_vision(variables: DF[Any], ctx: Context[CompletionWithVision]):
+async def completion_with_vision(
+    variables: DF[Any], ctx: Context[CompletionWithVision]
+):
     """Use Language Model with Vision feature from OpenAI
 
     Completion with Vision enables you to generate text

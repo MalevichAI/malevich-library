@@ -1,3 +1,8 @@
+import re
+
+import pandas as pd
+from malevich.square import DF, Context, processor
+
 from .models import MatchPattern
 
 """
@@ -6,11 +11,6 @@ This script contains the processor code for the pattern matching functionality
 This is an implementation of the 1.2 proposal as explained in the following document:
 https://www.craft.me/s/NmXjF6pbB5m0BG (might require logging in with email...)
 """
-
-import re
-
-import pandas as pd
-from malevich.square import DF, Context, processor
 
 __PATTERN_MATCH_ID = 'pattern_match_processor'
 __MP_FIELDS = ['pattern', 'join_char']
