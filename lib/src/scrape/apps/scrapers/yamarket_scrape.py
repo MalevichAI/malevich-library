@@ -1,8 +1,9 @@
+import time
 import pandas as pd
+import scrapy
 from fake_useragent import UserAgent
 from malevich.square import DF, Context, processor, scheme
 from pydantic import BaseModel
-from scrapy import Selector
 from selenium import webdriver
 
 
@@ -12,9 +13,10 @@ class YaMarket(BaseModel):
 
 
 class Response:
-    def __init__(self, text, url) -> None:
+    def __init__(self, text, url, captcha=False) -> None:
         self.text = text
         self.url = url
+        self.captcha = captcha
 
 
 def init_driver():
@@ -24,8 +26,34 @@ def init_driver():
     options.add_argument("--ignore-certificate-errors")
     options.add_argument("--headless")
     options.add_argument("--disable-blink-features=AutomationControlled")
-    options.add_argument(f"--user-agent={UserAgent(browsers=['chrome']).random}")  # noqa: E501
+    options.add_argument(f"--user-agent={UserAgent().random}")  # noqa: E501
     return webdriver.Chrome(options)
+
+def get_page(link):
+    driver = init_driver()
+    driver.delete_all_cookies()
+    successful = False
+    captcha = False
+    time_out = 5
+    for _ in range(5):
+        driver.get(link)
+        capcha_sel = scrapy.Selector(Response(driver.page_source, link))
+        capcha_tag = capcha_sel.xpath(
+            "//title[@text() = 'Ой, Капча!']"
+        ).get()
+        captcha = False
+        if capcha_tag is not None:
+            driver.execute_script("localStorage = {}; sessionStorage = {};")
+            driver.delete_all_cookies()
+            captcha = True
+            time_out += 5
+        else:
+            successful = True
+            break
+    if not successful:
+        driver.delete_all_cookies()
+        return Response(driver.page_source, link, captcha=captcha)
+    return Response(driver.page_source, link)
 
 
 @processor()
@@ -42,15 +70,16 @@ def scrape_yamarket(df: DF[YaMarket], context: Context):
 
     Returns:
     """
-    driver = init_driver()
     text = []
     props = []
     images = []
     errors = []
     for link in df["link"].to_list():
-        driver.get(link)
-        print(driver.page_source)
-        sel = Selector(Response(driver.page_source, link))
+        response = get_page(link)
+        print(response.text)
+        if response.captcha:
+            errors.append([link, "Captcha"])
+        sel = scrapy.Selector(response)
         if sel.xpath("//header[text() = 'Тут ничего нет']").get() is not None:
             errors.append([link, "404"])
             continue
