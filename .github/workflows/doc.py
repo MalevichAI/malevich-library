@@ -1,6 +1,6 @@
 import json
 
-from malevich.commands.dev import get_processor_docstring, list_procs, parse_docstring
+from malevich._cli.dev import get_processor_docstring, list_procs, parse_docstring
 
 data = json.loads(list_procs('lib/src/'))
 
