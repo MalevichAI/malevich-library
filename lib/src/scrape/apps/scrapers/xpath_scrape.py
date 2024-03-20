@@ -1,3 +1,4 @@
+import json
 import os
 from itertools import islice
 
@@ -260,13 +261,29 @@ def scrape_by_selectors(
             if max_results == 0:
                 max_results = len(df)
 
-            results_ = [item['text'] for item in islice(df, max_results)]
-            if context.app_cfg.get('squash_results', False) \
-                or context.app_cfg.get('links_are_independent', False):
-                results.append(
-                    context.app_cfg.get('squash_delimiter',
-                                        '\n').join(results_)
-                )
-            else:
-                results.extend(results_)
-    return pd.DataFrame({'result': results})
+            # results_ = [item['text'] for item in islice(df, max_results)]
+            columns = []
+            for item in islice(df, max_results):
+                data = json.loads(item['text'])
+                result_ = []
+                columns = []
+                for key, val in data.items():
+                    columns.append(key)
+                    if isinstance(val, list):
+                        string = '\n'.join(val)
+                        print(string)
+                        print(string.strip(""))
+                        result_.append(string.strip("\\n \""))
+                    else:
+                        result_.append(val)
+                results.append(result_)
+
+            # if context.app_cfg.get('squash_results', False) \
+            #     or context.app_cfg.get('links_are_independent', False):
+            #     results.append(
+            #         context.app_cfg.get('squash_delimiter',
+            #                             '\n').join(results_)
+            #     )
+            # else:
+            #     results.extend(results_)
+    return pd.DataFrame(results, columns=columns)
