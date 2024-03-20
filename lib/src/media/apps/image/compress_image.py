@@ -5,6 +5,8 @@ from malevich.square import APP_DIR, DF, Context, processor, scheme
 from PIL import Image
 from pydantic import BaseModel
 
+from .models import Resize
+
 
 @scheme()
 class ImageSchema(BaseModel):
@@ -12,7 +14,7 @@ class ImageSchema(BaseModel):
 
 
 @processor()
-def resize(df: DF[ImageSchema], context: Context):
+def resize(df: DF[ImageSchema], context: Context[Resize]):
     """Resizes images and reformats them
 
     ## Input:

@@ -3,9 +3,11 @@ from typing import Any
 
 from malevich.square import DFS, Context, M, processor
 
+from .models import Subset
+
 
 @processor(id='subset')
-def subset(dfs: DFS[M[Any]], context: Context):
+def subset(dfs: DFS[M[Any]], context: Context[Subset]):
     r"""Select a subset of dataframes from the list of dataframes.
 
     ## Input:
@@ -15,7 +17,7 @@ def subset(dfs: DFS[M[Any]], context: Context):
         A subset of dataframes or a single dataframe.
 
     ## Configuration:
-        - `expr`: str.
+        - `expr`: str, default None.
             A comma-separated list of integers or slices, e.g. `0,1:3,5:7,6,9:10`. The first dataframe has index 0.
 
     ## Details:

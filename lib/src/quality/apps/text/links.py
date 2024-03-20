@@ -3,13 +3,15 @@ import requests
 from malevich.square import DF, Context, processor, scheme
 from pydantic import BaseModel
 
+from .models import AssertLinks
+
 
 @scheme()
 class Links(BaseModel):
     link: str
 
 @processor()
-def assert_links(df: DF[Links], context: Context) -> pd.DataFrame:
+def assert_links(df: DF[Links], context: Context[AssertLinks]) -> pd.DataFrame:
     """
         Check if the links are valid (do not return error status codes)
 

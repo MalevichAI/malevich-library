@@ -1,6 +1,6 @@
 from typing import Any
 
-from malevich.square import DF, processor
+from malevich.square import DF
 
 
 #@processor()

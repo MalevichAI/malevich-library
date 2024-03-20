@@ -5,6 +5,8 @@ import pandas as pd
 from malevich.square import APP_DIR, DF, Context, processor, scheme
 from pydantic import BaseModel
 
+from .models import SplitOnFrames
+
 
 @scheme()
 class Videos(BaseModel):
@@ -12,7 +14,7 @@ class Videos(BaseModel):
 
 
 @processor()
-def split_on_frames(videos: DF['Videos'], context: Context):
+def split_on_frames(videos: DF['Videos'], context: Context[SplitOnFrames]):
     """Splits videos on frames
 
     ## Input:

@@ -4,9 +4,11 @@ import shutil
 
 from malevich.square import APP_DIR, DF, Context, processor
 
+from .models import GetLinksToFiles
+
 
 @processor()
-def get_links_to_files(df: DF, ctx: Context):
+def get_links_to_files(df: DF, ctx: Context[GetLinksToFiles]):
     """Get links to files produced during the workflow execution.
 
     ## Input:

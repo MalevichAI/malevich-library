@@ -1,14 +1,16 @@
+import re
+
+import pandas as pd
+from malevich.square import DF, Context, processor
+
+from .models import MatchPattern
+
 """
 This script contains the processor code for the pattern matching functionality
 
 This is an implementation of the 1.2 proposal as explained in the following document:
 https://www.craft.me/s/NmXjF6pbB5m0BG (might require logging in with email...)
 """
-
-import re
-
-import pandas as pd
-from malevich.square import DF, Context, processor
 
 __PATTERN_MATCH_ID = 'pattern_match_processor'
 __MP_FIELDS = ['pattern', 'join_char']
@@ -25,7 +27,7 @@ def _find_all_matches(text: str,
 
 
 @processor(id=__PATTERN_MATCH_ID)
-def match_pattern(dataframe: DF, context: Context) -> pd.DataFrame:
+def match_pattern(dataframe: DF, context: Context[MatchPattern]) -> pd.DataFrame:
     """
     This processor finds all the fragments
     that match a certain pattern within each cell.
@@ -35,6 +37,12 @@ def match_pattern(dataframe: DF, context: Context) -> pd.DataFrame:
     ## Input:
 
         An arbitrary DataFrame
+
+    ## Configuration:
+        - `pattern`: str.
+        A regular expression pattern to match.
+        - `join_char`: str, default ';'.
+        A character to join the matches with.
 
     ## Output:
 

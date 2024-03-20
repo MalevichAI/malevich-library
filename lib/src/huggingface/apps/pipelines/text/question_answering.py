@@ -1,8 +1,9 @@
 import pandas as pd
-import pydantic
 import torch
 from malevich.square import DF, Context, processor, scheme
 from transformers import Conversation, pipeline
+
+from .models import AnswerQuestions
 
 
 @scheme()
@@ -12,13 +13,9 @@ class QuestionInput:
     context: str
     """A context for the question"""
 
-class ConversationalPipelineConfig(pydantic.BaseModel):
-    model: str = "deepset/roberta-base-squad2"
-    """Name of the model to use in the pipeline"""
-
 
 @processor()
-def answer_questions(questions: DF[QuestionInput], context: Context):
+def answer_questions(questions: DF[QuestionInput], context: Context[AnswerQuestions]):
     """
     Answers questions using HuggingFace Transformers.
 
@@ -44,8 +41,8 @@ def answer_questions(questions: DF[QuestionInput], context: Context):
 
     ## Configuration:
 
-        - `model`: str. default "deepset/roberta-base-squad2".
-            Name of the model to use in the pipeline
+        - `model`: str, default "deepset/roberta-base-squad2".
+            Name of the model to use in the pipeline.
 
     -----
 
@@ -57,20 +54,9 @@ def answer_questions(questions: DF[QuestionInput], context: Context):
     Returns:
         Collection with answers, scores and indices of the answers
     """
-    try:
-        config = ConversationalPipelineConfig(**context.app_cfg)
-    except pydantic.ValidationError as err:
-        context.logger.error(
-            "Got an error while trying to get the config. "
-            '. '.join([
-                f"Field `{err['loc'][0]}` is not correct: {err['msg']}"
-                for err in err.errors()
-            ])
-        )
-        raise
 
     p = pipeline(
-        model=config.model,
+        model=context.app_cfg.model,
         task='question-answering',
         device='cuda' if torch.cuda.is_available() else 'cpu',
     )

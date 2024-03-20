@@ -7,6 +7,8 @@ from cvat_sdk.api_client import ApiClient, Configuration, models
 from malevich.square import DF, Context, processor, scheme
 from pydantic import BaseModel
 
+from .models import UploadImagesToTask
+
 
 @scheme()
 class TaskImages(BaseModel):
@@ -39,9 +41,9 @@ def upload_to_s3(
 
 
 @processor()
-def upload_images_to_task(df: DF[TaskImages], context: Context):
+def upload_images_to_task(df: DF[TaskImages], context: Context[UploadImagesToTask]):
     """
-        Creates task (if does not exists) and upload images to the task.
+    Creates task (if does not exists) and upload images to the task.
 
     ## Input:
 
@@ -61,11 +63,8 @@ def upload_images_to_task(df: DF[TaskImages], context: Context):
         - `cvat_password`: str.
             Account user password on CVAT.
 
-        - `cvat_org`: str.
+        - `cvat_org`: str, default ''.
             CVAT organization. By default uses personal workspace.
-
-        - `cvat_url`: str.
-			URL of your CVAT server.
 
         - `project_id`: str.
 			ID of CVAT project.
@@ -79,14 +78,12 @@ def upload_images_to_task(df: DF[TaskImages], context: Context):
         - `aws_secret_access_key`: str.
 			AWS credentials.
 
-        - `endpoint_url`: str, default is AWS S3 endpoint.
+        - `endpoint_url`: str, default 'AWS S3 endpoint'.
             URL endpoint of the cloud storage (S3).
 
         - `bucket_name`: str, default "cvat".
 			Name of S3 bucket.
 
-        - `cloud_id`: int.
-            ID of cloud storage.
 
     ## Output:
 
@@ -100,9 +97,19 @@ def upload_images_to_task(df: DF[TaskImages], context: Context):
             TaskImages: DF[TaskImages]:
                 A DataFrame with image and corresponding task
 
-        Returns:
-            DF[UploadResult]:
-                A DataFrame with status code of each image upload
+        A dataframe with three columns:
+            - task (string): Name of the task where image should be uploaded
+            - image (string): Name of the image file
+            - status (string): Upload Status Code
+    -----
+
+    Args:
+        TaskImages: DF[TaskImages]:
+            A DataFrame with image and corresponding task
+
+    Returns:
+        DF[UploadResult]:
+            A DataFrame with status code of each image upload
     """  # noqa: E501
     login = context.app_cfg.get('cvat_user', None)
     password = context.app_cfg.get('cvat_password', None)

@@ -5,11 +5,13 @@ import pandas as pd
 from apps.scrape_web import ScrapeLinks, run_spider
 from malevich.square import DF, Context, processor
 
+from .models import ScrapeText
+
 
 @processor()
 def scrape_text(
     scrape_links: DF[ScrapeLinks],
-    context: Context
+    context: Context[ScrapeText]
     ):
     """
         The text spider extracts textual content from web pages. It

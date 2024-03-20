@@ -1,8 +1,10 @@
 from malevich.square import DF, Any, Context, processor
 
+from .models import AddColumn
+
 
 @processor()
-def add_column(df: DF[Any], context: Context):
+def add_column(df: DF[Any], context: Context[AddColumn]):
     """Inserts a new column into a dataframe.
 
     ## Input:

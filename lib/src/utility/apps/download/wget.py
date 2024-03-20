@@ -6,6 +6,8 @@ import wget
 from malevich.square import APP_DIR, DF, Context, processor, scheme
 from pydantic import BaseModel
 
+from .models import Download
+
 
 @scheme()
 class Links(BaseModel):
@@ -14,7 +16,7 @@ class Links(BaseModel):
 
 
 @processor()
-def download(links: DF[Links], context: Context):
+def download(links: DF[Links], context: Context[Download]):
     """Download files from the internet
 
     ## Input:

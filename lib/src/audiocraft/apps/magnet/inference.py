@@ -8,6 +8,8 @@ import replicate
 import wget
 from malevich.square import APP_DIR, DF, Context, processor, scheme
 
+from .models import GenerateAudio
+
 
 @scheme()
 class Prompt:
@@ -16,14 +18,9 @@ class Prompt:
     """
     text: str
 
-# @init()
-# def init_magnet(context: Context):
-#     model_name = context.app_cfg.get('model_name', 'facebook/audio-magnet-small')
-#     context.common = MAGNeT.get_pretrained(model_name)
-
 
 @processor()
-def generate_audio(prompt: DF[Prompt], context: Context) -> str:
+def generate_audio(prompt: DF[Prompt], context: Context[GenerateAudio]) -> str:
     """
     Generate audio from text.
 
@@ -42,7 +39,7 @@ def generate_audio(prompt: DF[Prompt], context: Context) -> str:
 
             [Replicate](https://replicate.com/) API key.
 
-        - `save_prefix`: str.
+        - `save_prefix`: str, default 'default'.
 
             Prefix path to save the audio in.
 

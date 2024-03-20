@@ -1,8 +1,9 @@
 import pandas as pd
-import pydantic
 import torch
 from malevich.square import DF, Context, processor, scheme
 from transformers import pipeline
+
+from .models import SummarizeText
 
 
 @scheme()
@@ -10,15 +11,8 @@ class TextInput:
     text: str
     """Text to classify"""
 
-
-class TextSummarizationConfig(pydantic.BaseModel):
-    model: str | None= None
-    """Name of the model to use in the pipeline"""
-
-
-
 @processor()
-def summarize_text(text: DF[TextInput], context: Context):
+def summarize_text(text: DF[TextInput], context: Context[SummarizeText]):
     """
     Summarize text with HuggingFace Transformers.
 
@@ -37,8 +31,8 @@ def summarize_text(text: DF[TextInput], context: Context):
 
     ## Configuration:
 
-        - `model`: str. default 'none'.
-            Name of the model to use in the pipeline
+        - `model`: str, default 'none'.
+            Name of the model to use in the pipeline.
 
     -----
 
@@ -50,27 +44,17 @@ def summarize_text(text: DF[TextInput], context: Context):
     Returns:
         Collection with summaries and the original texts
     """  # noqa: E501
-    try:
-        config = TextSummarizationConfig(**context.app_cfg)
-    except pydantic.ValidationError as err:
-        context.logger.error(
-            "Got an error while trying to get the config. "
-            '. '.join([
-                f"Field `{err['loc'][0]}` is not correct: {err['msg']}"
-                for err in err.errors()
-            ])
-        )
-        raise
+
     try:
         p = pipeline(
-            model=config.model,
+            model=context.app_cfg.model,
             task='summarization',
             device='cuda' if torch.cuda.is_available() else 'cpu',
         )
     except Exception:
         context.logger.error(
             "Got an error while trying to create the pipeline. "
-            f"Probably the model name `{config.model }`is incorrect "
+            f"Probably the model name `{context.app_cfg.model }`is incorrect "
             "or does not support text summarization."
         )
         raise

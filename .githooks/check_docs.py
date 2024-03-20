@@ -1,13 +1,12 @@
 import json
 import os
 from subprocess import (
-    DEVNULL,
     PIPE,
-    CalledProcessError,
     Popen,
-    check_call,
     check_output,
 )
+
+from malevich.commands.dev import get_processor_docstring, list_procs, parse_docstring
 
 print("===== Malevich Git Pre-commit Hook =======")
 
@@ -27,9 +26,7 @@ for file in files:
     if file.endswith(".py"):
         d = os.path.dirname(os.path.join("./", file))
         results.append(
-                check_output(
-                    ["malevich", "dev", "list-procs", d]
-                ).decode()
+                list_procs(path=d, out=None)
         )
 if len(results) == 0:
     print("No modified procs to check. Exiting...")
@@ -48,15 +45,11 @@ for result in results:
 errors = []
 
 for proc in procs:
-    doc = check_output(
-        ["malevich", "dev" ,"get-doc", proc['name'], proc["path"]]
-    ).decode().strip()
+    print(f"Checking {proc['name']}...")
+    doc = get_processor_docstring(proc['name'], proc['path'])
     try:
-        check_call(
-            ["malevich", "dev" ,"parse-doc", f"\"{doc}\""],
-            stderr=DEVNULL,
-        )
-    except CalledProcessError:
+        parse_docstring(doc)
+    except Exception:
         errors.append(proc['name'])
 
 if len(errors) != 0:

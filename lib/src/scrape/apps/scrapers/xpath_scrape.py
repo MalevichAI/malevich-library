@@ -5,11 +5,13 @@ import pandas as pd
 from apps.scrape_web import ScrapeLinks, run_spider
 from malevich.square import DF, Context, processor
 
+from .models import ScrapeBySelectors
+
 
 @processor()
 def scrape_by_selectors(
     scrape_links: DF[ScrapeLinks],
-    context: Context
+    context: Context[ScrapeBySelectors]
     ):
     """
     The xPath spider extracts links from web pages using xPath (or CSS) selectors.

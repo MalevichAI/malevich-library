@@ -5,13 +5,15 @@ import pandas as pd
 from malevich.square import APP_DIR, DF, Context, processor, scheme
 from pydantic import BaseModel
 
+from .models import TextractTables
+
 
 @scheme()
 class TextracTable(BaseModel):
     filename: str
 
 @processor()
-def textract_tables(files: DF[TextracTable], context: Context):
+def textract_tables(files: DF[TextracTable], context: Context[TextractTables]):
     """Extracts tables from PDF files using AWS Textract.
 
     ## Input:
@@ -30,7 +32,7 @@ def textract_tables(files: DF[TextracTable], context: Context):
             Your AWS access key ID.
         - `aws_secret_access_key`: str.
             Your AWS secret access key.
-        - `write_contents`: bool.
+        - `write_contents`: bool, default False.
             Whether to write the contents of the table to the output.
 
     -----

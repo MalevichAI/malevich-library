@@ -5,10 +5,11 @@ import pandas as pd
 from malevich.square import DF, Context, processor
 
 from ..lib.chat import exec_chat
+from .models import PromptCompletion
 
 
 @processor()
-async def prompt_completion(variables: DF[Any], ctx: Context):
+async def prompt_completion(variables: DF[Any], ctx: Context[PromptCompletion]):
     """Use Chat Completions feature from OpenAI
 
     Chat completions enable you to chat with OpenAI

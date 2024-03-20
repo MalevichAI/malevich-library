@@ -1,16 +1,17 @@
 # Author: Leonid Zelenskiy <pak55256@gmail.com>
-
 from itertools import product
 from typing import Any
 
 import pandas as pd
 from malevich.square import DF, Context, processor
 
+from .models import Unwrap
+
 
 @processor()
 def unwrap(
     df: DF[Any],
-    context: Context
+    context: Context[Unwrap]
 ):
     """Unwrap columns with multiple values into multiple rows.
 

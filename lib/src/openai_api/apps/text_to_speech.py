@@ -7,10 +7,11 @@ import pandas as pd
 from malevich.square import APP_DIR, DF, Context, processor
 
 from ..lib.tts import exec_tts
+from .models import TextToSpeech
 
 
 @processor()
-async def text_to_speech(variables: DF[Any], ctx: Context):
+async def text_to_speech(variables: DF[Any], ctx: Context[TextToSpeech]):
     """Use Text-to-Speech feature from OpenAI
 
     Produce quality audio from text using OpenAI API
@@ -38,7 +39,7 @@ async def text_to_speech(variables: DF[Any], ctx: Context):
         - `model`: str, default 'tts-1'.
             The model to use.
         - `voice`: str, default 'alloy'.
-            The voice to use. One of 'alloy', 'echo', 'fable', 'onyx', 'nova', and 'shimmer'
+            The voice to use. One of 'alloy', 'echo', 'fable', 'onyx', 'nova', and 'shimmer'.
 
     -----
 

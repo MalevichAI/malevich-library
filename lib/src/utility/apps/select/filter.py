@@ -1,8 +1,10 @@
 from malevich.square import DF, Any, Context, processor
 
+from .models import Filter
+
 
 @processor()
-def filter(df: DF[Any], context: Context):
+def filter(df: DF[Any], context: Context[Filter]):
     """Filters rows by a number of conditions
 
     ## Input:
@@ -13,15 +15,17 @@ def filter(df: DF[Any], context: Context):
 
     ## Configuration:
 
-        A single condition is a dictionary with the following keys:
+        - `conditions`: list[dict], default [].
+            A list of conditions containing dictionaries.
+        A list of conditions containing dictionaries with the following keys:
 
-        - `column`: str.
+        `column`: str.
             The column to filter on.
-        - `operation`: str.
+        `operation`: str.
             The operation to perform.
-        - `value`: any.
+        `value`: any.
             The value to filter on.
-        - `type`: str.
+        `type`: str.
             The type of the value to filter on (optional).
 
     ## Example:

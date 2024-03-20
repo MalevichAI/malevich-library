@@ -8,10 +8,11 @@ import pandas as pd
 from malevich.square import DF, Context, processor
 
 from ..lib.whisper import exec_whisper
+from .models import SpeechToText
 
 
 @processor()
-async def speech_to_text(variables: DF[Any], ctx: Context):
+async def speech_to_text(variables: DF[Any], ctx: Context[SpeechToText]):
     """Use Speech-to-Text feature from OpenAI
 
     Transcribe audio to text using OpenAI API

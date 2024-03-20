@@ -1,26 +1,16 @@
-import argparse
 import json
-from subprocess import DEVNULL, CalledProcessError, check_call, check_output
 
-parser = argparse.ArgumentParser()
-parser.add_argument('--procs')
+from malevich.commands.dev import get_processor_docstring, list_procs, parse_docstring
 
-args = parser.parse_args()
-
-data = json.loads(args.procs)
+data = json.loads(list_procs('lib/src/'))
 
 errors = []
 for d in data:
-    doc = check_output(
-        ["malevich", "dev", "get-doc", d['name'], d['path']]
-    ).decode().strip()
-
+    print(f"Checking {d['name']} ...")
+    doc = get_processor_docstring(d['name'], d['path'])
     try:
-        check_call(
-            ["malevich", "dev", "parse-doc", doc],
-            stderr=DEVNULL
-        )
-    except CalledProcessError:
+        parse_docstring(doc)
+    except Exception:
         errors.append(d['name'])
 
 if len(errors) != 0:

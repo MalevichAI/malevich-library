@@ -5,6 +5,8 @@ import pandas as pd
 from malevich.square import DF, Context, processor
 from pydantic import BaseModel, ValidationError
 
+from .models import AssertRegex
+
 
 class Index(BaseModel):
     start: Optional[Union[int, float]] = None
@@ -36,7 +38,7 @@ def _error_message(
 
 
 @processor()
-def assert_regex(df: DF, ctx: Context):
+def assert_regex(df: DF, ctx: Context[AssertRegex]):
     """Asserts that the values in a dataframe match a regex.
 
     ## Input:
@@ -47,7 +49,7 @@ def assert_regex(df: DF, ctx: Context):
         - `errors` (str): containing the errors if any.
 
     ## Configuration:
-        - `rules`: list[dict].
+        - `rules`: list[dict], default [].
             The rules to apply.
         - `raise_on_error`: bool, default False.
             Whether to raise an exception if an error is found.

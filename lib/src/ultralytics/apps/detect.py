@@ -7,6 +7,8 @@ from malevich.square import APP_DIR, DF, Context, input_true, processor, scheme
 from pydantic import BaseModel
 from ultralytics import YOLO
 
+from .models import Detect, DetectRaw
+
 
 @scheme()
 class YOLOInputs(BaseModel):
@@ -32,7 +34,7 @@ def eval_path(path: str, file: str, context: Context):
 
 
 @processor()
-def detect(yolo_inputs: DF[YOLOInputs], context: Context):
+def detect(yolo_inputs: DF[YOLOInputs], context: Context[Detect]):
     """Detects objects on images
 
     ## Input:
@@ -52,19 +54,19 @@ def detect(yolo_inputs: DF[YOLOInputs], context: Context):
 
 
     ## Configuration:
-        - `weights`: str, default is 'yolo.pt'.
+        - `weights`: str, default 'yolo.pt'.
             A path to the weights file in the shared storage.
-        - `conf`: float, default is 0.25.
+        - `conf`: float, default 0.25.
             Confidence threshold.
-        - `iou`: float, default is 0.45.
+        - `iou`: float, default 0.45.
             IoU threshold.
-        - `classes`: dict, default is {}.
+        - `classes`: dict, default {}.
             A dictionary that maps class ids to class names.
-        - `save_plots`: bool, default is False.
+        - `save_plots`: bool, default False.
             Whether to save the output images.
-        - `save_path`: str.
+        - `save_path`: str, default 'default'.
             The pattern for the path to the output images.
-        - `batch_size`: int, default is 1.
+        - `batch_size`: int, default 1.
             The batch size.
 
     ## Available variables:
@@ -88,7 +90,7 @@ def detect(yolo_inputs: DF[YOLOInputs], context: Context):
             - xyxy: the bounding boxes of the detected objects
             - cls_ids: the class ids of the detected objects
             - cls_names: the class names of the detected objects
-            - plot**: the path to the output image, if save_plots is True
+            - plot**: the path to the output image, if save_plots True
 
     Remarks:
         **: the column is present only if save_plots is True
@@ -166,7 +168,7 @@ def detect(yolo_inputs: DF[YOLOInputs], context: Context):
 
 
 @processor()
-def detect_raw(yolo_inputs: DF[YOLOInputs], context: Context):
+def detect_raw(yolo_inputs: DF[YOLOInputs], context: Context[DetectRaw]):
     """Detects objects on images and returns raw YOLOv8 results
 
     ## Input:
@@ -183,19 +185,19 @@ def detect_raw(yolo_inputs: DF[YOLOInputs], context: Context):
 
 
     ## Configuration:
-        - `weights`: str, default is 'yolo.pt'.
+        - `weights`: str, default 'yolo.pt'.
             A path to the weights file in the shared storage.
-        - `conf`: float, default is 0.25.
+        - `conf`: float, default 0.25.
             Confidence threshold.
-        - `iou`: float, default is 0.45.
+        - `iou`: float, default 0.45.
             IoU threshold.
-        - `classes`: dict, default is {}.
+        - `classes`: dict, default {}.
             A dictionary that maps class ids to class names.
-        - `save_plots`: bool, default is False.
+        - `save_plots`: bool, default False.
             Whether to save the output images.
-        - `save_path`: pattern.
+        - `save_path`: str, default 'default'.
             The pattern for the path to the output images.
-        - `batch_size`: int, default is 1.
+        - `batch_size`: int, default 1.
             The batch size.
 
     ## Available variables:
