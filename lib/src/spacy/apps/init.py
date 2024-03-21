@@ -8,7 +8,10 @@ from .types import SpaCy
 
 @init()
 def spacy_init(ctx: Context):
-    model_name = ctx.app_cfg.get("model_name", "en_core_web_sm")
+    if ctx.app_cfg.get("language", "en") == "ru":
+        model_name = ctx.app_cfg.get("model_name", "ru_core_news_sm")
+    else:
+        model_name = ctx.app_cfg.get("model_name", "en_core_web_sm")
 
     ctx.common = SpaCy()
     spacy.prefer_gpu()
