@@ -20,14 +20,14 @@ def scrape_yamarket_api(df: DF[YaMarket], context: Context):
     """Scrape Yandex Market using API
     ## Input:
         A dataframe with a single column:
-        - offer_id(str): Product SKU vendor code.
+        - offer_id (str): Product SKU vendor code.
 
     ## Output:
         A dataframe with columns:
-        - offer_id(str): Product SKU vendor code.
-        - name(str): Product name.
-        - description(str): Product description.
-        - image(str): Product image links
+        - offer_id (str): Product SKU vendor code.
+        - name (str): Product name.
+        - description (str): Product description.
+        - image (str): Product image links
 
     ## Configuration:
         - business_id: str.
