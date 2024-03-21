@@ -1,5 +1,8 @@
+import json
 import time
+
 import pandas as pd
+import requests
 import scrapy
 from fake_useragent import UserAgent
 from malevich.square import DF, Context, processor, scheme
@@ -9,120 +12,60 @@ from selenium import webdriver
 
 @scheme()
 class YaMarket(BaseModel):
-    link: str
-
-
-class Response:
-    def __init__(self, text, url, captcha=False) -> None:
-        self.text = text
-        self.url = url
-        self.captcha = captcha
-
-
-def init_driver():
-    options = webdriver.ChromeOptions()
-    options.add_argument("--no-sandbox")
-    options.add_argument("--disable-dev-shm-usage")
-    options.add_argument("--ignore-certificate-errors")
-    options.add_argument("--headless")
-    options.add_argument("--disable-blink-features=AutomationControlled")
-    options.add_argument(f"--user-agent={UserAgent().random}")  # noqa: E501
-    return webdriver.Chrome(options)
-
-def get_page(link):
-    driver = init_driver()
-    driver.delete_all_cookies()
-    successful = False
-    captcha = False
-    time_out = 5
-    for _ in range(5):
-        driver.get(link)
-        capcha_sel = scrapy.Selector(Response(driver.page_source, link))
-        capcha_tag = capcha_sel.xpath(
-            "//title[@text() = 'Ой, Капча!']"
-        ).get()
-        captcha = False
-        if capcha_tag is not None:
-            driver.execute_script("localStorage = {}; sessionStorage = {};")
-            driver.delete_all_cookies()
-            captcha = True
-            time_out += 5
-        else:
-            successful = True
-            break
-    if not successful:
-        driver.delete_all_cookies()
-        return Response(driver.page_source, link, captcha=captcha)
-    return Response(driver.page_source, link)
+    offer_id: str
 
 
 @processor()
-def scrape_yamarket(df: DF[YaMarket], context: Context):
-    """
+def scrape_yamarket_api(df: DF[YaMarket], context: Context):
+    """Scrape Yandex Market using API
     ## Input:
+        A dataframe with a single column:
+        - offer_id(str): Product SKU vendor code.
 
     ## Output:
+        A dataframe with columns:
+        - offer_id(str): Product SKU vendor code.
+        - name(str): Product name.
+        - description(str): Product description.
+        - image(str): Product image links
 
     ## Configuration:
-
+        - business_id: str.
+            Yandex Market business_id.
+        - api_token: str.
+            Yandex Market API token.
+        - max_image_links: int, default None.
+            Max amount of images per product.
     -----
-    Args:
-
-    Returns:
     """
-    text = []
-    props = []
-    images = []
-    errors = []
-    for link in df["link"].to_list():
-        response = get_page(link)
-        print(response.text)
-        if response.captcha:
-            errors.append([link, "Captcha"])
-        sel = scrapy.Selector(response)
-        if sel.xpath("//header[text() = 'Тут ничего нет']").get() is not None:
-            errors.append([link, "404"])
-            continue
+    business_id = context.app_cfg.get('business_id', None)
+    assert business_id, "Must provide Business_ID"
 
-        title = sel.xpath("//h1[@data-additional-zone = 'title']/text()").get()
-        description = sel.xpath(
-            "//div[@aria-label = 'product-description']//span/text()"
-        ).get()
-        char_num = len(sel.xpath("//div[@aria-label = 'Характеристики']/div").getall())
-        chars = {}
-        for i in range(char_num):
-            char_ = sel.xpath(
-                "(//div[@data-zone-name = 'ProductSpecsList']//"
-                f"div[@aria-label = 'Характеристики']/div)[{i}]//span/text()"
-            ).getall()
-            if len(char_) == 2:
-                if char_[0] not in chars.keys():
-                    chars[char_[0]] = char_[1]
+    api_token = context.app_cfg.get("api_token", None)
+    assert api_token, "Must provide API Token"
 
-        imgs = sel.xpath(
-            "//ul[@aria-roledescription = 'carousel']/li//img/@src"
-        ).getall()
-        text.append([link, f"{title}\n\n{description}"])
-        for key, val in chars.items():
-            props.append([link, key, val])
-        for img in imgs[: context.app_cfg.get("max_results", None)]:
-            images.append([link, img])
+    max_results = context.app_cfg.get("max_image_links", None)
 
-    return_dfs = []
-
-    if context.app_cfg.get("only_images", False):
-        return_dfs.append(pd.DataFrame(images, columns=["link", "image"]))
-    elif context.app_cfg.get("only_properties", False):
-        return_dfs.append(
-            pd.DataFrame(props, columns=["link", "prop_name", "prop_value"])
-        )
-    else:
-        return_dfs.extend(
+    response = json.loads(
+        requests.post(
+            f'https://api.partner.market.yandex.ru/businesses/{business_id}/offer-mappings',
+            headers={
+                "Authorization": f"Bearer {api_token}"
+            },
+            json={
+                'offerIds': df['offer_id'].to_list()
+            }
+        ).text
+    )
+    outputs = []
+    for item in response['result']['offerMappings']:
+        item_offer = item["offer"]
+        outputs.append(
             [
-                pd.DataFrame(text, columns=["link", 'text']),
-                pd.DataFrame(images, columns=["link", "image"]),
-                pd.DataFrame(props, columns=["link", "prop_name", "prop_value"])
+                item_offer['offerId'],
+                item_offer['name'],
+                item_offer['description'],
+                '\n'.join(item_offer['pictures'][:max_results])
             ]
         )
-    return_dfs.append(pd.DataFrame(errors, columns=['link', 'error']))
-    return return_dfs
+    return pd.DataFrame(outputs, columns = ['offer_id', 'name', 'description', 'image'])
