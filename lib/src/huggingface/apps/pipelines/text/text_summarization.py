@@ -1,6 +1,6 @@
 import pandas as pd
 import torch
-from malevich.square import DF, Context, processor, scheme
+from malevich.square import DF, Context, init, processor, scheme
 from transformers import pipeline
 
 from .models import SummarizeText
@@ -10,6 +10,23 @@ from .models import SummarizeText
 class TextInput:
     text: str
     """Text to classify"""
+
+@init(prepare=True)
+def init_pipelint(context: Context[SummarizeText]):
+    try:
+        p = pipeline(
+            model=context.app_cfg.model,
+            task='summarization',
+            device='cuda' if torch.cuda.is_available() else 'cpu',
+        )
+    except Exception:
+        context.logger.error(
+            "Got an error while trying to create the pipeline. "
+            f"Probably the model name `{context.app_cfg.model }`is incorrect "
+            "or does not support text summarization."
+        )
+        raise
+    context.common = p
 
 @processor()
 def summarize_text(text: DF[TextInput], context: Context[SummarizeText]):
@@ -45,19 +62,7 @@ def summarize_text(text: DF[TextInput], context: Context[SummarizeText]):
         Collection with summaries and the original texts
     """  # noqa: E501
 
-    try:
-        p = pipeline(
-            model=context.app_cfg.model,
-            task='summarization',
-            device='cuda' if torch.cuda.is_available() else 'cpu',
-        )
-    except Exception:
-        context.logger.error(
-            "Got an error while trying to create the pipeline. "
-            f"Probably the model name `{context.app_cfg.model }`is incorrect "
-            "or does not support text summarization."
-        )
-        raise
+    p = context.common
 
     responses: list[dict] = p(text.text.to_list())
     if not isinstance(responses, list):
