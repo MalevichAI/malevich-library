@@ -53,7 +53,7 @@ jobs:
     
     - name: Install Malevich
       run: |
-        pip install malevich-space>=0.4.5 || { echo "::error::Failed to install malevich" ; exit 1 ;}
+        pip install "malevich-space<0.4.13" || { echo "::error::Failed to install malevich" ; exit 1 ;}
     
     - name: Get branch name
       run: echo "branch=$(git branch --show-current)" >> $GITHUB_OUTPUT
@@ -61,7 +61,12 @@ jobs:
     
     - name: Build, Test and Push
       run: |
-        dirs=$(git log --name-only -1 | grep '/' | cut -d '/' -f3 | sort -u)
+        if [[ ${{vars.DEV_CMT}} !=  "" ]] && [[ $(git log ${{vars.DEV_CMT}}) ]];
+        then
+          dirs=$(git log --name-only ${{vars.DEV_CMT}}.. | grep '/' | cut -d '/' -f3 | sort -u)
+        else
+          dirs=$(git log --name-only -1 | grep '/' | cut -d '/' -f3 | sort -u)
+        fi
         errors=()
         commit_sha=$(git rev-parse HEAD)
         if [[ ${dirs[0]} == "" ]];
@@ -145,6 +150,13 @@ jobs:
         fi
 
     - run: |
+        curl -L \
+          -X PATCH \
+          -H "Accept: application/vnd.github+json" \
+          -H "Authorization: Bearer ${{secrets.ENV_TOKEN}}" \
+          -H "X-GitHub-Api-Version: 2022-11-28" \
+          https://api.github.com/repos/${{github.repository}}/actions/variables/DEV_CMT \
+          -d '{"name":"DEV_CMT","value":"${{github.sha}}"}'
         rm USERNAME
         rm PASSWORD
         docker logout

@@ -1,8 +1,6 @@
 from collections import defaultdict
-from typing import Optional
 
 import pandas as pd
-import pydantic
 from malevich.square import DF, Context, processor, scheme
 from transformers import TokenClassificationPipeline, pipeline
 
@@ -12,18 +10,6 @@ from .models import TokenClassification
 @scheme()
 class TokenClassificationInput:
     text: str
-
-
-class TokenClassificationConfig(pydantic.BaseModel):
-    model: Optional[str] = None
-    tokenizer: Optional[str] = None
-    device: Optional[str] = 'cpu'
-    batch_size: Optional[int] = 1
-    aggregation_strategy: Optional[str] = 'none'
-    ignore_labels: Optional[str] = ["O"]
-    keep_text: Optional[bool] = False
-    keep_sentence_index: Optional[bool] = True
-
 
 @processor()
 def token_classification(
@@ -78,39 +64,28 @@ def token_classification(
 
     """  # noqa: E501
     data_ = text.text.to_list()
-    try:
-        ctx_ = TokenClassificationConfig(**context.app_cfg)
-    except pydantic.ValidationError as e:
-        errs_ = "\n".join(
-            [f"{err_['loc'][0]}: {err_['msg']}"
-             for err_ in e.errors()]
-        )
-        raise Exception(
-            "Configuration is invalid. "
-            "See errors below:\n" + errs_
-        ) from e
 
-    if ctx_.device == 'gpu' or ctx_.device == 'cuda':
+    if context.app_cfg.device == 'gpu' or context.app_cfg.device == 'cuda':
         try:
             import torch
             if torch.cuda.is_available():
-                ctx_.device = 0
+                context.app_cfg.device = 0
                 context.logger.warn(
                     "GPU is available. Switching to GPU mode."
                 )
             else:
-                ctx_.device = -1
+                context.app_cfg.device = -1
         except ImportError:
             context.logger.warn(
                 "PyTorch is not available. Switching to CPU mode."
             )
-            ctx_.device = -1
+            context.app_cfg.device = -1
     else:
-        ctx_.device = -1
+        context.app_cfg.device = -1
 
     pipeline_: TokenClassificationPipeline = pipeline(
         "ner",
-        **ctx_.model_dump(
+        **context.app_cfg.model_dump(
             exclude_none=True,
             exclude=["keep_text", "keep_sentence_index"]
         ),
@@ -129,12 +104,12 @@ def token_classification(
             for k, v in rec_.items():
                 df_data[k].append(v)
 
-            if ctx_.keep_text:
+            if context.app_cfg.keep_text:
                 df_data['text'].append(text)
 
     context.logger.info(f"Stats: {k: len(v) for k,v in df_data.items()}")
 
-    if not ctx_.keep_sentence_index:
+    if not context.app_cfg.keep_sentence_index:
         df_data.pop('sentence_index', None)
 
     return pd.DataFrame(df_data)
