@@ -1,1 +1,2 @@
 from .extract_named_entities_model import ExtractNamedEntities
+from .count_word_percentage_model import CountWordPercentage

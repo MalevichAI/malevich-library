@@ -7,4 +7,4 @@
 #
 # To enable this hook, rename this file to "pre-commit".
 
-/usr/bin/python .githooks/check_docs.py
+python .githooks/check_docs.py
