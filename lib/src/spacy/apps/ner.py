@@ -5,7 +5,7 @@ import pandas as pd
 from malevich.square import DF, Context, processor, scheme
 from pydantic import BaseModel
 
-from .models import ExtractNamedEntities
+from .models import CountWordPercentage, ExtractNamedEntities
 from .types import SpaCy
 
 
@@ -115,7 +115,7 @@ def extract_named_entities(
 
 
 @processor()
-def count_word_percentage(df: DF[TextKey], context: Context):
+def count_word_percentage(df: DF[TextKey], context: Context[CountWordPercentage]):
     """
     Count keyword frequency in text.
 

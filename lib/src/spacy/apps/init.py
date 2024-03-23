@@ -6,7 +6,7 @@ import spacy.cli
 from .types import SpaCy
 
 
-@init()
+@init(prepare=True)
 def spacy_init(ctx: Context):
     if ctx.app_cfg.get("language", "en") == "ru":
         model_name = ctx.app_cfg.get("model_name", "ru_core_news_sm")

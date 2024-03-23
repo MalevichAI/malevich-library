@@ -5,6 +5,8 @@ import requests
 from malevich.square import DF, Context, processor, scheme
 from pydantic import BaseModel
 
+from .models import ScrapeYamarketApi
+
 
 @scheme()
 class YaMarket(BaseModel):
@@ -12,7 +14,7 @@ class YaMarket(BaseModel):
 
 
 @processor()
-def scrape_yamarket_api(df: DF[YaMarket], context: Context):
+def scrape_yamarket_api(df: DF[YaMarket], context: Context[ScrapeYamarketApi]):
     """Scrape Yandex Market using API
     ## Input:
         A dataframe with a single column:
