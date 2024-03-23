@@ -1,13 +1,9 @@
 import json
-import time
 
 import pandas as pd
 import requests
-import scrapy
-from fake_useragent import UserAgent
 from malevich.square import DF, Context, processor, scheme
 from pydantic import BaseModel
-from selenium import webdriver
 
 
 @scheme()
