@@ -2,7 +2,7 @@ import uuid
 
 import pandas as pd
 import torch
-from malevich.square import DF, Context, processor, scheme
+from malevich.square import DF, Context, init, processor, scheme
 from transformers import Conversation, pipeline
 
 from .models import ContinueConversation
@@ -15,6 +15,16 @@ class DialogMessageInput:
     role: str
     """An identifier of the role of the message. It can be "user" or "assistant"."""
     # dialog_id: Optional[str] = None
+
+@init(prepare=True)
+def init_pipeline(context: Context[ContinueConversation]):
+    p = pipeline(
+        # https://huggingface.co/docs/transformers/v4.37.2/en/main_classes/pipelines#transformers.Conversation
+        model=context.app_cfg.model,
+        task='conversational',
+        device='cuda' if torch.cuda.is_available() else 'cpu',
+    )
+    context.common = p
 
 @processor()
 def continue_conversation(
@@ -62,14 +72,7 @@ def continue_conversation(
     Returns:
         Collection with messages and responses
     """  # noqa: E501
-
-    p = pipeline(
-        # https://huggingface.co/docs/transformers/v4.37.2/en/main_classes/pipelines#transformers.Conversation
-        model=context.app_cfg.model,
-        task='conversational',
-        device='cuda' if torch.cuda.is_available() else 'cpu',
-    )
-
+    p = context.common
 
     if 'dialog_id' not in message.columns:
         message.insert(0, 'dialog_id', [
