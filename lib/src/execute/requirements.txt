@@ -1,1 +1,1 @@
-malevich @ https://github.com/MalevichAI/malevich/archive/commands/dev.zip
+malevich @ https://github.com/MalevichAI/malevich/archive/dev/unstable.zip
