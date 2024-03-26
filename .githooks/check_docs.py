@@ -6,7 +6,7 @@ from subprocess import (
     check_output,
 )
 
-from malevich.commands.dev import get_processor_docstring, list_procs, parse_docstring
+from malevich._cli.dev import get_processor_docstring, list_procs, parse_docstring
 
 print("===== Malevich Git Pre-commit Hook =======")
 
