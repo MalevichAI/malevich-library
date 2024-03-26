@@ -1,0 +1,9 @@
+execute:
+  name: Run subflows inside a flow
+  description: Allows you to run flows inside your current flow
+  visibility:
+    - public
+  app:
+    container_ref: ramprin/malevich:execute
+    container_user: null
+    container_token: null
