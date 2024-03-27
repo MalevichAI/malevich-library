@@ -46,7 +46,7 @@ async def prompt_completion(variables: DF[Any], ctx: Context[PromptCompletion]):
             Your OpenAI API key.
         - `user_prompt`: str.
             The prompt for the user.
-        - `system_prompt`: str.
+        - `system_prompt`: str, default "".
             The prompt for the system.
         - `model`: str, default 'gpt-3.5-turbo'.
             The model to use.
