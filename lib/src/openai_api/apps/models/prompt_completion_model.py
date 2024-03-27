@@ -2,10 +2,10 @@
 #   filename:  prompt_completion_model.json
 
 from __future__ import annotations
+from malevich.square import scheme
 
 from typing import List, Optional
 
-from malevich.square import scheme
 from pydantic import BaseModel, Field
 
 
@@ -13,7 +13,7 @@ from pydantic import BaseModel, Field
 class PromptCompletion(BaseModel):
     openai_api_key: str = Field(..., description='Your OpenAI API key')
     user_prompt: str = Field(..., description='The prompt for the user')
-    system_prompt: str = Field(..., description='The prompt for the system')
+    system_prompt: Optional[str] = Field('', description='The prompt for the system')
     model: Optional[str] = Field('gpt-3.5-turbo', description='The model to use')
     organization: Optional[str] = Field(None, description='The organization to use')
     max_retries: Optional[int] = Field(3, description='The maximum number of retries')
