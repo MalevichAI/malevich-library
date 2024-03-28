@@ -1,6 +1,6 @@
 import pandas as pd
 import torch
-from malevich.square import DF, Context, processor, scheme
+from malevich.square import DF, Context, init, processor, scheme
 from transformers import Conversation, pipeline
 
 from .models import AnswerQuestions
@@ -12,6 +12,15 @@ class QuestionInput:
     """The content of the message"""
     context: str
     """A context for the question"""
+
+@init(prepare=True)
+def init_pipeline(context: Context[AnswerQuestions]):
+    p = pipeline(
+        model=context.app_cfg.model,
+        task='question-answering',
+        device='cuda' if torch.cuda.is_available() else 'cpu',
+    )
+    context.common = p
 
 
 @processor()
@@ -54,12 +63,7 @@ def answer_questions(questions: DF[QuestionInput], context: Context[AnswerQuesti
     Returns:
         Collection with answers, scores and indices of the answers
     """
-
-    p = pipeline(
-        model=context.app_cfg.model,
-        task='question-answering',
-        device='cuda' if torch.cuda.is_available() else 'cpu',
-    )
+    p = context.common
 
     responses: list[Conversation] = p(questions.to_dict(orient='records'))
     if not isinstance(responses, list):

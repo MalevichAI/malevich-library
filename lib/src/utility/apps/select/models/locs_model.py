@@ -2,6 +2,9 @@
 #   filename:  locs_model.json
 
 from __future__ import annotations
+
+from typing import List, Optional
+
 from malevich.square import scheme
 
 from typing import List, Optional

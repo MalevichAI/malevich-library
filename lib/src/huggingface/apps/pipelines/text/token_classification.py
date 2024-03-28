@@ -1,7 +1,7 @@
 from collections import defaultdict
 
 import pandas as pd
-from malevich.square import DF, Context, processor, scheme
+from malevich.square import DF, Context, init, processor, scheme
 from transformers import TokenClassificationPipeline, pipeline
 
 from .models import TokenClassification
@@ -10,6 +10,36 @@ from .models import TokenClassification
 @scheme()
 class TokenClassificationInput:
     text: str
+
+@init(prepare=True)
+def init_pipeline(context: Context[TokenClassification]):
+    if context.app_cfg.device == 'gpu' or context.app_cfg.device == 'cuda':
+        try:
+            import torch
+            if torch.cuda.is_available():
+                context.app_cfg.device = 0
+                context.logger.warn(
+                    "GPU is available. Switching to GPU mode."
+                )
+            else:
+                context.app_cfg.device = -1
+        except ImportError:
+            context.logger.warn(
+                "PyTorch is not available. Switching to CPU mode."
+            )
+            context.app_cfg.device = -1
+    else:
+        context.app_cfg.device = -1
+
+    pipeline_: TokenClassificationPipeline = pipeline(
+        "ner",
+        **context.app_cfg.model_dump(
+            exclude_none=True,
+            exclude=["keep_text", "keep_sentence_index"]
+        ),
+    )
+
+    context.common = pipeline_
 
 @processor()
 def token_classification(
@@ -65,31 +95,7 @@ def token_classification(
     """  # noqa: E501
     data_ = text.text.to_list()
 
-    if context.app_cfg.device == 'gpu' or context.app_cfg.device == 'cuda':
-        try:
-            import torch
-            if torch.cuda.is_available():
-                context.app_cfg.device = 0
-                context.logger.warn(
-                    "GPU is available. Switching to GPU mode."
-                )
-            else:
-                context.app_cfg.device = -1
-        except ImportError:
-            context.logger.warn(
-                "PyTorch is not available. Switching to CPU mode."
-            )
-            context.app_cfg.device = -1
-    else:
-        context.app_cfg.device = -1
-
-    pipeline_: TokenClassificationPipeline = pipeline(
-        "ner",
-        **context.app_cfg.model_dump(
-            exclude_none=True,
-            exclude=["keep_text", "keep_sentence_index"]
-        ),
-    )
+    pipeline_ = context.common
 
     results = pipeline_(data_)
 
