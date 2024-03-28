@@ -70,7 +70,7 @@ def count_word_percentage(df: DF[TextKey], context: Context[CountWordPercentage]
             if metric == 'percent':
                 string = f"{x['percentage'] * 100}%"
             else:
-                string = f"{x['percentage']}"
+                string = x['percentage']
 
             outputs.append(
                 [
