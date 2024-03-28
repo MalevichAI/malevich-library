@@ -1,0 +1,1 @@
+malevich @ https://github.com/MalevichAI/malevich/archive/dev/unstable.zip

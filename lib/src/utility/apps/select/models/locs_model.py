@@ -6,6 +6,9 @@ from __future__ import annotations
 from typing import List, Optional
 
 from malevich.square import scheme
+
+from typing import List, Optional
+
 from pydantic import BaseModel, Field
 
 
@@ -26,4 +29,8 @@ class Locs(BaseModel):
     row_idx: Optional[int] = Field(None, description='The row index to be extracted')
     row_idxs: Optional[List[int]] = Field(
         None, description='The row indexes to be extracted'
+    )
+    unique: Optional[bool] = Field(
+        False,
+        description='Get unique values from column. Must be used with `column` or `column_idx`',
     )
