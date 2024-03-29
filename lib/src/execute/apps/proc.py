@@ -1,3 +1,4 @@
+import pandas as pd
 from malevich import SpaceInterpreter, SpaceSetup
 from malevich.models.injections import SpaceInjectable
 from malevich.models.task.interpreted.space import SpaceTaskStage
@@ -7,7 +8,10 @@ from .models import Execute
 
 
 @processor()
-def execute(input: Sink, context: Context[Execute]):
+def execute(
+    input: Sink,
+    context: Context[Execute]
+):
     """
     Execute other flows and get results.
 
@@ -40,10 +44,24 @@ def execute(input: Sink, context: Context[Execute]):
     Returns:
         DataFrames, which will be returned by launched flow.
     """
+    if context.common is None:
+        context.common = {}
+        context[context.operation_id] = 0
+    elif context.operation_id not in context.common:
+        context[context.operation_id] = 0
+
+    if context.common[context.operation_id] > 5:
+        print("Limit exceeded")
+        result = []
+        for i in input:
+            result.append(i[0])
+        return result
+
     args_map = context.app_cfg.get("args_map", None)
     assert args_map, "Argument mapping was not provided"
     reverse_id = context.app_cfg.get("reverse_id", None)
     assert reverse_id, "Reverse ID was not provided"
+
     empty = True
     for i in input:
         if len(i) > 1:
@@ -52,7 +70,8 @@ def execute(input: Sink, context: Context[Execute]):
             empty = False
             break
     if empty:
-        raise AssertionError("All inputs are empty!")
+        return pd.DataFrame([True], columns=['done'])
+
     deployment_id = context.app_cfg.get('deployment_id', None)
     prepare = context.app_cfg.get('prepare', False)
     attach = context.app_cfg.get('attach_to_last', False)
@@ -64,6 +83,7 @@ def execute(input: Sink, context: Context[Execute]):
              "One of the following options should be provided: "
              "deployment_id, prepare, attach_to_last"
         )
+
     setup = SpaceSetup(**context.app_cfg.get('__space__'))
     setup.api_url = setup.api_url.replace('/api/v1', '')
     interpreter = SpaceInterpreter(setup)
@@ -90,8 +110,9 @@ def execute(input: Sink, context: Context[Execute]):
     for i in range(len(args_map)):
         if len(input[i]) != 0:
             override[args_map[i]] = input[i][0]
-
+    context.common[context.operation_id] += 1
     task.run(override=override)
+    context.common[context.operation_id] = 0
     results = task.results()[0].get_dfs()
     if prepare:
         task.stop()
