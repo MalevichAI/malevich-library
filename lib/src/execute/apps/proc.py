@@ -2,10 +2,17 @@ import pandas as pd
 from malevich import SpaceInterpreter, SpaceSetup
 from malevich.models.injections import SpaceInjectable
 from malevich.models.task.interpreted.space import SpaceTaskStage
-from malevich.square import Context, Sink, processor
+from malevich.square import Context, Sink, init, processor
 
 from .models import Execute
 
+
+@init(prepare=True)
+def init_counter(ctx: Context):
+    print('Initing common')
+    if ctx.common is None:
+        ctx.common = {}
+    ctx.common[ctx.operation_id] = 1
 
 @processor()
 def execute(
@@ -38,29 +45,22 @@ def execute(
     - attach_to_last: bool, default False.
         Use the last created active deployment.
 
+    - timeout: int, default 150.
+        Time to wait.
+
     -----
     Args:
         input (Sink): DataFrames for the flow you want to launch.
     Returns:
         DataFrames, which will be returned by launched flow.
     """
-    if context.common is None:
-        context.common = {}
-        context[context.operation_id] = 0
-    elif context.operation_id not in context.common:
-        context[context.operation_id] = 0
 
-    if context.common[context.operation_id] > 5:
+    if context.common[context.operation_id] > context.app_cfg.get('max_depth', 5):
         print("Limit exceeded")
         result = []
         for i in input:
             result.append(i[0])
         return result
-
-    args_map = context.app_cfg.get("args_map", None)
-    assert args_map, "Argument mapping was not provided"
-    reverse_id = context.app_cfg.get("reverse_id", None)
-    assert reverse_id, "Reverse ID was not provided"
 
     empty = True
     for i in input:
@@ -70,7 +70,12 @@ def execute(
             empty = False
             break
     if empty:
-        return pd.DataFrame([True], columns=['done'])
+        return pd.DataFrame()
+
+    args_map = context.app_cfg.get("args_map", None)
+    assert args_map, "Argument mapping was not provided"
+    reverse_id = context.app_cfg.get("reverse_id", None)
+    assert reverse_id, "Reverse ID was not provided"
 
     deployment_id = context.app_cfg.get('deployment_id', None)
     prepare = context.app_cfg.get('prepare', False)
@@ -112,8 +117,10 @@ def execute(
             override[args_map[i]] = input[i][0]
     context.common[context.operation_id] += 1
     task.run(override=override)
+    results = task.results(
+        fetch_timeout=context.app_cfg.get('timeout', 150)
+    )[0].get_dfs()
     context.common[context.operation_id] = 0
-    results = task.results()[0].get_dfs()
     if prepare:
         task.stop()
     if len(results) == 1:

@@ -55,28 +55,28 @@ def count_word_percentage(df: DF[TextKey], context: Context[CountWordPercentage]
     outputs = []
     for _, row in df.iterrows():
         keywords = row["keywords"].split(delim)
+        for i in range(len(keywords)):
+            tokens = model(keywords[i].strip())
+            keywords[i] = [x.lemma_.strip() for x in tokens]
+
         tokens = model(row["text"])
         tokens = [
             x.lemma_.strip() for x in tokens if x.lemma_ not in "!-;:\"\'_/\\—,.?"
         ]
-        mappd = Counter(tokens)
-        res = {key: val / sum(mappd.values()) for key, val in mappd.items()}
-        key_percentage = []
+
         for key in keywords:
-            lemma = model(key.strip())[0].lemma_
-            key_percentage.append({"key": key, "percentage": res.get(lemma, 0)})
+            per = 0
+            for i in range(len(tokens) - len(key) + 1):
+                if tokens[i:i+len(key)] == key:
+                    per += 1
 
-        for x in key_percentage:
-            if metric == 'percent':
-                string = f"{x['percentage'] * 100}%"
-            else:
-                string = x['percentage']
-
+            per = per/(len(tokens) - len(key) + 1)
             outputs.append(
                 [
                     row["idx"],
-                    x['key'],
-                    string
+                    ' '.join(key),
+                    per if metric == 'float' else f"{per*100}%"
                 ]
             )
+
     return pd.DataFrame(outputs, columns=['idx','key', 'frequency'])
