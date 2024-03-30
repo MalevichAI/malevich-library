@@ -1,13 +1,24 @@
+import pandas as pd
 from malevich import SpaceInterpreter, SpaceSetup
 from malevich.models.injections import SpaceInjectable
 from malevich.models.task.interpreted.space import SpaceTaskStage
-from malevich.square import Context, Sink, processor
+from malevich.square import Context, Sink, init, processor
 
 from .models import Execute
 
 
+@init(prepare=True)
+def init_counter(ctx: Context):
+    print('Initing common')
+    if ctx.common is None:
+        ctx.common = {}
+    ctx.common[ctx.operation_id] = 1
+
 @processor()
-def execute(input: Sink, context: Context[Execute]):
+def execute(
+    input: Sink,
+    context: Context[Execute]
+):
     """
     Execute other flows and get results.
 
@@ -34,16 +45,23 @@ def execute(input: Sink, context: Context[Execute]):
     - attach_to_last: bool, default False.
         Use the last created active deployment.
 
+    - timeout: int, default 150.
+        Time to wait.
+
     -----
     Args:
         input (Sink): DataFrames for the flow you want to launch.
     Returns:
         DataFrames, which will be returned by launched flow.
     """
-    args_map = context.app_cfg.get("args_map", None)
-    assert args_map, "Argument mapping was not provided"
-    reverse_id = context.app_cfg.get("reverse_id", None)
-    assert reverse_id, "Reverse ID was not provided"
+
+    if context.common[context.operation_id] > context.app_cfg.get('max_depth', 5):
+        print("Limit exceeded")
+        result = []
+        for i in input:
+            result.append(i[0])
+        return result
+
     empty = True
     for i in input:
         if len(i) > 1:
@@ -52,7 +70,13 @@ def execute(input: Sink, context: Context[Execute]):
             empty = False
             break
     if empty:
-        raise AssertionError("All inputs are empty!")
+        return pd.DataFrame()
+
+    args_map = context.app_cfg.get("args_map", None)
+    assert args_map, "Argument mapping was not provided"
+    reverse_id = context.app_cfg.get("reverse_id", None)
+    assert reverse_id, "Reverse ID was not provided"
+
     deployment_id = context.app_cfg.get('deployment_id', None)
     prepare = context.app_cfg.get('prepare', False)
     attach = context.app_cfg.get('attach_to_last', False)
@@ -64,6 +88,7 @@ def execute(input: Sink, context: Context[Execute]):
              "One of the following options should be provided: "
              "deployment_id, prepare, attach_to_last"
         )
+
     setup = SpaceSetup(**context.app_cfg.get('__space__'))
     setup.api_url = setup.api_url.replace('/api/v1', '')
     interpreter = SpaceInterpreter(setup)
@@ -90,9 +115,12 @@ def execute(input: Sink, context: Context[Execute]):
     for i in range(len(args_map)):
         if len(input[i]) != 0:
             override[args_map[i]] = input[i][0]
-
+    context.common[context.operation_id] += 1
     task.run(override=override)
-    results = task.results()[0].get_dfs()
+    results = task.results(
+        fetch_timeout=context.app_cfg.get('timeout', 150)
+    )[0].get_dfs()
+    context.common[context.operation_id] = 0
     if prepare:
         task.stop()
     if len(results) == 1:

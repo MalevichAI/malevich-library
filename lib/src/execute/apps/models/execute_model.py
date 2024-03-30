@@ -25,3 +25,4 @@ class Execute(BaseModel):
     attach_to_last: Optional[bool] = Field(
         False, description='Use the last created active deployment'
     )
+    timeout: Optional[int] = Field(150, description='Time to wait')
