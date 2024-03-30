@@ -1,5 +1,3 @@
-from collections import Counter
-
 import pandas as pd
 from malevich.square import DF, Context, processor, scheme
 from pydantic import BaseModel
