@@ -53,3 +53,26 @@ def add_column(df: DF[Any], context: Context[AddColumn]):
     df.insert(position, column_name, value)
 
     return df
+
+
+@processor()
+def add_index(df: DF[Any], context: Context):
+    """
+    Add index column to the dataframe
+
+    ## Input:
+
+    Any dataframe
+
+    ## Output:
+
+    Input dataframe with additional column `index`
+
+    -----
+    Args:
+        df (DF[Any]): Any dataframe
+    Returns:
+        Input dataframe with additional column `index`
+    """
+    df.reset_index(inplace=True)
+    return df

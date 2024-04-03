@@ -35,6 +35,8 @@ def locs(df: DF[Any], context: Context[Locs]):
             The row index to be extracted.
         - `row_idxs`: list[int], default None.
             The row indexes to be extracted.
+        - `unique`: bool, default False.
+            Get unique values from column. Must be used with `column` or `column_idx`.
 
         Multiple fields may be provided and in such case,
         the function will extract the intersection of the fields.
@@ -77,7 +79,10 @@ def locs(df: DF[Any], context: Context[Locs]):
     rows = context.app_cfg.get('rows', None)
     row_idx = context.app_cfg.get('row_idx', None)
     row_idxs = context.app_cfg.get('row_idxs', None)
+    unique = context.app_cfg.get('unique', False)
 
+    if unique and not (column or column_idx):
+        raise AssertionError("unique field should be used with column or column_idx")
 
     # Copy the dataframe to avoid side effects
     result: pd.DataFrame = df.copy()
@@ -88,7 +93,11 @@ def locs(df: DF[Any], context: Context[Locs]):
     # We start with column id as it is the most specific
     # and thus the most restrictive
     if column_idx is not None and len(result.columns) > column_idx:
-        result = pd.DataFrame(result.iloc[:, column_idx])
+        series = result.iloc[:, column_idx]
+        if unique:
+            result = pd.DataFrame(pd.unique(series), columns=[series.name])
+        else:
+            result = pd.DataFrame(series)
     elif column_idxs is not None:
         # Multiple indices are only processed if
         # column_id is not provided to keep
@@ -108,6 +117,11 @@ def locs(df: DF[Any], context: Context[Locs]):
 
 
     if column is not None and column in result.columns:
+        series: pd.Series = result[column]
+        if unique:
+            result = pd.DataFrame(pd.unique(series), columns=[series.name])
+        else:
+            result = pd.DataFrame(series)
         result = pd.DataFrame(result[column])
 
     if columns is not None:
