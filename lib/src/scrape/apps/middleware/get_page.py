@@ -81,7 +81,7 @@ def get_page(link: str, sp_conf) -> str:
             not_exist = sel.xpath("//h1[contains(@class, 'PageNotFound')]")
 
             if len(not_exist) > 0:
-                return "404"
+                return "404", False
 
             WebDriverWait(driver, time_out).until(
                 expected_conditions.presence_of_element_located(
@@ -123,7 +123,8 @@ def get_page(link: str, sp_conf) -> str:
 
     if not successful:
         driver.delete_all_cookies()
-        return "CAPTCHA" if captcha else "Error"
+        res_ = "CAPTCHA" if captcha else "Error"
+        return res_, False
 
     driver.execute_script(ALL_CHARS_SCRIPT)
     filename = hashlib.sha256(link.encode()).hexdigest() + ".html"
@@ -186,7 +187,7 @@ def get_page_ali(df: DF[AliLink], context: Context):
         for link, task in processes:
             response, cards = task.result()
             if response == "404" or response == "CAPTCHA":
-                errors.append([link, response, cards])
+                errors.append([link, response])
             else:
                 context.share(response)
                 outputs.append([link, response, cards])
