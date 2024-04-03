@@ -1,52 +1,28 @@
-import multiprocessing
-from concurrent.futures import ProcessPoolExecutor
+import re
+import string
 
 import pandas as pd
 import scrapy
 from fake_useragent import UserAgent
-from malevich.square import DF, Context, processor, scheme
+from malevich.square import DF, Context, init, processor, scheme
 from pydantic import BaseModel
 from selenium import webdriver
-from selenium.common.exceptions import TimeoutException, WebDriverException
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions
-from selenium.webdriver.support.ui import WebDriverWait
 
 from .models import ScrapeAliexpress
 
-TO_EN_SCRIPT = """
-        var ru_xp = "//div[text() = 'RU']"
-        var eng_xp = "//li/div/span/span[text() = 'English']"
-        var click_event = new Event("click", { bubbles: true, cancelable: false });
 
-        var ru = document.evaluate(ru_xp, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue
-        console.log(ru)
-        if (ru == null){
-            ru_xp = "//div[text() = 'EN']"
-            ru = document.evaluate(ru_xp, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue
-            console.log(ru)
-        }
-        var resp = ru.dispatchEvent(click_event)
-        ru = document.evaluate(eng_xp, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue
-        console.log(ru)
-        resp = ru.dispatchEvent(click_event)
-        """  # noqa: E501
+@init()
+def init_driver(context: Context):
+    options = webdriver.ChromeOptions()
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--ignore-certificate-errors")
+    options.add_argument("--headless")
+    options.add_argument("--disable-blink-features=AutomationControlled")
+    options.add_argument(f"--user-agent={UserAgent(browsers=['chrome']).random}")  # noqa: E501
+    context.common = webdriver.Chrome(options)
 
-class Response:
-    def __init__(self, text, url, cards={}, captcha=False) -> None:
-        self.text = text
-        self.url = url
-        self.cards = cards
-        self.captcha = captcha
-
-@scheme()
-class ScrapeLinks(BaseModel):
-    link: str
-
-
-@scheme()
-class ScrapeResult(BaseModel):
-    result: str
 
 def get_cards(driver: webdriver.Chrome):
     chars_data = {}
@@ -96,80 +72,27 @@ def get_cards(driver: webdriver.Chrome):
             chars_data[prop_name].append(prop[1].text)
     return chars_data
 
-def init_driver():
-    options = webdriver.ChromeOptions()
-    options.add_argument('--no-sandbox')
-    options.add_argument('--disable-dev-shm-usage')
-    options.add_argument('--ignore-certificate-errors')
-    options.add_argument('--headless')
-    options.add_argument('--disable-blink-features=AutomationControlled')
-    options.add_argument(f"--user-agent={UserAgent(browsers=['chrome']).random}") # noqa: E501
-    return webdriver.Chrome(options)
+@scheme()
+class ScrapeLinks(BaseModel):
+    link: str
+    filename: str
+    cards: bool
 
-def get_page(link, sp_conf):
-    driver = init_driver()
-    driver.delete_all_cookies()
-    successful = False
-    captcha = False
-    time_out = 5
-    for _ in range(5):
-        try:
-            driver.get(link)
 
-            sel = scrapy.Selector(Response(text=driver.page_source, url=link))
-            not_exist = sel.xpath(
-                "//h1[contains(@class, 'PageNotFound')]"
-            )
+@scheme()
+class ScrapeResult(BaseModel):
+    result: str
 
-            if len(not_exist) > 0:
-                return Response(driver.page_source, link, {})
 
-            WebDriverWait(driver, time_out).until(
-                expected_conditions.presence_of_element_located(
-                    (By.XPATH, "//div[@id = 'content_anchor']")
-                    )
-                )
-            try:
-                if sp_conf.get('browser_language', 'ru') == 'en':
-                    driver.execute_script(
-                        TO_EN_SCRIPT
-                    )
-                    WebDriverWait(driver, 15).until(
-                        expected_conditions.presence_of_element_located(
-                            (By.XPATH,
-                            "//div[@id = 'content_anchor']/h2[text() = 'Description']") # noqa: E501
-                        )
-                    )
-            except (TimeoutException, WebDriverException):
-                continue
-            WebDriverWait(driver, time_out).until(
-                expected_conditions.presence_of_element_located(
-                    (By.XPATH, "//div[@id = 'characteristics_anchor']")
-                )
-            )
-            successful = True
-            break
-        except (TimeoutException, WebDriverException):
-            capcha_sel = scrapy.Selector(Response(driver.page_source, link))
-            capcha_sel = capcha_sel.xpath(
-                "//div[@class = 'scratch-captcha-title']"
-            ).getall()
-            captcha = False
-            if len(capcha_sel) > 0:
-                driver.execute_script("localStorage = {}")
-                driver.delete_all_cookies()
-                captcha = True
-            time_out += 5
-            continue
-
-    if not successful:
-        driver.delete_all_cookies()
-        return Response(driver.page_source, link, captcha=captcha)
-    return Response(driver.page_source, link, get_cards(driver))
+class Response:
+    def __init__(self, text, url) -> None:
+        self.text = text
+        self.url = url
 
 @processor()
 def scrape_aliexpress(
-        scrape_links: DF[ScrapeLinks], context: Context[ScrapeAliexpress]
+        scrape_links: DF[ScrapeLinks],
+        context: Context[ScrapeAliexpress]
     ):
     """Scrapes aliexpress.
 
@@ -179,7 +102,6 @@ def scrape_aliexpress(
         - `link` (str): containing web links to be scraped
 
     ## Output:
-
         Depends on the configuration, processor returns from 2 to 5 DataFrames.
 
         By default, it returns 5 DataFrames: text, images, properties, cards and errors.
@@ -405,70 +327,69 @@ def scrape_aliexpress(
     """ # noqa: E501
     sp_conf = context.app_cfg.get('spider_cfg', {})
     max_results = context.app_cfg.get('max_results', None)
+    driver = context.common
 
-    processes = []
-    with ProcessPoolExecutor(multiprocessing.cpu_count()) as executor:
-        for link in scrape_links['link'].to_list():
-            task = executor.submit(get_page, link=link, sp_conf=sp_conf)
-            processes.append((link, task))
+    text_df = []
+    image_df = []
+    card_df = []
+    props_df = []
+    for _, row in scrape_links.iterrows():
+        link = row['link']
+        file = open(context.get_share_path(row['filename'])).read()
 
-        text_df = []
-        image_df = []
-        errors_df = []
-        card_df = []
-        props_df = []
-        for link, task in processes:
-            response = task.result()
-            cards = response.cards
-            sel = scrapy.Selector(response)
+        sel = scrapy.Selector(Response(file, link))
 
-            not_found = sel.xpath("//h1[contains(@class, 'PageNotFound')]").getall()
-            if len(not_found) > 0:
-                errors_df.append([link, "404"])
-                continue
-            elif response.captcha:
-                errors_df.append([link, "captcha"])
-                continue
+        title = ' '.join(sel.xpath('//h1/text()').getall())
+        description = "" + sel.xpath(
+            "normalize-space(string(//div[@id = 'content_anchor']))"
+        ).get()
 
-            title = ' '.join(sel.xpath('//h1/text()').getall())
-            description = "" + ' '.join(sel.xpath(
-                "//div[@id = 'content_anchor']//*[not(self::img) and not(self::script) \
-                and not(self::div)]/text()"
-            ).getall())
+        description = re.sub(r'window.adminAccountId=.*;', '', description)
 
-            keys = sel.xpath(
-                "//div[@id = 'characteristics_anchor']//span[contains(@class, 'title')]/text()"  # noqa: E501
-            ).getall()
-            values = sel.xpath(
-                "//div[@id = 'characteristics_anchor']//span[contains(@class, 'value')]/text()" # noqa: E501
-            ).getall()
+        keys = sel.xpath(
+            "//div[@id = 'characteristics_anchor']//span[contains(@class, 'title')]/text()"  # noqa: E501
+        ).getall()
+        values = sel.xpath(
+            "//div[@id = 'characteristics_anchor']//span[contains(@class, 'value')]/text()" # noqa: E501
+        ).getall()
 
-            properties = {}
-            for key, val in zip(keys, values):
-                if key not in properties.keys():
-                    properties[key] = val
+        properties = {}
+        for key, val in zip(keys, values):
+            if key not in properties.keys():
+                properties[key] = val
 
-            images = sel.xpath("//div[contains(@class, 'gallery_Gallery__picList')]//picture//img/@src").getall()   # noqa: E501
-            images.extend(sel.xpath("//div[@id = 'content_anchor']//img/@src").getall())
+        images = sel.xpath("//div[contains(@class, 'gallery_Gallery__picList')]//picture//img/@src").getall()   # noqa: E501
+        images.extend(sel.xpath("//div[@id = 'content_anchor']//img/@src").getall())
 
-            text_df.append([
-                link,
-                f'Title:\n{title}\n\n' +
-                f'Description:\n{description}\n\n' +
-                f'Properties:\n{properties}\n\n' +
-                'Images:\n' + '\n'.join(images[:max_results])
-            ])
+        text = (
+            f'Title:\n{title}\n\n'
+            f'Description:\n{description}\n\n'
+            f'Properties:\n{properties}\n\n'
+        )
 
-            for image in images[:max_results]:
-                image_df.append([link, image])
 
+
+        for image in images[:max_results]:
+            image_df.append([link, image])
+
+        if row['cards']:
+            driver.get(f"file://{context.get_share_path(row['filename'])}")
+            cards = get_cards(context.common)
+            cards_str = 'Variants:\n'
             for key in cards.keys():
+                cards_str += key + '\n'
                 for val in cards[key]:
+                    cards_str += val + '\n'
                     card_df.append([link, key, val])
+            text += cards_str
 
-            for key in properties.keys():
-                props_df.append([link, key, properties[key]])
+        text_df.append([
+            link,
+            text
+        ])
 
+        for key in properties.keys():
+            props_df.append([link, key, properties[key]])
 
     return_df = []
 
@@ -486,6 +407,97 @@ def scrape_aliexpress(
             pd.DataFrame(card_df, columns=["link", "name", "value"])
         ])
 
-    return_df.append(pd.DataFrame(errors_df, columns=["link", "error"]))
-
     return return_df
+
+@processor()
+def get_matches(
+    text: DF,
+    keys: DF,
+    vals: DF,
+    kvals: DF,
+    context: Context
+):
+    """
+    Match key-value in text
+
+    ## Input:
+    Four dataframes. First one is Text DataFrame with columns:
+        - link (str): Aliexpress Link.
+        - text (str): Aliexpress product info.
+    ---
+
+    Second one is Keys DataFrame with columns:
+        - idx (int): Key ID.
+        - key (str): Key name.
+
+    ---
+
+    Third one is Values DataFrame with columns:
+        - idx (int): Value ID.
+        - value (str): Value name.
+
+    ---
+
+    The last is match DataFrame which contains key -> value mapping.
+        - key (int): Key ID.
+        - value (int): Value ID.
+
+    ## Output:
+    Three DataFrames with results. First DataFrame contains matches.
+        - link (str): Aliexpress link.
+        - key (int): Key ID.
+        - value (int): Value ID.
+    ---
+    Second one contains not matched keys.
+        - link (str): Aliexpress link.
+        - key (int): Key ID which wasn't found in the text.
+    ---
+    Third DF contains not matched values.
+        - link (str): Aliexpress link.
+        - key (int): Key ID which was found in the text.
+        - value (int): Value ID which was not found.
+    -----
+    Args:
+        text(DF): Text DataFrame.
+        keys(DF): Keys DataFrame.
+        values(DF): Values DataFrame.
+        kvals(DF): Key-Values Mapping.
+    Returns:
+        Match results.
+    """
+    keys_dict = {}
+    vals_dict = {}
+    props = {}
+    for _, row in keys.iterrows():
+        keys_dict[row['idx']] = row['key']
+
+    for _, row in vals.iterrows():
+        vals_dict[row['idx']] = row['value']
+
+    for kid in kvals['key'].unique():
+        props[kid] = kvals[kvals['key'] == kid]['value'].to_list()
+
+    matches = []
+    not_matched_keys = []
+    not_matched_value = []
+
+    for _, row in text.iterrows():
+        text_:str = row['text'].lower()
+        for char in string.punctuation:
+            if char in text_:
+                text_ = text_.replace(char, ' ')
+
+        for key in props.keys():
+            if keys_dict[key].lower() not in text_:
+                not_matched_keys.append([row['link'], key])
+            else:
+                for val in props[key]:
+                    if vals_dict[val].lower() in text_:
+                        matches.append([row['link'], key, val])
+                    else:
+                        not_matched_value.append(row['link'], key, val)
+    return (
+        pd.DataFrame(matches, columns=['link', 'key', 'value']),
+        pd.DataFrame(not_matched_keys, columns=['link', 'key']),
+        pd.DataFrame(not_matched_value, columns=['link', 'key', 'value'])
+    )
