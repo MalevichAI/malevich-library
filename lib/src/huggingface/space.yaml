@@ -11,6 +11,6 @@ huggingface:
     - title: Inference on token-classification model (NER, POS, etc.)
   repo_url: https://github.com/MalevichAI/malevich-library/tree/dev/lib/src/huggingface
   app:
-    container_ref: public.ecr.aws/u6e1k0c7/huggingface
+    container_ref: public.ecr.aws/o1z1g3t0/huggingface
     container_user: null
     container_token: null

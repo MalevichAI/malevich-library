@@ -13,6 +13,6 @@ scrape:
     - title: Search with Bing
   repo_url: https://github.com/MalevichAI/malevich-library/tree/dev/lib/src/scrape
   app:
-    container_ref: public.ecr.aws/u6e1k0c7/scrape
+    container_ref: public.ecr.aws/o1z1g3t0/scrape
     container_user: null
     container_token: null

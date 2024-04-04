@@ -7,7 +7,7 @@ linear:
   icon: component/linear.png
   repo_url: https://github.com/MalevichAI/malevich-library/tree/main/lib/src/linear
   app:
-    container_ref: public.ecr.aws/u6e1k0c7/linear
+    container_ref: public.ecr.aws/o1z1g3t0/linear
     container_user: null
     container_token: null
   tags:
