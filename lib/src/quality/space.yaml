@@ -5,7 +5,7 @@ geohero:
     - public
   icon: component/geohero.png
   app:
-    container_ref: public.ecr.aws/u6e1k0c7/geohero
+    container_ref: public.ecr.aws/o1z1g3t0/geohero
     container_user: null
     container_token: null
   tags:
