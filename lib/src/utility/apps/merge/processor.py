@@ -8,10 +8,21 @@ from .models import Merge
 
 def merge_dfs(dfs: List[DF[Any]], context: Context):
     # TODO: Document code
+    if 'both_on' in context.app_cfg and (
+       'left_on' in context.app_cfg or
+       'right_on' in context.app_cfg
+    ):
+        raise ValueError('both_on can not be provided with left_on or right_on')
+
     how = context.app_cfg.get('how', 'inner')
-    on = context.app_cfg.get('both_on', ('index' if how != 'cross' else None))
     left_on = context.app_cfg.get('left_on', None)
     right_on = context.app_cfg.get('right_on', None)
+    on = context.app_cfg.get(
+        'both_on',
+        (
+          'index' if how != 'cross' and not (left_on or right_on) else None
+        )
+    )
     suffixes = context.app_cfg.get('suffixes', ['_0', '_1'])
 
     flatten_dfs = []
