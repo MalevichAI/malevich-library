@@ -3,15 +3,21 @@ import os
 from itertools import islice
 
 import pandas as pd
-from apps.scrape_web import ScrapeLinks, run_spider
-from malevich.square import DF, Context, processor
+from apps.scrape_web import run_spider
+from malevich.square import DF, Context, processor, scheme
+from pydantic import BaseModel
 
 from .models import ScrapeBySelectors
 
 
+@scheme()
+class ScrapeLinksXpath(BaseModel):
+    link: str
+
+
 @processor()
 def scrape_by_selectors(
-    scrape_links: DF[ScrapeLinks],
+    scrape_links: DF[ScrapeLinksXpath],
     context: Context[ScrapeBySelectors]
     ):
     """
@@ -234,7 +240,7 @@ def scrape_by_selectors(
     -----
 
     Args:
-        scrape_links (DF[ScrapeLinks]): A dataframe with a column named `link` containing web links.
+        scrape_links (DF[ScrapeLinksXpath]): A dataframe with a column named `link` containing web links.
         context: The configuration dictionary. See [Available Options] for more information.
 
     Returns:
