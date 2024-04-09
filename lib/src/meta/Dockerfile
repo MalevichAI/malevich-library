@@ -5,4 +5,6 @@ RUN pip install -U pydantic
 RUN pip install -U https://github.com/MalevichAI/malevich/archive/feature/iso-installer.zip
 RUN malevich dev in-app-install
 
+COPY ./requirements.txt ./requirements.txt
+RUN pip install -r ./requirements.txt
 COPY  ./apps ./apps
