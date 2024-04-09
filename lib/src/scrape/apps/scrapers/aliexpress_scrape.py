@@ -73,7 +73,7 @@ def get_cards(driver: webdriver.Chrome):
     return chars_data
 
 @scheme()
-class ScrapeLinks(BaseModel):
+class ScrapeLinksAli(BaseModel):
     link: str
     filename: str
     cards: bool
@@ -91,7 +91,7 @@ class Response:
 
 @processor()
 def scrape_aliexpress(
-        scrape_links: DF[ScrapeLinks],
+        scrape_links: DF[ScrapeLinksAli],
         context: Context[ScrapeAliexpress]
     ):
     """Scrapes aliexpress.
@@ -319,7 +319,7 @@ def scrape_aliexpress(
     -----
 
     Args:
-        scrape_links (DF[ScrapeLinks]): A dataframe with a column named `link` containing web links.
+        scrape_links (DF[ScrapeLinksAli]): A dataframe with a column named `link` containing web links.
         context: The configuration dictionary. See [Available Options] for more information.
 
     Returns:
