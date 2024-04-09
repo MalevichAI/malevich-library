@@ -2,15 +2,22 @@ import os
 from itertools import islice
 
 import pandas as pd
-from apps.scrape_web import ScrapeLinks, run_spider
-from malevich.square import DF, Context, processor
+from apps.scrape_web import run_spider
+from malevich.square import DF, Context, processor, scheme
+from pydantic import BaseModel
 
 from .models import ScrapeGoogleSearch
 
 
+@scheme()
+class ScrapeLinksGoogle(BaseModel):
+    link: str
+
+
+
 @processor()
 def scrape_google_search(
-scrape_links: DF[ScrapeLinks],
+scrape_links: DF[ScrapeLinksGoogle],
     context: Context[ScrapeGoogleSearch]
     ):
     """
@@ -196,7 +203,7 @@ scrape_links: DF[ScrapeLinks],
     -----
 
     Args:
-        scrape_links (DF[ScrapeLinks]): A dataframe with a column named `link` containing web links.
+        scrape_links (DF[ScrapeLinksGoogle]): A dataframe with a column named `link` containing web links.
         context: The configuration dictionary. See [Available Options] for more information.
 
     Returns:
