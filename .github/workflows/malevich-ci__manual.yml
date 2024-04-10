@@ -31,9 +31,9 @@ jobs:
           ref: ${{ inputs.branch }}
       - name: Docker Login
         run: |
-          if [[ ${{ secrets.REGISTRY_TYPE }} == ecr* ]];
+          if [[ "${{ secrets.REGISTRY_TYPE }}" == ecr* ]];
           then
-            if [[ ${{ secrets.REGISTRY_TYPE}} == 'ecr-private' ]];
+            if [[ "${{ secrets.REGISTRY_TYPE}}" == 'ecr-private' ]];
               then
                 image_url=${{ secrets.REGISTRY_ID }}.dkr.ecr.us-east-1.amazonaws.com
               else
@@ -43,7 +43,7 @@ jobs:
             aws configure set aws_access_key_id ${{ secrets.IMAGE_USERNAME }}
             aws configure set aws_secret_access_key ${{ secrets.IMAGE_PASSWORD }}
             aws configure set region us-east-1
-            if [[ ${{ secrets.REGISTRY_TYPE}} == 'ecr-private' ]];
+            if [[ "${{ secrets.REGISTRY_TYPE}}" == 'ecr-private' ]];
             then
               token=$(aws ecr get-login-password)
             else
@@ -74,7 +74,7 @@ jobs:
       
       - name: Build, Test and Push
         run: |
-          if [[ ${{ inputs.apps }} == "all" ]];
+          if [[ "${{ inputs.apps }}" == "all" ]];
           then
             dirs=$(git log --name-only -1 | grep '/' | cut -d '/' -f3 | sort -u)
           else
@@ -83,12 +83,12 @@ jobs:
           fi
           errors=()
           commit_sha=$(git rev-parse HEAD)
-          if [[ ${dirs[0]} == "" ]]; 
+          if [[ "${dirs[0]}" == "" ]]; 
           then
             echo "No changed directories, exiting..."
             exit 0
           fi
-          if [[ ${{ secrets.REGISTRY_TYPE }} == 'ecr-private' ]]; 
+          if [[ "${{ secrets.REGISTRY_TYPE }}" == 'ecr-private' ]]; 
           then
             image_url=${{ secrets.REGISTRY_ID }}.dkr.ecr.us-east-1.amazonaws.com
           else
@@ -99,13 +99,13 @@ jobs:
             dir=$( echo $dir | xargs )
             dir=lib/src/$dir
             name=$(basename $dir)
-            if [[ $dir != *.* ]] && [[ -e $dir ]] && [[ -f $dir/Dockerfile ]]; 
+            if [[ "$dir" != *.* ]] && [[ -e "$dir" ]] && [[ -f "$dir/Dockerfile" ]]; 
             then
               if [[ ${{ inputs.build }} == 'true' ]];
               then
                 build_context=$dir
                 build_file=$dir/Dockerfile
-                if [[ -f $dir/.buildconf ]];
+                if [[ -f "$dir/.buildconf" ]];
                 then
                   build_context=$( cat $dir/.buildconf | grep "BuildContext" || echo "context ${build_context}" )
                   build_context=$( echo $build_context | cut -d ' ' -f2 )
@@ -114,10 +114,10 @@ jobs:
                 fi
                 echo "Building ${name}"
                 docker build -q -t $image_url/$name:$commit_sha -f $build_file $build_context || { echo "::warning::Failed to build ${name}" ; errors+=("${name}") ; continue ;}
-                if [[ ${{ secrets.REGISTRY_TYPE}} == ecr* ]]; 
+                if [[ "${{ secrets.REGISTRY_TYPE}}" == ecr* ]]; 
                 then
                   echo "Finding/Creating AWS repository"
-                  if [[ ${{ secrets.REGISTRY_TYPE}} == "ecr" ]]; 
+                  if [[ "${{ secrets.REGISTRY_TYPE}}" == "ecr" ]]; 
                   then
                     aws ecr-public describe-repositories --repository-names $name > /dev/null || \
                     aws ecr-public create-repository --repository-name $name > /dev/null 
@@ -129,7 +129,7 @@ jobs:
                 echo "Pushing ${name} "
                 docker push -q --all-tags $image_url/$name || { echo "::warning::Failed to push ${name}" ; errors+=("${name}") ; continue ;}
               fi
-              if [[ -f .github/workflows/app.py ]] && [[ -f $dir/space.yaml ]];  
+              if [[ -f ".github/workflows/app.py" ]] && [[ -f "$dir/space.yaml" ]];  
               then
                 python3 .github/workflows/app.py --path "lib/src/${name}/space.yaml" --url "$image_url/$name:$commit_sha" && \
                 echo "::notice::${name} configured"
@@ -138,7 +138,7 @@ jobs:
               fi
 
               echo -n "Testing ${name} "  
-              if [[ ${{ secrets.IMAGE_USERNAME }} == "$(cat USERNAME)" ]] && [[ ${{ secrets.IMAGE_PASSWORD}} == "$(cat PASSWORD)" ]]; 
+              if [[ "${{ secrets.IMAGE_USERNAME }}" == "$(cat USERNAME)" ]] && [[ "${{ secrets.IMAGE_PASSWORD}}" == "$(cat PASSWORD)" ]]; 
               then
                 echo "with credentials"
                 space ci report ./$dir ${{ steps.extract_branch.outputs.branch }} \
@@ -155,7 +155,7 @@ jobs:
                 --space-username=${{ secrets.SPACE_USERNAME }} --space-password=${{ secrets.SPACE_PASSWORD }} --space-org=${{ secrets.ORG_ID }} \
                 ${{ secrets.API_URL }} || { echo "::warning::Failed to report ${name}" ; errors+=("${name}") ;}
               fi
-              if [[ ${{ inputs.build }} == 'true' ]];
+              if [[ '${{ inputs.build }}' == 'true' ]];
               then  
                 echo "Tagging ${name} as latest and pushing"
                 docker tag $image_url/$name:$commit_sha $image_url/$name:latest
