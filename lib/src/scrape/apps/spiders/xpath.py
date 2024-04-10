@@ -13,7 +13,8 @@ class XpathSpider(scrapy.Spider):
             start_urls,
             components,
             output_type='json',
-            include_keys=False,
+            include_keys=True,
+            output_delim='\n',
             *args,
             **kwargs
         ) -> None:
@@ -22,6 +23,7 @@ class XpathSpider(scrapy.Spider):
         self.config = components
         self.type = output_type
         self._include_keys = include_keys
+        self.output_delim = output_delim
 
     def start_requests(self):
         for url in self.start_urls:
@@ -34,7 +36,7 @@ class XpathSpider(scrapy.Spider):
 
     def parse(self, response: scrapy.http.Response):
         selector = scrapy.Selector(response)
-        outputs = {} if self.type == 'json' else []
+        outputs = {} if self.type != 'text' else []
         for cfg in self.config:
             data = []
             count = cfg.get('count', None)
@@ -53,14 +55,22 @@ class XpathSpider(scrapy.Spider):
                     data[i] = data[i].replace('\n', '\\n')
                     data[i] = data[i].replace('\t', '\\t')
 
-            if self.type == 'json':
+            if self.type != 'text':
                 outputs[cfg['key']] = data
             else:
-                outputs.append('\n'.join(data))
-        if self.type == 'json':
-            yield {'text': json.dumps(outputs, ensure_ascii=False)}
+                if self._include_keys:
+                    outputs.append(
+                        f'{data[0]}\n' +
+                        f'{self.output_delim}'.join(data[1:])
+                    )
+                else:
+                    outputs.append(
+                        f'{self.output_delim}'.join(data)
+                    )
+        if self.type != 'text':
+            yield {'text': json.dumps(outputs, ensure_ascii=False), 'url': response.url}
         else:
-            yield {'text': '\n\n'.join(outputs)}
+            yield {'text': '\n\n'.join(outputs), 'url': response.url}
 
 
 
