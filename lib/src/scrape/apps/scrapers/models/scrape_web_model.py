@@ -2,10 +2,10 @@
 #   filename:  scrape_web_model.json
 
 from __future__ import annotations
+from malevich.square import scheme
 
 from typing import Any, Dict, List, Optional
 
-from malevich.square import scheme
 from pydantic import BaseModel, Field
 
 
