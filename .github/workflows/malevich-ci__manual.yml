@@ -13,6 +13,11 @@ on:
         options:
         - 'true'
         - 'false'
+      apps:
+        description: 'Which things to build'
+        required: false
+        default: 'all'
+
 jobs:
   build_push:
     environment: ${{ inputs.branch }}
@@ -69,7 +74,13 @@ jobs:
       
       - name: Build, Test and Push
         run: |
-          dirs=$(git log --name-only -1 | grep '/' | cut -d '/' -f3 | sort -u)
+          if [[ ${{ inputs.apps }} == "all" ]];
+          then
+            dirs=$(git log --name-only -1 | grep '/' | cut -d '/' -f3 | sort -u)
+          else
+            IFS=','
+            read -r -a dirs <<< "${{ inputs.apps }}"
+          fi
           errors=()
           commit_sha=$(git rev-parse HEAD)
           if [[ ${dirs[0]} == "" ]]; 
