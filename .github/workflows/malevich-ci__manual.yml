@@ -80,7 +80,9 @@ jobs:
           else
             IFS=','
             read -r -a dirs <<< "${{ inputs.apps }}"
+            dirs=${dirs[@]}
           fi
+          IFS=' '
           errors=()
           commit_sha=$(git rev-parse HEAD)
           if [[ "${dirs[0]}" == "" ]]; 
