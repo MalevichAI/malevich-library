@@ -68,11 +68,11 @@ def scrape_by_selectors(
         - `components`: list[dict], default [].
             A list of components with keys and Xpaths need to be found.
 
-        - `output_type`: str, default 'json'.
+        - `output_type`: str, default 'single_table'.
             Output type of scraping results.
                 In case of 'disjoint' will return a DataFrame for every key.
                 For 'single_table' will return a DataFrame in format [link, key, value].
-                In case of 'j   son' or 'text' will return a DataFrame in format [link, result].
+                In case of 'json' or 'text' will return a DataFrame in format [link, result].
 
         - `output_delimeter`: str, default '\\n'.
             If output_type is text, will use this delimeter to combine values.

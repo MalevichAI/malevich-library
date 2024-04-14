@@ -76,7 +76,6 @@ def get_cards(driver: webdriver.Chrome):
 class ScrapeLinksAli(BaseModel):
     link: str
     filename: str
-    cards: bool
 
 
 @scheme()
@@ -372,7 +371,7 @@ def scrape_aliexpress(
         for image in images[:max_results]:
             image_df.append([link, image])
 
-        if row['cards']:
+        if sel.xpath("//div[@data-spm = 'sku_floor']//ul").get() is not None:
             driver.get(f"file://{context.get_share_path(row['filename'])}")
             cards = get_cards(context.common)
             cards_str = 'Variants:\n'
