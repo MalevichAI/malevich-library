@@ -26,6 +26,7 @@ def get_page(link, token):
         f"https://api.crawlbase.com/?token={token}"
         f"&url={quote(link, safe='')}&page_wait=3000"
     )
+    print(f'Requesting {link} ...')
     return requests.get(
         link
     ).text
@@ -64,7 +65,7 @@ def get_page_crawlbase_ali(df: DF[CrawlBase], context: Context[GetPageCrawlbaseA
             task = executor.submit(
                 get_page,
                 link=pr,
-                token=context.app_cfg.get('crawlbase_token')
+                token=context.app_cfg.get('token')
             )
             results.append((pr, task))
         for link, thrd in results:
