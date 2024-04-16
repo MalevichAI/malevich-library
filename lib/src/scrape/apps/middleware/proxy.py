@@ -64,7 +64,7 @@ def get_page_crawlbase_ali(df: DF[CrawlBase], context: Context[GetPageCrawlbaseA
             task = executor.submit(
                 get_page,
                 link=pr,
-                token=context.app_cfg.get('crawlbase_token')
+                token=context.app_cfg.get('token')
             )
             results.append((pr, task))
         for link, thrd in results:
