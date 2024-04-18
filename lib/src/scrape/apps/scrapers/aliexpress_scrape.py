@@ -4,7 +4,7 @@ import string
 import pandas as pd
 import scrapy
 from fake_useragent import UserAgent
-from malevich.square import DF, Context, init, processor, scheme
+from malevich.square import DF, Context, processor, scheme
 from pydantic import BaseModel
 from selenium import webdriver
 from selenium.webdriver.common.by import By
