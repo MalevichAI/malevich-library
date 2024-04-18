@@ -24,12 +24,12 @@ class Response:
 def get_page(link, token):
     link = (
         f"https://api.crawlbase.com/?token={token}"
-        f"&url={quote(link, safe='')}&page_wait=3000"
+        f"&url={quote(link, safe='')}&page_wait=6000&ajax_wait=5000"
     )
     print(f'Requesting {link} ...')
     return requests.get(
         link
-    ).text
+    )
 
 @processor()
 def get_page_crawlbase_ali(df: DF[CrawlBase], context: Context[GetPageCrawlbaseAli]):
@@ -69,7 +69,11 @@ def get_page_crawlbase_ali(df: DF[CrawlBase], context: Context[GetPageCrawlbaseA
             )
             results.append((pr, task))
         for link, thrd in results:
-            data = thrd.result()
+            response = thrd.result()
+            if response.status_code >= 400:
+                captcha.append([link, response.status_code])
+                continue
+            data = response.text
             sel = Selector(Response(data, link))
 
             if sel.xpath("//div[@class = 'scratch-captcha-title']").get() is not None:
