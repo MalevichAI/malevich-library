@@ -34,7 +34,10 @@ def _squash_column_df(
     df_ = df.copy()
     # Turn all specified columns into strings
     df_[columns] = df_[columns].astype(str)
-    df_[res_col_name] = df_[columns].apply(lambda row: delim.join(row), axis=1)
+    if not df_.empty:
+         df_[res_col_name] = df_[columns].apply(
+             lambda row: delim.join(row), axis=1
+        )
     if drop:
         df_.drop(columns=columns, inplace=True)
     return df_
