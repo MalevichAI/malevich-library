@@ -3,15 +3,21 @@ import os
 from itertools import islice
 
 import pandas as pd
-from apps.scrape_web import ScrapeLinks, run_spider
-from malevich.square import DF, Context, processor
+from apps.scrape_web import run_spider
+from malevich.square import DF, Context, processor, scheme
+from pydantic import BaseModel
 
 from .models import ScrapeBySelectors
 
 
+@scheme()
+class ScrapeLinksXpath(BaseModel):
+    link: str
+
+
 @processor()
 def scrape_by_selectors(
-    scrape_links: DF[ScrapeLinks],
+    scrape_links: DF[ScrapeLinksXpath],
     context: Context[ScrapeBySelectors]
     ):
     """
@@ -59,6 +65,20 @@ def scrape_by_selectors(
                 By default, `allowed_domains` is set to an empty list, so the
                 app will traverse the entire web.
 
+        - `components`: list[dict], default [].
+            A list of components with keys and Xpaths need to be found.
+
+        - `output_type`: str, default 'single_table'.
+            Output type of scraping results.
+                In case of 'disjoint' will return a DataFrame for every key.
+                For 'single_table' will return a DataFrame in format [link, key, value].
+                In case of 'json' or 'text' will return a DataFrame in format [link, result].
+
+        - `output_delimeter`: str, default '\\n'.
+            If output_type is text, will use this delimeter to combine values.
+
+        - `include_keys`: bool, default False.
+            If output_type is text and set to True, will include keys into the text.
 
         - `max_depth`: int, default 0.
             The maximum depth to traverse the web.
@@ -234,16 +254,49 @@ def scrape_by_selectors(
     -----
 
     Args:
-        scrape_links (DF[ScrapeLinks]): A dataframe with a column named `link` containing web links.
+        scrape_links (DF[ScrapeLinksXpath]): A dataframe with a column named `link` containing web links.
         context: The configuration dictionary. See [Available Options] for more information.
 
     Returns:
         A dataframe with a textual column named `result`
     """ # noqa: E501
     context.app_cfg['spider'] = 'xpath'
+
+    if context.app_cfg.get('spider_cfg', None) is None :
+            context.app_cfg['spider_cfg'] = {}
+
+    if context.app_cfg.get('components', None) is not None:
+        components = context.app_cfg.pop('components')
+        if 'components' not in context.app_cfg['spider_cfg']:
+            context.app_cfg['spider_cfg']['components'] = components
+    else:
+        components = context.app_cfg['spider_cfg'].get('components', [])
+
+    if context.app_cfg.get('output_type', None) is not None:
+        output_type = context.app_cfg.pop('output_type')
+        if 'output_type' not in context.app_cfg['spider_cfg']:
+            context.app_cfg['spider_cfg']['output_type'] = output_type
+    else:
+        output_type = context.app_cfg['spider_cfg'].get('output_type', 'single_table')
+
+    if context.app_cfg.get('include_keys', None) is not None:
+        include = context.app_cfg.pop('include_keys')
+        context.app_cfg['spider_cfg']['include_keys'] = include
+
+    context.app_cfg['spider_cfg']['output_delim'] = context.app_cfg.get(
+        'output_delimeter',
+        '\n'
+    )
+
     procs, ids = run_spider(scrape_links, context)
     results = []
     timeout = context.app_cfg.get('timeout', 15)
+
+    if output_type == 'disjoint':
+        disjoint = {}
+        for component in components:
+            disjoint[component['key']] = []
+
     for proc_, _id in zip(procs, ids):
         proc_.join(timeout * len(procs) if timeout > 0 else None)
         # Raise if proc failed
@@ -261,29 +314,42 @@ def scrape_by_selectors(
             if max_results == 0:
                 max_results = len(df)
 
-            # results_ = [item['text'] for item in islice(df, max_results)]
-            columns = []
-            for item in islice(df, max_results):
-                data = json.loads(item['text'])
-                result_ = []
-                columns = []
-                for key, val in data.items():
-                    columns.append(key)
-                    if isinstance(val, list):
-                        string = '\n'.join(val)
-                        print(string)
-                        print(string.strip(""))
-                        result_.append(string.strip("\\n \""))
-                    else:
-                        result_.append(val)
-                results.append(result_)
+            if output_type == 'disjoint':
+                for item in islice(df, max_results):
+                    data = json.loads(item['text'])
+                    link = item['url']
+                    for key, val in data.items():
+                        for v in val:
+                            disjoint[key].append(
+                                [
+                                    link,
+                                    v
+                                ]
+                            )
 
-            # if context.app_cfg.get('squash_results', False) \
-            #     or context.app_cfg.get('links_are_independent', False):
-            #     results.append(
-            #         context.app_cfg.get('squash_delimiter',
-            #                             '\n').join(results_)
-            #     )
-            # else:
-            #     results.extend(results_)
-    return pd.DataFrame(results, columns=columns)
+            elif output_type == 'single_table':
+                for item in islice(df, max_results):
+                    data = json.loads(item['text'])
+                    link = item['url']
+                    for i, (key, val) in enumerate(data.items()):
+                        for v in val:
+                            results.append([i, link, key, v])
+
+            else:
+                for item in islice(df, max_results):
+                    results.append([item['url'], item['text']])
+
+    if output_type == 'disjoint':
+        ret = [
+            pd.DataFrame(
+                val,
+                columns=['link', key]
+            ) for key, val in disjoint.items()
+        ]
+        return ret
+
+    return pd.DataFrame(
+        results,
+        columns=['idx', 'link', 'key', 'value']
+        if output_type == 'single_table' else ['link', 'result']
+    )

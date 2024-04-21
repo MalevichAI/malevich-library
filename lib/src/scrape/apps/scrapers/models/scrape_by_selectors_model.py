@@ -2,10 +2,10 @@
 #   filename:  scrape_by_selectors_model.json
 
 from __future__ import annotations
+from malevich.square import scheme
 
 from typing import Any, Dict, List, Optional
 
-from malevich.square import scheme
 from pydantic import BaseModel, Field
 
 
@@ -13,6 +13,20 @@ from pydantic import BaseModel, Field
 class ScrapeBySelectors(BaseModel):
     allowed_domains: Optional[List[str]] = Field(
         None, description='A list of allowed domains to scrape'
+    )
+    components: Optional[List[Dict[str, Any]]] = Field(
+        [], description='A list of components with keys and Xpaths need to be found'
+    )
+    output_type: Optional[str] = Field(
+        'json', description='Output type of scraping results'
+    )
+    output_delimeter: Optional[str] = Field(
+        '\n',
+        description='If output_type is text, will use this delimeter to combine values',
+    )
+    include_keys: Optional[bool] = Field(
+        False,
+        description='If output_type is text and set to True, will include keys into the text',
     )
     max_depth: Optional[int] = Field(
         0, description='The maximum depth to traverse the web'
