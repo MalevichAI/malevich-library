@@ -4,24 +4,12 @@ import string
 import pandas as pd
 import scrapy
 from fake_useragent import UserAgent
-from malevich.square import DF, Context, init, processor, scheme
+from malevich.square import DF, Context, processor, scheme
 from pydantic import BaseModel
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 
 from .models import ScrapeAliexpress
-
-
-@init()
-def init_driver(context: Context):
-    options = webdriver.ChromeOptions()
-    options.add_argument("--no-sandbox")
-    options.add_argument("--disable-dev-shm-usage")
-    options.add_argument("--ignore-certificate-errors")
-    options.add_argument("--headless")
-    options.add_argument("--disable-blink-features=AutomationControlled")
-    options.add_argument(f"--user-agent={UserAgent(browsers=['chrome']).random}")  # noqa: E501
-    context.common = webdriver.Chrome(options)
 
 
 def get_cards(driver: webdriver.Chrome):
@@ -73,10 +61,9 @@ def get_cards(driver: webdriver.Chrome):
     return chars_data
 
 @scheme()
-class ScrapeLinks(BaseModel):
+class ScrapeLinksAli(BaseModel):
     link: str
     filename: str
-    cards: bool
 
 
 @scheme()
@@ -91,7 +78,7 @@ class Response:
 
 @processor()
 def scrape_aliexpress(
-        scrape_links: DF[ScrapeLinks],
+        scrape_links: DF[ScrapeLinksAli],
         context: Context[ScrapeAliexpress]
     ):
     """Scrapes aliexpress.
@@ -319,7 +306,7 @@ def scrape_aliexpress(
     -----
 
     Args:
-        scrape_links (DF[ScrapeLinks]): A dataframe with a column named `link` containing web links.
+        scrape_links (DF[ScrapeLinksAli]): A dataframe with a column named `link` containing web links.
         context: The configuration dictionary. See [Available Options] for more information.
 
     Returns:
@@ -327,7 +314,14 @@ def scrape_aliexpress(
     """ # noqa: E501
     sp_conf = context.app_cfg.get('spider_cfg', {})
     max_results = context.app_cfg.get('max_results', None)
-    driver = context.common
+    options = webdriver.ChromeOptions()
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--ignore-certificate-errors")
+    options.add_argument("--headless")
+    options.add_argument("--disable-blink-features=AutomationControlled")
+    options.add_argument(f"--user-agent={UserAgent(browsers=['chrome']).random}")  # noqa: E501
+    driver = webdriver.Chrome(options)
 
     text_df = []
     image_df = []
@@ -372,9 +366,9 @@ def scrape_aliexpress(
         for image in images[:max_results]:
             image_df.append([link, image])
 
-        if row['cards']:
+        if sel.xpath("//div[@data-spm = 'sku_floor']//ul").get() is not None:
             driver.get(f"file://{context.get_share_path(row['filename'])}")
-            cards = get_cards(context.common)
+            cards = get_cards(driver)
             cards_str = 'Variants:\n'
             for key in cards.keys():
                 cards_str += key + '\n'

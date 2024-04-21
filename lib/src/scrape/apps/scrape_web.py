@@ -21,10 +21,6 @@ SPIDERS = {
     'xpath': 'apps.spiders.xpath.XpathSpider',
 }
 
-@scheme()
-class ScrapeLinks(BaseModel):
-    link: str
-
 
 @scheme()
 class ScrapeResult(BaseModel):
@@ -32,7 +28,7 @@ class ScrapeResult(BaseModel):
 
 
 def run_spider(
-        scrape_links: DF[ScrapeLinks],
+        scrape_links: DF,
         context: Context
     ):
     spider_cls = SPIDERS.get(context.app_cfg.get('spider', 'text'))
