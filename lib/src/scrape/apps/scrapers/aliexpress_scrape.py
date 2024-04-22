@@ -367,16 +367,18 @@ def scrape_aliexpress(
             image_df.append([link, image])
 
         if sel.xpath("//div[@data-spm = 'sku_floor']//ul").get() is not None:
-            driver.get(f"file://{context.get_share_path(row['filename'])}")
-            cards = get_cards(driver)
-            cards_str = 'Variants:\n'
-            for key in cards.keys():
-                cards_str += key + '\n'
-                for val in cards[key]:
-                    cards_str += val + '\n'
-                    card_df.append([link, key, val])
-            text += cards_str
-
+            try:
+                driver.get(f"file://{context.get_share_path(row['filename'])}")
+                cards = get_cards(driver)
+                cards_str = 'Variants:\n'
+                for key in cards.keys():
+                    cards_str += key + '\n'
+                    for val in cards[key]:
+                        cards_str += val + '\n'
+                        card_df.append([link, key, val])
+                text += cards_str
+            except Exception:
+                ...
         text_df.append([
             link,
             text
