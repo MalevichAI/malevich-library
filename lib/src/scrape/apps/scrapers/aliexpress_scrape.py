@@ -341,7 +341,7 @@ def scrape_aliexpress(
         description = re.sub(r'window.adminAccountId=.*;', '', description)
 
         keys = sel.xpath(
-            "//div[@id = 'characteristics_anchor']//span[contains(@class, 'title')]/text()"  # noqa: E501
+            "//div[@id = 'characteristics_anchor']//span[contains(@class, 'name')]/text()"  # noqa: E501
         ).getall()
         values = sel.xpath(
             "//div[@id = 'characteristics_anchor']//span[contains(@class, 'value')]/text()" # noqa: E501
