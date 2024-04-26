@@ -4,13 +4,24 @@ import string
 import pandas as pd
 import scrapy
 from fake_useragent import UserAgent
-from malevich.square import DF, Context, processor, scheme
+from malevich.square import DF, Context, init, processor, scheme
 from pydantic import BaseModel
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 
 from .models import ScrapeAliexpress
 
+
+@init()
+def init_driver(ctx: Context):
+    options = webdriver.ChromeOptions()
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--ignore-certificate-errors")
+    options.add_argument("--headless")
+    options.add_argument("--disable-blink-features=AutomationControlled")
+    options.add_argument(f"--user-agent={UserAgent(browsers=['chrome']).random}")  # noqa: E501
+    ctx.common = webdriver.Chrome(options)
 
 def get_cards(driver: webdriver.Chrome):
     chars_data = {}
@@ -314,14 +325,7 @@ def scrape_aliexpress(
     """ # noqa: E501
     sp_conf = context.app_cfg.get('spider_cfg', {})
     max_results = context.app_cfg.get('max_results', None)
-    options = webdriver.ChromeOptions()
-    options.add_argument("--no-sandbox")
-    options.add_argument("--disable-dev-shm-usage")
-    options.add_argument("--ignore-certificate-errors")
-    options.add_argument("--headless")
-    options.add_argument("--disable-blink-features=AutomationControlled")
-    options.add_argument(f"--user-agent={UserAgent(browsers=['chrome']).random}")  # noqa: E501
-    driver = webdriver.Chrome(options)
+    driver = context.common
 
     text_df = []
     image_df = []
@@ -330,7 +334,6 @@ def scrape_aliexpress(
     for _, row in scrape_links.iterrows():
         link = row['link']
         file = open(context.get_share_path(row['filename'])).read()
-
         sel = scrapy.Selector(Response(file, link))
 
         title = ' '.join(sel.xpath('//h1/text()').getall())
@@ -341,7 +344,7 @@ def scrape_aliexpress(
         description = re.sub(r'window.adminAccountId=.*;', '', description)
 
         keys = sel.xpath(
-            "//div[@id = 'characteristics_anchor']//span[contains(@class, 'title')]/text()"  # noqa: E501
+            "//div[@id = 'characteristics_anchor']//span[contains(@class, 'title') or contains(@class, 'name')]/text()"  # noqa: E501
         ).getall()
         values = sel.xpath(
             "//div[@id = 'characteristics_anchor']//span[contains(@class, 'value')]/text()" # noqa: E501

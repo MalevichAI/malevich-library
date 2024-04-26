@@ -31,9 +31,20 @@ def get_page(link, token):
         link
     )
 
+def get_page_scrape(link, token):
+    payload = {
+        'api_key': token,
+        'url': link,
+        'render': True,
+        'wait_for_selector': 'div#characteristics_anchor',
+        'country_code': 'us',
+        'device_type': 'desktop'
+    }
+    return requests.get('https://api.scraperapi.com/', params=payload)
+
 @processor()
 def get_page_crawlbase_ali(df: DF[CrawlBase], context: Context[GetPageCrawlbaseAli]):
-    """Get aliexpress product page using CrawlBase API
+    """Get aliexpress product page using API
     ## Input:
         A DataFrame with columns:
             - link (str): Link to a page.
@@ -49,8 +60,9 @@ def get_page_crawlbase_ali(df: DF[CrawlBase], context: Context[GetPageCrawlbaseA
 
     ## Configuration:
         - token: str.
-            CrawlBase API token (https://crawlbase.com/).
-
+            API token (CrawlBase or ScrapeAPI).
+        - api: str, default "crawlbase".
+            Which API to use: CrawlBase or ScrapeAPI.
     -----
     Args:
         df(DF[CrawlBase]): DataFrame with aliexpress links.
@@ -63,7 +75,10 @@ def get_page_crawlbase_ali(df: DF[CrawlBase], context: Context[GetPageCrawlbaseA
     with ThreadPoolExecutor(15) as executor:
         for pr in df['link'].to_list():
             task = executor.submit(
-                get_page,
+                (
+                    get_page if context.app_cfg.get('api', 'crawlbase') == 'crawlbase'
+                    else get_page_scrape
+                ),
                 link=pr,
                 token=context.app_cfg.get('token')
             )
