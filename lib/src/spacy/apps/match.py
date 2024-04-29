@@ -127,7 +127,7 @@ def get_matches(
                     if vals_dict[val].lower() in text_:
                         matches.append([row['link'], key, val])
                     else:
-                        not_matched_value.append(row['link'], key, val)
+                        not_matched_value.append([row['link'], key, val])
     return (
         pd.DataFrame(matches, columns=['link', 'key', 'value']),
         pd.DataFrame(not_matched_keys, columns=['link', 'key']),
@@ -177,8 +177,6 @@ def get_matches_sm(text: DF, kvals: DF, context: Context):
         props[key] = vals_
 
     matches = []
-    not_matched_keys = []
-    not_matched_value = []
 
     for _, row in text.iterrows():
         text_:str = row['text'].lower()
@@ -187,14 +185,11 @@ def get_matches_sm(text: DF, kvals: DF, context: Context):
                 text_ = text_.replace(char, ' ')
 
         for key in props.keys():
-            if key.lower() not in text_:
-                not_matched_keys.append([row['link'], key])
-            else:
+            if key.lower() in text_:
                 for val in props[key]:
                     if val.lower() in text_:
                         matches.append([row['link'], key, val])
-                    else:
-                        not_matched_value.append(row['link'], key, val)
+
 
     matches = pd.DataFrame(matches, columns=['link', 'key', 'value'])
     if (len(matches) > 0 and context.app_cfg.get('squash_columns', False)):
