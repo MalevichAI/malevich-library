@@ -1,16 +1,26 @@
 import re
-import string
 
 import pandas as pd
 import scrapy
 from fake_useragent import UserAgent
-from malevich.square import DF, Context, processor, scheme
+from malevich.square import DF, Context, init, processor, scheme
 from pydantic import BaseModel
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 
 from .models import ScrapeAliexpress
 
+
+@init()
+def init_driver(ctx: Context):
+    options = webdriver.ChromeOptions()
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--ignore-certificate-errors")
+    options.add_argument("--headless")
+    options.add_argument("--disable-blink-features=AutomationControlled")
+    options.add_argument(f"--user-agent={UserAgent(browsers=['chrome']).random}")  # noqa: E501
+    ctx.common = webdriver.Chrome(options)
 
 def get_cards(driver: webdriver.Chrome):
     chars_data = {}
@@ -314,14 +324,7 @@ def scrape_aliexpress(
     """ # noqa: E501
     sp_conf = context.app_cfg.get('spider_cfg', {})
     max_results = context.app_cfg.get('max_results', None)
-    options = webdriver.ChromeOptions()
-    options.add_argument("--no-sandbox")
-    options.add_argument("--disable-dev-shm-usage")
-    options.add_argument("--ignore-certificate-errors")
-    options.add_argument("--headless")
-    options.add_argument("--disable-blink-features=AutomationControlled")
-    options.add_argument(f"--user-agent={UserAgent(browsers=['chrome']).random}")  # noqa: E501
-    driver = webdriver.Chrome(options)
+    driver = context.common
 
     text_df = []
     image_df = []
@@ -330,7 +333,6 @@ def scrape_aliexpress(
     for _, row in scrape_links.iterrows():
         link = row['link']
         file = open(context.get_share_path(row['filename'])).read()
-
         sel = scrapy.Selector(Response(file, link))
 
         title = ' '.join(sel.xpath('//h1/text()').getall())
@@ -341,7 +343,7 @@ def scrape_aliexpress(
         description = re.sub(r'window.adminAccountId=.*;', '', description)
 
         keys = sel.xpath(
-            "//div[@id = 'characteristics_anchor']//span[contains(@class, 'title')]/text()"  # noqa: E501
+            "//div[@id = 'characteristics_anchor']//span[contains(@class, 'title') or contains(@class, 'name')]/text()"  # noqa: E501
         ).getall()
         values = sel.xpath(
             "//div[@id = 'characteristics_anchor']//span[contains(@class, 'value')]/text()" # noqa: E501
@@ -352,7 +354,7 @@ def scrape_aliexpress(
             if key not in properties.keys():
                 properties[key] = val
 
-        images = sel.xpath("//div[contains(@class, 'gallery_Gallery__picList')]//picture//img/@src").getall()   # noqa: E501
+        images = sel.xpath("//div[contains(@class, 'Grid')]//div[contains(@class, 'gallery_Gallery__picList')]//picture//img/@src").getall()   # noqa: E501
         images.extend(sel.xpath("//div[@id = 'content_anchor']//img/@src").getall())
 
         text = (
@@ -367,16 +369,18 @@ def scrape_aliexpress(
             image_df.append([link, image])
 
         if sel.xpath("//div[@data-spm = 'sku_floor']//ul").get() is not None:
-            driver.get(f"file://{context.get_share_path(row['filename'])}")
-            cards = get_cards(driver)
-            cards_str = 'Variants:\n'
-            for key in cards.keys():
-                cards_str += key + '\n'
-                for val in cards[key]:
-                    cards_str += val + '\n'
-                    card_df.append([link, key, val])
-            text += cards_str
-
+            try:
+                driver.get(f"file://{context.get_share_path(row['filename'])}")
+                cards = get_cards(driver)
+                cards_str = 'Variants:\n'
+                for key in cards.keys():
+                    cards_str += key + '\n'
+                    for val in cards[key]:
+                        cards_str += val + '\n'
+                        card_df.append([link, key, val])
+                text += cards_str
+            except Exception:
+                ...
         text_df.append([
             link,
             text
@@ -402,96 +406,3 @@ def scrape_aliexpress(
         ])
 
     return return_df
-
-@processor()
-def get_matches(
-    text: DF,
-    keys: DF,
-    vals: DF,
-    kvals: DF,
-    context: Context
-):
-    """
-    Match key-value in text
-
-    ## Input:
-    Four dataframes. First one is Text DataFrame with columns:
-        - link (str): Aliexpress Link.
-        - text (str): Aliexpress product info.
-    ---
-
-    Second one is Keys DataFrame with columns:
-        - idx (int): Key ID.
-        - key (str): Key name.
-
-    ---
-
-    Third one is Values DataFrame with columns:
-        - idx (int): Value ID.
-        - value (str): Value name.
-
-    ---
-
-    The last is match DataFrame which contains key -> value mapping.
-        - key (int): Key ID.
-        - value (int): Value ID.
-
-    ## Output:
-    Three DataFrames with results. First DataFrame contains matches.
-        - link (str): Aliexpress link.
-        - key (int): Key ID.
-        - value (int): Value ID.
-    ---
-    Second one contains not matched keys.
-        - link (str): Aliexpress link.
-        - key (int): Key ID which wasn't found in the text.
-    ---
-    Third DF contains not matched values.
-        - link (str): Aliexpress link.
-        - key (int): Key ID which was found in the text.
-        - value (int): Value ID which was not found.
-    -----
-    Args:
-        text(DF): Text DataFrame.
-        keys(DF): Keys DataFrame.
-        values(DF): Values DataFrame.
-        kvals(DF): Key-Values Mapping.
-    Returns:
-        Match results.
-    """
-    keys_dict = {}
-    vals_dict = {}
-    props = {}
-    for _, row in keys.iterrows():
-        keys_dict[row['idx']] = row['key']
-
-    for _, row in vals.iterrows():
-        vals_dict[row['idx']] = row['value']
-
-    for kid in kvals['key'].unique():
-        props[kid] = kvals[kvals['key'] == kid]['value'].to_list()
-
-    matches = []
-    not_matched_keys = []
-    not_matched_value = []
-
-    for _, row in text.iterrows():
-        text_:str = row['text'].lower()
-        for char in string.punctuation:
-            if char in text_:
-                text_ = text_.replace(char, ' ')
-
-        for key in props.keys():
-            if keys_dict[key].lower() not in text_:
-                not_matched_keys.append([row['link'], key])
-            else:
-                for val in props[key]:
-                    if vals_dict[val].lower() in text_:
-                        matches.append([row['link'], key, val])
-                    else:
-                        not_matched_value.append(row['link'], key, val)
-    return (
-        pd.DataFrame(matches, columns=['link', 'key', 'value']),
-        pd.DataFrame(not_matched_keys, columns=['link', 'key']),
-        pd.DataFrame(not_matched_value, columns=['link', 'key', 'value'])
-    )
