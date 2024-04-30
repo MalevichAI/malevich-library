@@ -4,9 +4,14 @@
 from __future__ import annotations
 from malevich.square import scheme
 
+from typing import Optional
+
 from pydantic import BaseModel, Field
 
 
 @scheme()
 class GetPageCrawlbaseAli(BaseModel):
-    token: str = Field(..., description='CrawlBase API token (https://crawlbase.com/)')
+    token: str = Field(..., description='API token (CrawlBase or ScrapeAPI)')
+    api: Optional[str] = Field(
+        'crawlbase', description='Which API to use: CrawlBase or ScrapeAPI'
+    )
