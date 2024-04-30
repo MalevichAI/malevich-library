@@ -87,7 +87,10 @@ def squash_rows(df: DF[Any], context: Context[SquashRows]):
                     squash_delim
                 ).reset_index(drop=True)
             )
-        return pd.concat(pds).reset_index(drop=True)
+        if len(pds) != 0:
+            return pd.concat(pds).reset_index(drop=True)
+        else:
+            return pd.DataFrame(columns=df.columns)
 
 
 @processor()
