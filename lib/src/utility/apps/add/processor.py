@@ -33,7 +33,8 @@ def add_column(df: DF[Any], context: Context[AddColumn]):
             The value of the new column.
         - position: int, default 0.
             The position to insert the new column. If positive, the new column will be inserted from the beginning of the dataframe. If negative, the new column will be inserted from the end of the dataframe.
-
+        - skip_if_exists: bool, default False.
+            If columns exists, no exception will be thrown if this flag is set.
     -----
 
     Args:
@@ -50,7 +51,15 @@ def add_column(df: DF[Any], context: Context[AddColumn]):
     if position < 0:
         position = len(df.columns) + position + 1
 
-    df.insert(position, column_name, value)
+    if column_name in df.columns:
+        if not context.app_cfg.skip_if_exists:
+            raise ValueError(
+                f"Collection already has a column {column_name}. You may "
+                "specify to skip insertion in that case by providing "
+                "`skip_if_exists=True` flag."
+            )
+    else:
+        df.insert(position, column_name, value)
 
     return df
 
