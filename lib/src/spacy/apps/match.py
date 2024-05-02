@@ -33,7 +33,7 @@ def _squash_column_df(
     # Turn all specified columns into strings
     df_[columns] = df_[columns].astype(str)
     if not df_.empty:
-         df_[res_col_name] = df_[columns].apply(
+        df_[res_col_name] = df_[columns].apply(
              lambda row: delim.join(row), axis=1
         )
     if drop:
@@ -162,7 +162,7 @@ def get_matches_sm(text: DF, kvals: DF, context: Context):
             Result column name.
         - squash_drop: bool, default False.
             Remove key, value columns.
-        - squash_delim: str, default ",".
+        - squash_delim: str, default " ".
             Delimeter between key and value.
     -----
     Args:
@@ -179,6 +179,7 @@ def get_matches_sm(text: DF, kvals: DF, context: Context):
     matches = []
 
     for _, row in text.iterrows():
+        has_matches = False
         text_:str = row['text'].lower()
         for char in string.punctuation:
             if char in text_:
@@ -188,8 +189,11 @@ def get_matches_sm(text: DF, kvals: DF, context: Context):
             if key.lower() in text_:
                 for val in props[key]:
                     if val.lower() in text_:
+                        has_matches = True
                         matches.append([row['link'], key, val])
 
+        if not has_matches:
+            matches.append([row['link'], "", ""])
 
     matches = pd.DataFrame(matches, columns=['link', 'key', 'value'])
     if (len(matches) > 0 and context.app_cfg.get('squash_columns', False)):
@@ -199,7 +203,7 @@ def get_matches_sm(text: DF, kvals: DF, context: Context):
                 ['key', 'value'],
                 context.app_cfg.get("squash_result", None),
                 context.app_cfg.get("squash_drop", False),
-                context.app_cfg.get("squash_delim", ","),
+                context.app_cfg.get("squash_delim", " "),
             )
 
     return matches
