@@ -9,6 +9,6 @@ utility:
     - Preprocessing
   repo_url: https://github.com/MalevichAI/malevich-library/tree/dev/lib/src/utility
   app:
-    container_ref: public.ecr.aws/o1z1g3t0/utility
+    container_ref: public.ecr.aws/o1z1g3t0/utility:25202c5ebb78817a1a36a8cc9c5d379c1172a3f0
     container_user: null
     container_token: null
