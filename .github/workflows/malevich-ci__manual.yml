@@ -98,9 +98,9 @@ jobs:
           else
             image_url=${{ secrets.REGISTRY_URL }}/${{ secrets.REGISTRY_ID }}
           fi
+          dir=$( echo $dir | xargs )
           for dir in $dirs
           do
-            dir=$( echo $dir | xargs )
             dir=lib/src/$dir
             echo $dir
             name=$(basename $dir)
