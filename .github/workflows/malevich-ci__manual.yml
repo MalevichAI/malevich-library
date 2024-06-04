@@ -102,6 +102,7 @@ jobs:
           do
             dir=$( echo $dir | xargs )
             dir=lib/src/$dir
+            echo $dir
             name=$(basename $dir)
             if [[ "$dir" != *.* ]] && [[ -e "$dir" ]] && [[ -f "$dir/Dockerfile" ]]; 
             then
