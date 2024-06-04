@@ -85,6 +85,8 @@ jobs:
           IFS=' '
           errors=()
           commit_sha=$(git rev-parse HEAD)
+          echo "DIRS:"
+          echo $dirs
           if [[ "${dirs[0]}" == "" ]]; 
           then
             echo "No changed directories, exiting..."
