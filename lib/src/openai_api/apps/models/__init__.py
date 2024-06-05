@@ -1,4 +1,5 @@
 from .prompt_completion_model import PromptCompletion
+from .thread_completion_model import ThreadPromptCompletion
 from .text_to_speech_model import TextToSpeech
 from .speech_to_text_model import SpeechToText
 from .text_to_image_model import TextToImage
