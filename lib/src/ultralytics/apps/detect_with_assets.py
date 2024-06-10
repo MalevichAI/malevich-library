@@ -1,14 +1,11 @@
-import json
 import os
-from collections import defaultdict
+
 import cv2
-import asyncio
 import pandas as pd
-from malevich.square import APP_DIR, DF, Context, init, obj, processor, scheme
+from malevich.square import APP_DIR, DF, Context, processor, scheme
 from pydantic import BaseModel
 from ultralytics import YOLO
-import tracemalloc
-import gc
+
 from .models import DetectVideo
 
 
@@ -79,7 +76,7 @@ async def detect_with_asset(
     Returns:
         A collection of YOLO results
     """
-    def get_path(x):
+    def get_path(x):  # noqa: ANN202
         path = context.get_share_path(x, not_exist_ok=True)
         if path is not None and os.path.exists(path):  # noqa: E501
             return path
@@ -132,7 +129,7 @@ async def detect_with_asset(
                     del r.orig_img
                     try:
                         results.append(r.tojson() if context.app_cfg.return_raw else r)
-                    except: # !!!
+                    except Exception: # !!!
                         results.append({})
                 k += 1
             else:
