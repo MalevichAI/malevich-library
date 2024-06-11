@@ -139,11 +139,13 @@ async def exec_run(
         thread_id = run.thread_id
         # poll until completed
         # no better way to do this until OpenAI updates the API
-        while run.status != "completed" and run.status != "failed":
+        max_iter, iter = 500, 0
+        while run.status != "completed" and run.status != "failed" and iter <= max_iter:
             run = client.beta.threads.runs.retrieve(
                 run_id=run_id,
                 thread_id=thread_id
             )
+            iter += 1
             await asyncio.sleep(0.1)
         # get the list of messages
         # latest messages are in the beginning of the list
