@@ -2,7 +2,7 @@ import os
 import shutil
 
 import pandas as pd
-from malevich.square import APP_DIR, DF, Context, init, obj, processor, scheme
+from malevich.square import APP_DIR, DF, Context, init, processor, scheme
 from pydantic import Field
 
 
@@ -18,6 +18,8 @@ def freeze_dir(ctx: Context):
 
 @processor()
 def collect_asset(df: DF, context: Context[CollectAssetConfig]):
+    """
+    """
     paths = df[context.app_cfg.path_column_name].to_list()
     outputs = []
     for path in paths:
