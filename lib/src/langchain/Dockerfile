@@ -1,4 +1,4 @@
-FROM pogrebnoijak/julius_export_python11:0.1
+FROM malevichai/app:python11_v0.1
 
 ENV GIT_BRANCH ${branch}
 
