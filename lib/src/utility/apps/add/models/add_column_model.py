@@ -19,3 +19,7 @@ class AddColumn(BaseModel):
         0,
         description='The position to insert the new column. If positive, the new column will be inserted from the beginning of the dataframe. If negative, the new column will be inserted from the end of the dataframe',
     )
+    skip_if_exists: Optional[bool] = Field(
+        False,
+        description="If set, the processor will not raise exeception if column exists."
+    )
