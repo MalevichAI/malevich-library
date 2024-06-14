@@ -1,0 +1,14 @@
+qdrant:
+  name: Qdrant
+  description: Use Qdrant, a vector DB suitable for recommendation systems and geolocations
+  visibility:
+    - public
+  tags:
+    - DB
+  designed_for_use_case:
+    - title: Recommendation system
+  repo_url: https://github.com/MalevichAI/malevich-library/tree/dev/lib/src/qdrant
+  app:
+    container_ref: public.ecr.aws/o1z1g3t0/qdrant
+    container_user: null
+    container_token: null
