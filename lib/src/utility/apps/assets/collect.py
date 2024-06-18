@@ -18,8 +18,6 @@ def freeze_dir(ctx: Context):
 
 @processor()
 def collect_asset(df: DF, context: Context[CollectAssetConfig]):
-    """
-    """
     paths = df[context.app_cfg.path_column_name].to_list()
     outputs = []
     for path in paths:
