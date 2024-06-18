@@ -1,14 +1,12 @@
-import json
 import os
-from collections import defaultdict
+from typing import Any
+
 import cv2
-import asyncio
 import pandas as pd
-from malevich.square import APP_DIR, DF, Context, init, obj, processor, scheme
+from malevich.square import APP_DIR, DF, Context, processor, scheme
 from pydantic import BaseModel
 from ultralytics import YOLO
-import tracemalloc
-import gc
+
 from .models import DetectVideo
 
 
@@ -39,8 +37,8 @@ async def detect_with_asset(
     """Detects objects on a video
 
     ## Input:
-        - `yolo`: a YOLO object
-        - `inputs`: a YOLOVideoInputs object
+        - `yolo` (asset): a YOLO object
+        - `inputs` (asset|DF): a YOLOVideoInputs object
 
     ## Output:
         A dataframe with the following columns:
@@ -62,11 +60,11 @@ async def detect_with_asset(
             A list of classes to detect. By default predicts all classes.
         - `gpus`: list[int], default None.
             List of GPU indices. If None, uses all available GPUs.
-        - `save images`: bool, default True.
+        - `save_images`: bool, default True.
             Whether to save and share original images across apps.
         - `return_raw`: bool, default False.
             If True, returns JSON-serialized YOLO Results objects.
-        - `fps`: int, default 1:
+        - `fps`: int, default 1.
             Frame per second for video processing.
 
     -----
@@ -79,7 +77,7 @@ async def detect_with_asset(
     Returns:
         A collection of YOLO results
     """
-    def get_path(x):
+    def get_path(x) -> str | Any:
         path = context.get_share_path(x, not_exist_ok=True)
         if path is not None and os.path.exists(path):  # noqa: E501
             return path
@@ -132,7 +130,7 @@ async def detect_with_asset(
                     del r.orig_img
                     try:
                         results.append(r.tojson() if context.app_cfg.return_raw else r)
-                    except: # !!!
+                    except Exception: # !!!
                         results.append({})
                 k += 1
             else:
