@@ -1,4 +1,5 @@
 import json
+
 import pandas as pd
 from malevich.square import DF, Context, processor, scheme
 from qdrant_client import QdrantClient

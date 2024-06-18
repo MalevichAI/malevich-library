@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 from malevich.square import scheme
-from pydantic import BaseModel, Field
-from typing import Optional, Union
+from pydantic import Field
+
 from .qdrant import Qdrant
+
 
 @scheme()
 class Query(Qdrant):

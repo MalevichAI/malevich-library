@@ -1,10 +1,10 @@
 import json
+
 import pandas as pd
 from malevich.square import DF, Context, processor, scheme
 from qdrant_client import QdrantClient
 
-from .models import Filter, Query, VectorParams
-from typing import Any
+from .models import Filter, Query
 
 
 @scheme()

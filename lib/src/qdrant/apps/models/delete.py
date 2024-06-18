@@ -1,10 +1,10 @@
 from __future__ import annotations
+
 from malevich.square import scheme
+from pydantic import Field
 
-from typing import List, Optional
-
-from pydantic import BaseModel, Field
 from .qdrant import Qdrant
+
 
 @scheme()
 class Delete(Qdrant):
