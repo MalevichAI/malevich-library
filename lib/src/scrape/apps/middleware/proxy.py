@@ -20,6 +20,7 @@ class Response:
     def __init__(self, text, url) -> None:
         self.text = text
         self.url = url
+        self.encoding = 'utf-8'
 
 def get_page(link, token):
     link = (
