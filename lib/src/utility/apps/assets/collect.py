@@ -2,27 +2,35 @@ import os
 import shutil
 
 import pandas as pd
-from malevich.square import APP_DIR, DF, Context, init, processor, scheme
-from pydantic import Field
+from malevich.square import APP_DIR, DF, Context, init, obj, processor
 
-
-@scheme()
-class CollectAssetConfig:
-    path_column_name: str = Field(
-        'path', description='Name of the column containing the paths to the assets'
-    )
 
 @init()
 def freeze_dir(ctx: Context):
     ctx.common = os.listdir(APP_DIR)
 
 @processor()
-def collect_asset(df: DF, context: Context[CollectAssetConfig]):
-    paths = df[context.app_cfg.path_column_name].to_list()
+def collect_asset(df: DF[obj], context: Context):
+    """
+    Moves assets to shared filesystem
+
+    Input:
+        An asset
+
+    Output:
+        A dataframe with a column:
+
+        - `path' (str): A path (or paths) to asset files in the shared FS.
+
+    -----
+    """
+    paths = df.path.to_list()
     outputs = []
     for path in paths:
         os.makedirs(os.path.join(APP_DIR, path), exist_ok=True)
         shutil.copy(path, os.path.join(APP_DIR, path))
         outputs.append(path)
     context.share_many(outputs)
-    return pd.DataFrame(outputs, columns=[context.app_cfg.path_column_name])
+    return pd.DataFrame(outputs, columns=['path'])
+
+
