@@ -1,0 +1,14 @@
+duckdb:
+  name: DuckDB
+  description: Use DuckDB Python API for concurrent SQL database management
+  visibility:
+    - public
+  tags:
+    - DB
+  designed_for_use_case:
+    - title: Create Database from a dataframe, S3 or PyArrow array
+  repo_url: https://github.com/MalevichAI/malevich-library/tree/dev/lib/src/duckdb
+  app:
+    container_ref: public.ecr.aws/o1z1g3t0/duckdb
+    container_user: null
+    container_token: null
