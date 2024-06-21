@@ -2,7 +2,7 @@ import re
 
 import pandas as pd
 import scrapy
-from malevich.square import DF, Context, init, processor, scheme
+from malevich.square import DF, Context, processor
 
 
 class Response:

@@ -1,7 +1,6 @@
 import os
 from concurrent.futures import ThreadPoolExecutor
 from hashlib import sha256
-from urllib.parse import quote
 
 import pandas as pd
 import requests
