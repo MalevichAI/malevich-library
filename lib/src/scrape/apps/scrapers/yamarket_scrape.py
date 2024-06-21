@@ -2,6 +2,7 @@ import json
 
 import pandas as pd
 import requests
+import scrapy
 from malevich.square import DF, Context, processor, scheme
 from pydantic import BaseModel
 
@@ -67,3 +68,92 @@ def scrape_yamarket_api(df: DF[YaMarket], context: Context[ScrapeYamarketApi]):
             ]
         )
     return pd.DataFrame(outputs, columns = ['offer_id', 'name', 'description', 'image'])
+
+
+@processor()
+def scrape_yamarket(df: DF, ctx: Context):
+    """
+    Scarpe Yandex Market Product Card
+
+    ## Input:
+    A single DataFrame with two columns:
+        - link (str): Link to the product
+        - filename (str): Filename to which the product was written.
+
+    ## Output:
+    Three DataFrames with text, images and properties. First one contains two columns:
+        - link (str): Link to the product
+        - text (str): Product title and description
+
+    ---
+
+    Second DataFrame contains two columns:
+        - link (str): Link to the product
+        - image (str): Link to the image
+
+    ---
+
+    Last DataFrame contains three columns:
+        - link (str): Link to the product
+        - key (str): Property key
+        - value (str): Property value
+
+    ## Configuration:
+        - max_results: int, default 3.
+            The amount of images to retrieve.
+    -----
+    """  # noqa: E501
+    max_results = ctx.app_cfg.get('max_results', 3)
+    text_df = []
+    image_df = []
+    props_df = []
+
+    for _, row in df.iterrows():
+        link = row['link']
+        page = open(ctx.get_share_path(row['filename'])).read()
+        sel = scrapy.Selector(text=page)
+        text = ""
+
+        title = sel.xpath("//h1[@data-additional-zone='title']/text()").get()
+        if title:
+            text += f"Title:\n{title}\n\n"
+        desc = sel.xpath(
+            'normalize-space(//div[contains(@data-zone-name, "ProductDescription")]'
+            '//div[text()]/text())'
+        ).get()
+        if desc:
+            text += f"Description:\n{desc}"
+
+        text_df.append([link, text])
+
+        alls = json.loads(
+            sel.xpath(
+                '//div[contains(@data-apiary-widget-name, "SpecsList")]'
+                '//noframes[@class="apiary-patch"]/text()'
+            ).get()
+        )
+
+        try:
+            alls = alls['collections']['fullSpecs']
+            for k, v in alls.items():
+                if 'specItems' in v:
+                    for item in v['specItems']:
+                        props_df.append([link, item['name'], item['value']])
+        except KeyError:
+            pass
+
+        images = sel.xpath(
+                '//div[@data-apiary-widget-name="@card/MediaViewerGallery"]'
+                '//img[contains(@src, "https://")]/@src'
+            ).getall()
+        images.extend(
+            sel.xpath('//ul[@role="tablist"]//img[contains(@src, "https://")]/@src').getall()
+        )
+        for i in range(min(max_results, len(images))):
+            image_df.append([link, images[i]])
+
+    return (
+        pd.DataFrame(text_df, columns=['link', 'text']),
+        pd.DataFrame(image_df, columns=['link', 'image']),
+        pd.DataFrame(props_df, columns=['link', 'key', 'value'])
+    )
