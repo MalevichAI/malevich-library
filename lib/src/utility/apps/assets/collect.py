@@ -19,8 +19,7 @@ def collect_asset(df: DF[obj], context: Context):
 
     ## Output:
         A dataframe with a column:
-
-        - `path' (str): A path (or paths) to asset files in the shared FS.
+        - `path` (str): A path (or paths) to asset files in the shared FS.
 
     -----
     """
