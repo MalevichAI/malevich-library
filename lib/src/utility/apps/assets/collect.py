@@ -14,10 +14,10 @@ def collect_asset(df: DF[obj], context: Context):
     """
     Moves assets to shared filesystem
 
-    Input:
+    ## Input:
         An asset
 
-    Output:
+    ## Output:
         A dataframe with a column:
 
         - `path' (str): A path (or paths) to asset files in the shared FS.
