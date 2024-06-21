@@ -225,7 +225,6 @@ def scrape_text(
         proc_.join(timeout * len(procs) if timeout > 0 else None)
         # Raise if proc failed
         if proc_.exitcode != 0:
-            # print exception in proc
             proc_.terminate()
             raise Exception(f'Scraping failed. {proc_.exception}')
 
