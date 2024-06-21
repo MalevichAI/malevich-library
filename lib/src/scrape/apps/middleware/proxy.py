@@ -32,22 +32,12 @@ class Response:
         self.encoding = 'utf-8'
 
 def get_page(config: dict):
-    # link = (
-    #     f"https://api.crawlbase.com/?token={token}"
-    #     f"&url={quote(link, safe='')}&page_wait=5000&ajax_wait=3000"
-    # )
     return requests.get(
         "https://api.crawlbase.com/",
         params=config
     )
 
 def get_page_scrape(config: dict):
-    # payload = {
-    #     'api_key': token,
-    #     'url': link,
-    #     'render': 'true',
-    #     'device_type': 'desktop'
-    # }
     return requests.get(
         'https://api.scraperapi.com/',
         params=config

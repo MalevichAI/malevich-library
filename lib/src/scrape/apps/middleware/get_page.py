@@ -138,7 +138,6 @@ def get_page_(link: str, sp_conf) -> str:
         driver.find_element(By.XPATH, "//div[@data-spm = 'sku_floor']//ul")
         cards = True
     except NoSuchElementException:
-        print('Page has no cards')
         ...
 
     return filename, cards
