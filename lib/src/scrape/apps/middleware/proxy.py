@@ -16,8 +16,7 @@ CRAWLBASE_CFG = {
 }
 SCRAPE_CFG = {
     'render': 'true',
-    'device_type': 'desktop',
-    'selector': 'div#characteristics_anchor'
+    'device_type': 'desktop'
 }
 
 @scheme()
@@ -78,14 +77,24 @@ def get_page_with_proxy(df: DF, context: Context[GetPageWithProxy]):
     token = context.app_cfg.get('token', None)
     assert context.app_cfg.get('token', None), "Proxy token must be provided"
     api = context.app_cfg.get('api', 'crawlbase')
+
+    cfg = context.app_cfg.get('proxy_config', {})
+    if api == 'crawlbase':
+        cfg["token"] = token
+    else:
+        cfg["api_key"] = token
+    if context.app_cfg.get('api', 'crawlbase') == 'crawlbase':
+        for k, v in CRAWLBASE_CFG.items():
+            if k not in cfg:
+                cfg[k] = v
+    else:
+        for k, v in SCRAPE_CFG.items():
+            if k not in cfg:
+                cfg[k] = v
+
     with ThreadPoolExecutor(15) as executor:
         for pr in df['link'].to_list():
-            cfg = context.app_cfg.get('proxy_config', {})
             cfg['url'] = pr
-            if api == 'crawlbase':
-                cfg["token"] = token
-            else:
-                cfg["api_key"] = token
             task = executor.submit(
                 (
                     get_page if api == 'crawlbase'
@@ -159,23 +168,17 @@ def get_page_crawlbase_ali(df: DF[CrawlBase], context: Context[GetPageCrawlbaseA
         DataFrames with results and errors.
     """
     cfg = context.app_cfg.get('proxy_config', {})
-    if context.app_cfg.get('api', 'crawlbase') == 'crawlbase':
-        for k, v in CRAWLBASE_CFG.items():
-            if k not in cfg:
-                cfg[k] = v
-    else:
-        for k, v in SCRAPE_CFG.items():
-            if k not in cfg:
-                cfg[k] = v
+    if 'selector' not in cfg:
+        cfg['selector']='div#characteristics_anchor'
 
     context.app_cfg['proxy_config'] = cfg
 
-    files, errors = get_page_with_proxy(df, context)
+    files_df, errors_df = get_page_with_proxy(df, context)
     captcha = []
     files = []
-    for _, row in errors.iterrows():
+    for _, row in errors_df.iterrows():
         captcha.append([row['link'], row['error']])
-    for _, row in files.iterrows():
+    for _, row in files_df.iterrows():
         link = row['link']
         data = open(context.get_share_path(row['filename'])).read()
         sel = Selector(Response(data, link))
