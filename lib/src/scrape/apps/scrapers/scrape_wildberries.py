@@ -4,6 +4,8 @@ import pandas as pd
 import scrapy
 from malevich.square import DF, Context, processor
 
+from .models import ScrapeWildberries
+
 
 class Response:
     def __init__(self, text, url) -> None:
@@ -14,7 +16,7 @@ class Response:
 @processor()
 def scrape_wildberries(
         df: DF,
-        context: Context
+        context: Context[ScrapeWildberries]
     ):
     """
     Scarpe Wildberries Product Card

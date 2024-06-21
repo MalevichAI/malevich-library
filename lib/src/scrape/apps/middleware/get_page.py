@@ -19,6 +19,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.ui import WebDriverWait
 
+from .models import GetPage
+
 
 @scheme()
 class AliLink(BaseModel):
@@ -198,7 +200,7 @@ def get_page_ali(df: DF[AliLink], context: Context):
     )
 
 @processor()
-def get_page(df: DF, ctx: Context):
+def get_page(df: DF, ctx: Context[GetPage]):
     """
     Get pages from web and write it to the html file.
 

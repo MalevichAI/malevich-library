@@ -5,11 +5,10 @@ from hashlib import sha256
 import pandas as pd
 import requests
 from malevich.square import APP_DIR, DF, Context, processor, scheme
-from pandas import DataFrame
 from pydantic import BaseModel
 from scrapy import Selector
 
-from .models import GetPageCrawlbaseAli
+from .models import GetPageCrawlbaseAli, GetPageWithProxy
 
 CRAWLBASE_CFG = {
     'page_wait': 3000,
@@ -45,7 +44,7 @@ def get_page_scrape(config: dict):
 
 
 @processor()
-def get_page_with_proxy(df: DF, context: Context) -> tuple[DataFrame, DataFrame]:
+def get_page_with_proxy(df: DF, context: Context[GetPageWithProxy]):
     """Get web page using proxy API (Scrape API or Crawlbase)
     ## Input:
         A DataFrame with columns:

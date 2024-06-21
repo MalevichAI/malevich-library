@@ -6,7 +6,7 @@ import scrapy
 from malevich.square import DF, Context, processor, scheme
 from pydantic import BaseModel
 
-from .models import ScrapeYamarketApi
+from .models import ScrapeYamarket, ScrapeYamarketApi
 
 
 @scheme()
@@ -71,7 +71,7 @@ def scrape_yamarket_api(df: DF[YaMarket], context: Context[ScrapeYamarketApi]):
 
 
 @processor()
-def scrape_yamarket(df: DF, ctx: Context):
+def scrape_yamarket(df: DF, ctx: Context[ScrapeYamarket]):
     """
     Scarpe Yandex Market Product Card
 
