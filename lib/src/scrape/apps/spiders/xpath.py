@@ -43,9 +43,17 @@ class XpathSpider(scrapy.Spider):
             if self.type == 'text' and self._include_keys:
                 data.append(cfg['key'])
             try:
-                data.extend(selector.xpath(cfg['xpath']).getall()[:count])
+                expr = cfg['xpath']
+                if not isinstance(expr, list):
+                    expr = [expr]
+                for e in expr:
+                    data.extend(selector.xpath(e).getall()[:count])
             except KeyError:
-                data.extend(selector.css(cfg['css']).getall()[:count])
+                expr = cfg['css']
+                if not isinstance(expr, list):
+                    expr = [expr]
+                for e in expr:
+                 data.extend(selector.css(e).getall()[:count])
             for i in range(len(data)):
                 if cfg.get('join_url', False):
                     if self._include_keys and i == 0:
