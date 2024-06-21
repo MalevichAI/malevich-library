@@ -4,6 +4,7 @@ import os
 from concurrent.futures import ProcessPoolExecutor
 
 import pandas as pd
+import requests
 import scrapy
 from fake_useragent import UserAgent
 from malevich.square import APP_DIR, DF, Context, processor, scheme
@@ -17,6 +18,8 @@ from selenium.common.exceptions import (
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.ui import WebDriverWait
+
+from .models import GetPage
 
 
 @scheme()
@@ -67,7 +70,7 @@ def init_driver():
     return webdriver.Chrome(options)
 
 
-def get_page(link: str, sp_conf) -> str:
+def get_page_(link: str, sp_conf) -> str:
     driver = init_driver()
     driver.delete_all_cookies()
     successful = False
@@ -137,7 +140,6 @@ def get_page(link: str, sp_conf) -> str:
         driver.find_element(By.XPATH, "//div[@data-spm = 'sku_floor']//ul")
         cards = True
     except NoSuchElementException:
-        print('Page has no cards')
         ...
 
     return filename, cards
@@ -181,7 +183,7 @@ def get_page_ali(df: DF[AliLink], context: Context):
         errors = []
         outputs = []
         for link in df["link"].to_list():
-            task = executor.submit(get_page, link=link, sp_conf=sp_conf)
+            task = executor.submit(get_page_, link=link, sp_conf=sp_conf)
             processes.append((link, task))
 
         for link, task in processes:
@@ -195,4 +197,63 @@ def get_page_ali(df: DF[AliLink], context: Context):
     return (
         pd.DataFrame(outputs, columns=["link", "filename", "cards"]),
         pd.DataFrame(errors, columns=["link", 'error'])
+    )
+
+@processor()
+def get_page(df: DF, ctx: Context[GetPage]):
+    """
+    Get pages from web and write it to the html file.
+
+    ## Input:
+
+    A DataFrame with column:
+        - link (str): page link.
+
+    ## Output:
+
+    Two DataFrames, first DataFrame with columns:
+        - link (str): Aliexpress link.
+        - filename (str): Filename to which page is saved.
+
+    ---
+
+    Second one is an error DataFrame with columns:
+        - link (str): Aliexpress link.
+        - status_code (str): Response status code.
+
+
+    ## Configuration:
+        - follow_redirects: bool, default False.
+            Follow redirect if 3xx code is received.
+    -----
+
+    Args:
+        df: A dataframe with links.
+
+    Returns:
+        Dataframes with filenames and errors.
+    """
+    out = []
+    err = []
+    for link in df['link'].to_list():
+        response = requests.get(
+            link, allow_redirects=ctx.app_cfg.get('follow_redirects', False)
+        )
+        if response.status_code < 200 or response.status_code >= 300:
+            err.append([link, response.status_code])
+            continue
+        data = response.text
+        filename = hashlib.sha256(link.encode()).hexdigest() + ".html"
+        with open(
+            os.path.join(
+                APP_DIR,
+                filename
+            ), 'w'
+        ) as f:
+            f.write(data)
+        out.append([link, filename])
+        ctx.share_many([x[1] for x in out])
+    return (
+        pd.DataFrame(out, columns=['link', 'filename']),
+        pd.DataFrame(out, columns=['link', 'status_code'])
     )
