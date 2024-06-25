@@ -95,7 +95,6 @@ def execute(
                     plh = plh.to_dict(orient='records')
                     # NOTE: this is bad, but I have no idea
                     # how to get rid of multi-column index better
-                    print(plh)
                     plh = [
                             {
                                 key[1]: value
@@ -103,7 +102,6 @@ def execute(
                             }
                         for item in plh
                     ]
-                    print(plh) #please.
                 else:
                     plh = []
                 # TODO: introduce placeholders
