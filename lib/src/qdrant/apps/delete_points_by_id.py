@@ -25,29 +25,27 @@ def delete_points_by_id(
     ## Input:
 
         A dataframe consisting of columns:
-        - `id`: str or int
-			name of the collection.
+        - `id` (str): Name of the collection.
 
     ## Output:
 
         A dataframe with column:
-        - `status`: str
-			status of the operation.
+        - `status` (str): Status of the operation.
 
     ## Configuration:
 
-        - `url`: str
-            URL location of your Qdrant DB
-        - `api_key`: str or None
-            API key of your Qdrant DB
-        - `timeout`: int or None
-            Connection timeout in seconds
-        - `https`: bool or None
-            Whether HTTPS connection is used
-        - `collection_name`: str or None
-            Name of the collection
-        - `ordering`: str or None
-            JSON string with the ordering of the deletion
+        - `url`: str.
+            URL location of your Qdrant DB.
+        - `api_key`: str, default None.
+            API key of your Qdrant DB.
+        - `timeout`: int, default None.
+            Connection timeout in seconds.
+        - `https`: bool, default None.
+            Whether HTTPS connection is used.
+        - `collection_name`: str, default None.
+            Name of the collection.
+        - `ordering`: str, default None.
+            JSON string with the ordering of the deletion.
     -----
 
     Args:

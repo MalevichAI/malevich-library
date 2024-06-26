@@ -4,28 +4,33 @@ from qdrant_client import QdrantClient
 
 from .models import Qdrant
 
+
 @processor()
 def get_collections(
     ctx: Context[Qdrant]
 ) -> DF:
     '''Create a collection in Qdrant.
 
+    ## Input:
+
+        None.
+
+
     ## Output:
 
         A dataframe with column:
-        - `collection`: str
-			Name of the collection
+        - `collection` (str): Name of the collection.
 
     ## Configuration:
 
-        - `url`: str
-            URL location of your Qdrant DB
-        - `api_key`: str or None
-            API key of your Qdrant DB
-        - `timeout`: int or None
-            Connection timeout in seconds
-        - `https`: bool or None
-            Whether HTTPS connection is used
+        - `url`: str.
+            URL location of your Qdrant DB.
+        - `api_key`: str, default None.
+            API key of your Qdrant DB.
+        - `timeout`: int, default None.
+            Connection timeout in seconds.
+        - `https`: bool, default None.
+            Whether HTTPS connection is used.
 
     -----
 

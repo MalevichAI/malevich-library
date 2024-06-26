@@ -24,37 +24,39 @@ def delete_points_by_filter(
 ) -> DF[DeleteCollectionResponse]:
     '''Create a collection in Qdrant.
 
+
     ## Input:
 
         A dataframe consisting of columns:
-        - `filter`: str
-            JSON string of the filter for deletion.
+
+        - `filter` (str): JSON string of the filter for deletion.
 
     ## Output:
 
         A dataframe with column:
-        - `status`: str
-            Status of the operation.
+
+        - `status` (str): Status of the operation.
+
 
     ## Configuration:
 
-        - `url`: str
-            URL location of your Qdrant DB
-        - `api_key`: str or None
-            API key of your Qdrant DB
-        - `timeout`: int or None
-            Connection timeout in seconds
-        - `https`: bool or None
-            Whether HTTPS connection is used
-        - `collection_name`: str or None
-            Name of the collection
-        - `ordering`: str or None
-            JSON string with the ordering of the deletion
+        - `url`: str.
+            URL location of your Qdrant DB.
+        - `api_key`: str, default None.
+            API key of your Qdrant DB.
+        - `timeout`: int, default None.
+            Connection timeout in seconds.
+        - `https`: bool, default None.
+            Whether HTTPS connection is used.
+        - `collection_name`: str, default None.
+            Name of the collection.
+        - `ordering`: str, default None.
+            JSON string with the ordering of the deletion.
 
     -----
 
     Args:
-        messages (DF[DeleteCollectionFilterMessage]): A dataframe with names and parameters
+        messages (DF[DeleteCollectionFilterMessage]): A dataframe with names and parameters.
         of the collections.
         ctx (Context[Delete]): context.
 

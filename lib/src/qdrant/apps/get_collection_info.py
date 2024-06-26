@@ -23,25 +23,23 @@ def get_collection_info(
     ## Input:
 
         A dataframe consisting of columns:
-        - `name`: str
-			name of the collection.
+        - `name` (str): name of the collection.
 
     ## Output:
 
         A dataframe with column:
-        - `info`: str
-			JSON string with the info about the collection
+        - `info` (str): JSON string with the info about the collection.
 
     ## Configuration:
 
-        - `url`: str
-            URL location of your Qdrant DB
-        - `api_key`: str or None
-            API key of your Qdrant DB
-        - `timeout`: int or None
-            Connection timeout in seconds
-        - `https`: bool or None
-            Whether HTTPS connection is used
+        - `url`: str.
+            URL location of your Qdrant DB.
+        - `api_key`: str, default None.
+            API key of your Qdrant DB.
+        - `timeout`: int, default None.
+            Connection timeout in seconds.
+        - `https`: bool, default None.
+            Whether HTTPS connection is used.
 
     -----
 

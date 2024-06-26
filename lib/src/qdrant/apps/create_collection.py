@@ -30,33 +30,34 @@ def create_collection(
 ) -> DF[CreateCollectionResponse]:
     '''Create a collection in Qdrant.
 
+
     ## Input:
 
         A dataframe consisting of columns:
-        - `name`: str
-            Name of the collection.
-        - `vector_size`: str
-            JSON string of names and sizes of vectors in the collection.
-        - `distance`: str
-            Distance score metric (case insensitive).
-            Available metrics: `cosine`, `dot`, `manhattan`, `euclid`
+
+        - `name` (str): Name of the collection.
+        - `vector_size` (str): JSON string of names and sizes of vectors in the collection.
+        - `distance` (str): Distance score metric (case insensitive).
+            Available metrics: `cosine`, `dot`, `manhattan`, `euclid`.
+
 
     ## Output:
 
         A dataframe with column:
-        - `status`: bool
-            Status of the operation. If `true`, collection was successfully created.
+
+        - `status` (bool): Status of the operation. If `true`, collection was successfully created.
+
 
     ## Configuration:
 
-        - `url`: str
-            URL location of your Qdrant DB
-        - `api_key`: str or None
-            API key of your Qdrant DB
-        - `timeout`: int or None
-            Connection timeout in seconds
-        - `https`: bool or None
-            Whether HTTPS connection is used
+        - `url`: str.
+            URL location of your Qdrant DB.
+        - `api_key`: str, default None.
+            API key of your Qdrant DB.
+        - `timeout`: int, default None.
+            Connection timeout in seconds.
+        - `https`: bool, default None.
+            Whether HTTPS connection is used.
 
     ## Notes:
 

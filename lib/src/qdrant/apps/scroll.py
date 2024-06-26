@@ -29,43 +29,37 @@ def scroll(
     ## Input:
 
         A dataframe consisting of columns:
-        - `filter`: dict[str]
-			Qdrant filters packed into dictionary
-        - `limit`: int
-			Max responses returned
+        - `filter` (dict[str]): Qdrant filters packed into dictionary.
+        - `limit` (int): Max responses returned.
 
     ## Output:
 
         A dataframe with columns:
-        - `query_id`: int
-			Index of the query in the input DF
-        - `point_id`: str | int
-			Index of the point in Qdrant
-        - `payload`: str
-			Columns with payload keys.
+        - `query_id` (int): Index of the query in the input DF.
+        - `point_id` (str | int): Index of the point in Qdrant.
+        - `payload` (str): Columns with payload keys.
             Number of columns depends on the payload.
-        - `vectors`: str
-			Columns with string representations of vectors.
+        - `vectors` (str): Columns with string representations of vectors.
             Number of columns depends on the payload.
 
     ## Configuration:
 
-        - `url`: str
-            URL location of your Qdrant DB
-        - `api_key`: str or None
-            API key of your Qdrant DB
-        - `timeout`: int or None
-            Connection timeout in seconds
-        - `https`: bool or None
-            Whether HTTPS connection is used
-        - `collection_name`: str or None
-            Name of the collection
-        - `with_vectors`: list[str] or bool
+        - `url`: str.
+            URL location of your Qdrant DB.
+        - `api_key`: str, default None.
+            API key of your Qdrant DB.
+        - `timeout`: int, default None.
+            Connection timeout in seconds.
+        - `https`: bool, default None.
+            Whether HTTPS connection is used.
+        - `collection_name`: str, default None.
+            Name of the collection.
+        - `with_vectors`: list[str], default True.
             List of the vectors to choose.
-            If True, all vectors will be choose. If opposite, none will
-        - `with_payload`: list[str] or bool
+            If True, all vectors will be choose. If opposite, none will.
+        - `with_payload`: list[str], default bool.
             List of the payload columns to choose.
-            If True, all vectors will be choose. If opposite, none will
+            If True, all vectors will be choose. If opposite, none will.
 
     ## Notes:
 
@@ -75,7 +69,7 @@ def scroll(
 
     Args:
         messages (DF[ScrollMessage]): A dataframe with filters and limits.
-        ctx (Context[Query]): context
+        ctx (Context[Query]): context.
 
     Returns:
         A dataframe with selected payloads and vectors.

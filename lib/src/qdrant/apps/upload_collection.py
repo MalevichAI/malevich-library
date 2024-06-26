@@ -27,29 +27,26 @@ def upload_collection(
     ## Input:
 
         A dataframe consisting of columns:
-        - `vectors`: str
-            JSON string of the vectors.
-        - `payload`: str or None
-            JSON string of the payload.
-        - `id`: int or str or None
-            Distance score metric (case insensitive). Available metrics: `cosine`, `dot`, `manhattan`, `euclid`
+        - `vectors` (str): JSON string of the vectors.
+        - `payload` (str | None): JSON string of the payload.
+        - `id` (int | str | None): Distance score metric (case insensitive).
+            Available metrics: `cosine`, `dot`, `manhattan`, `euclid`.
 
     ## Output:
 
         A dataframe with column:
-        - `status`: bool
-            Status of the operation. If True, collection was successfully created.
+        - `status` (bool): Status of the operation. If True, collection was successfully created.
 
     ## Configuration:
 
-        - `url`: str
-            URL location of your Qdrant DB
-        - `api_key`: str or None
-            API key of your Qdrant DB
-        - `timeout`: int or None
-            Connection timeout in seconds
-        - `https`: bool or None
-            Whether HTTPS connection is used
+        - `url`: str.
+            URL location of your Qdrant DB.
+        - `api_key`: str, default None.
+            API key of your Qdrant DB.
+        - `timeout`: int, default None.
+            Connection timeout in seconds.
+        - `https`: bool, default None.
+            Whether HTTPS connection is used.
 
 
     ## Notes:

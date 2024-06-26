@@ -20,28 +20,32 @@ def delete_collection(
 ) -> DF[DeleteCollectionResponse]:
     '''Create a collection in Qdrant.
 
+
     ## Input:
 
         A dataframe consisting of columns:
-        - `name`: str
-            Name of the collection.
+
+        - `name` (str): Name of the collection.
+
 
     ## Output:
 
         A dataframe with column:
-        - `status`: bool
-            Status of the operation. If True, collection was successfully created.
+
+        - `status` (bool): Status of the operation. If True, collection was successfully created.
+
 
     ## Configuration:
 
-        - `url`: str
-            URL location of your Qdrant DB
-        - `api_key`: str or None
-            API key of your Qdrant DB
-        - `timeout`: int or None
-            Connection timeout in seconds
-        - `https`: bool or None
-            Whether HTTPS connection is used
+        - `url`: str.
+            URL location of your Qdrant DB.
+        - `api_key`: str, default None.
+            API key of your Qdrant DB.
+        - `timeout`: int, default None.
+            Connection timeout in seconds.
+        - `https`: bool, default None.
+            Whether HTTPS connection is used.
+
     -----
 
     Args:
