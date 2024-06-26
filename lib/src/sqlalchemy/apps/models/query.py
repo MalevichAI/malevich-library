@@ -6,4 +6,4 @@ from .connection import Connection
 
 
 class Query(Connection):
-    subsequent: Optional[bool] = Field(True, description='Submit subsequently')
+    subsequent: Optional[bool] = Field(False, description='Whether each command should be committed or all at once') # noqa:E501

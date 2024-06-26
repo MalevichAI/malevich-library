@@ -1,4 +1,3 @@
-from .models import Execute
 import re
 from typing import Any
 
@@ -31,7 +30,7 @@ def execute(
     exec_msg: DF[ExecuteMessage],
     fmt_msg: DF[FormatTokenMessage],
     plh_msg: DF[PlaceholderMessage],
-    ctx: Context[Execute]
+    ctx: Context[Query]
 ) -> DFS:
     '''
     Execute raw SQL command on the database.
@@ -39,14 +38,23 @@ def execute(
 
     ## Input:
 
-         `exec_msg` (DF[ExecuteMessage]): actual commands
-         `fmt_msg` (DF[FormatTokenMessage]): format values for tokens in the commands
-         `plh_msg` (DF[PlaceholderMessage]): placeholders for the commands to execute multiple statements
+        Consists of three dataframes.
 
+        `exec_msg` (DF[ExecuteMessage]): A dataframe with columns:
+            - `command` (str): command string.
+
+        `fmt_msg` (DF[FormatTokenMessage]): A dataframe with format values for tokens in the commands:
+            - `token` (str): token in the command.
+            - `value` (str): substitute string.
+
+        `plh_msg` (DF[PlaceholderMessage]): A dataframe with placeholders for the commands to execute multiple statements:
+            - `cmd_id` (int): id of the command in `exec_msg` dataframe.
+            - `token` (str): name of the token to substitute with.
+            - `value`: value to substitute.
 
     ## Output:
 
-        A list of dataframs with a result for each query. If the query does not return any values, a dataframe with a single column `rows_affected` is returned.
+        A list of dataframes with a result for each query. If the query does not return any values, a dataframe with a single column `rows_affected` is returned.
 
 
     ## Configuration:
@@ -86,12 +94,12 @@ def execute(
         ----------------------
 
         And placeholders can look like this:
-        --------------------------
-        | cmd_id | token | value |
-        --------------------------
-        | 1 | name | product_name|
-        | 1 | price|  200        |
-        --------------------------
+        --------------------------------
+        | cmd_id | token | value       |
+        --------------------------------
+        | 1      | name  | product_name|
+        | 1      | price |  200        |
+        --------------------------------
 
 
     -----
@@ -124,7 +132,12 @@ def execute(
                 }
                 # Selecting placeholders and validating the shape
                 plh = plh_msg[plh_msg.cmd_id == id].drop(columns=['cmd_id'])
+                pattern = r':(.*?)'
+                tokens = re.findall(pattern, command['command'], flags=re.MULTILINE)
                 if not plh.empty:
+                    if len(tokens) == 0:
+                        raise ValueError('No placeholders found in the command. Use: `:placeholder` format to mark a token as a placeholder') # noqa:E501
+
                     plh['row'] = plh.groupby(['token']).cumcount()
                     plh = (
                         plh
