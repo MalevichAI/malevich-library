@@ -1,3 +1,4 @@
+from .models import Execute
 import re
 from typing import Any
 
@@ -30,7 +31,7 @@ def execute(
     exec_msg: DF[ExecuteMessage],
     fmt_msg: DF[FormatTokenMessage],
     plh_msg: DF[PlaceholderMessage],
-    ctx: Context[Query]
+    ctx: Context[Execute]
 ) -> DFS:
     '''
     Execute raw SQL command on the database.
@@ -38,9 +39,9 @@ def execute(
 
     ## Input:
 
-        - `exec_msg` (DF[ExecuteMessage]): actual commands
-        - `fmt_msg` (DF[FormatTokenMessage]): format values for tokens in the commands
-        - `plh_msg` (DF[PlaceholderMessage]): placeholders for the commands to execute multiple statements
+         `exec_msg` (DF[ExecuteMessage]): actual commands
+         `fmt_msg` (DF[FormatTokenMessage]): format values for tokens in the commands
+         `plh_msg` (DF[PlaceholderMessage]): placeholders for the commands to execute multiple statements
 
 
     ## Output:
@@ -50,8 +51,10 @@ def execute(
 
     ## Configuration:
 
-        - `url` (str): URL of the DB to connect to
-        - `subsequent` (bool): if True, each statement will be commited before the next one is executed
+        - `url`: str.
+            URL of the DB to connect to.
+        - `subsequent`: bool.
+            if True, each statement will be commited before the next one is executed.
 
 
     ## Notes:

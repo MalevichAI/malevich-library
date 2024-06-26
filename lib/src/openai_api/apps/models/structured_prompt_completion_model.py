@@ -2,10 +2,10 @@
 #   filename:  structured_prompt_completion_model.json
 
 from __future__ import annotations
+from malevich.square import scheme
 
 from typing import Any, Dict, List, Optional, Union
 
-from malevich.square import scheme
 from pydantic import BaseModel, Field
 
 
