@@ -64,10 +64,6 @@ def executemany(
                 {column_3} INTEGER
             );
         ```
-        ```sql
-        INSERT INTO {table} ({column_2}, {column_3})
-            VALUES (:name, :price);
-        ```
 
         The format tokens needed can look like this:
         ----------------------
