@@ -63,7 +63,7 @@ async def exec_vision(
 
     response: ChatCompletion = await client.chat.completions.create(
         messages=messages,
-        model=conf.model or 'gpt-4-vision-preview',
+        model=conf.model or 'gpt-4o',
         max_tokens=conf.max_tokens,
         top_p=conf.top_p,
         frequency_penalty=conf.frequency_penalty,
