@@ -3,7 +3,6 @@ sqlalchemy:
   description: Operate on different databases using Python API
   visibility:
     - public
-  icon: component/spacy.png
   tags:
     - Database
   designed_for_use_case:

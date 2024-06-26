@@ -40,15 +40,56 @@ def execute(
 
         - `exec_msg` (DF[ExecuteMessage]): actual commands
         - `fmt_msg` (DF[FormatTokenMessage]): format values for tokens in the commands
+        - `plh_msg` (DF[PlaceholderMessage]): placeholders for the commands to execute multiple statements
+
 
     ## Output:
 
         A list of dataframs with a result for each query. If the query does not return any values, a dataframe with a single column `rows_affected` is returned.
 
+
     ## Configuration:
 
         - `url` (str): URL of the DB to connect to
         - `subsequent` (bool): if True, each statement will be commited before the next one is executed
+
+
+    ## Notes:
+
+        IMPORTANT! Format tokens are needed for literals such as table names and column names. Placeholders are needed for
+        constants and help to execute a command multiple times. In order to use placeholders, mark the tokens in your SQL commands with `:`.
+
+        E.g. for queries:
+        ```sql
+        CREATE TABLE IF NOT EXISTS {table} (
+                {column_1} INTEGER PRIMARY KEY,
+                {column_2} TEXT,
+                {column_3} INTEGER
+            );
+        ```
+        ```sql
+        INSERT INTO {table} ({column_2}, {column_3})
+            VALUES (:name, :price);
+        ```
+
+        The format tokens needed can look like this:
+        ----------------------
+        | token    | value   |
+        ----------------------
+        | table    | products|
+        | column_1 | id      |
+        | column_2 | name    |
+        | column_3 | price   |
+        ----------------------
+
+        And placeholders can look like this:
+        --------------------------
+        | cmd_id | token | value |
+        --------------------------
+        | 1 | name | product_name|
+        | 1 | price|  200        |
+        --------------------------
+
 
     -----
 
@@ -56,6 +97,7 @@ def execute(
 
         exec_msg (DF[ExecuteMessage]): dataframe with commands
         fmt_msg (DF[FormatTokenMessage]): dataframe with format tokens
+        plh_msg (DF[PlaceholerMessage]): dataframe with placeholders
 
     Returns:
 
