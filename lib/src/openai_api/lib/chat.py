@@ -1,9 +1,11 @@
-from typing import List
+import asyncio
+from typing import AsyncGenerator, List
 
 from langchain.chat_models import ChatOpenAI as LLMOpenAI
 from langchain.output_parsers import ResponseSchema, StructuredOutputParser
 from langchain.prompts import ChatPromptTemplate, HumanMessagePromptTemplate
-from openai import AsyncOpenAI
+from openai import AsyncOpenAI, OpenAI
+from openai.types.beta.threads import TextContentBlock
 from openai.types.chat import ChatCompletion, ChatCompletionMessage
 
 from ..models.configuration.base import Configuration
@@ -31,6 +33,7 @@ async def exec_chat(
     )
 
     return [choice.message for choice in response.choices]
+
 
 
 async def exec_structured_chat(
@@ -68,3 +71,97 @@ async def exec_structured_chat(
     )
 
     return output_parser.parse(output.content.replace('\n', ''))
+
+
+
+async def exec_assistant(
+    message: dict[str, str], conf: Configuration
+) -> str:
+    client = AsyncOpenAI(
+        api_key=conf.api_key,
+        max_retries=conf.max_retries,
+        organization=conf.organization,
+    )
+    assistant = await client.beta.assistants.create(
+        model=message["model"],
+        instructions=message["instructions"],
+    )
+    return assistant.id
+
+
+
+async def exec_run(
+    messages: List[dict[str, str]], conf: Configuration
+) -> AsyncGenerator:
+    client = OpenAI(
+        api_key=conf.api_key,
+        max_retries=conf.max_retries,
+        organization=conf.organization
+    )
+    for message in messages:
+        assistant = client.beta.assistants.retrieve(
+            assistant_id=message["assistant_id"]
+        )
+        # if thread is NaN, create one
+        if isinstance(message["thread_id"], float):
+            run = client.beta.threads.create_and_run(
+                assistant_id=message["assistant_id"],
+                thread={
+                    "messages": [
+                        {
+                            "role": message["role"],
+                            "content": message["content"]
+                        }
+                    ]
+                },
+                model=assistant.model,
+                temperature=conf.temperature,
+                top_p=conf.top_p,
+                max_completion_tokens=conf.max_tokens
+            )
+        else:
+            # create a message, we do not need a handle for user messages
+            client.beta.threads.messages.create(
+                thread_id=message["thread_id"],
+                role=message["role"],
+                content=message["content"]
+            )
+            # create a run
+            run = client.beta.threads.runs.create(
+                thread_id=message["thread_id"],
+                assistant_id=message["assistant_id"],
+                model=assistant.model,
+                temperature=conf.temperature,
+                top_p=conf.top_p,
+                max_completion_tokens=conf.max_tokens,
+            )
+        run_id = run.id
+        thread_id = run.thread_id
+        # poll until completed
+        # no better way to do this until OpenAI updates the API
+        while run.status != "completed" and run.status != "failed":
+            run = client.beta.threads.runs.retrieve(
+                run_id=run_id,
+                thread_id=thread_id
+            )
+            await asyncio.sleep(0.1)
+        # get the list of messages
+        # latest messages are in the beginning of the list
+        message_list = client.beta.threads.messages.list(
+            thread_id=thread_id,
+            limit=1
+        )
+        # message_list is always 1 element long, but we iterate just in case
+        for msg in message_list.data:
+            # messages consist of content blocks, e.g. text, image, audio
+            # for now we only look for text
+            # but it is possible to expand it in the future
+            for content_block in msg.content:
+                if isinstance(content_block, TextContentBlock):
+                    yield (
+                        content_block.text.value,
+                        thread_id,
+                        message["assistant_id"]
+                    )
+
+
