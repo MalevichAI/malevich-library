@@ -1,4 +1,5 @@
 import re
+from typing import Any
 
 import pandas as pd
 import sqlalchemy as sql
@@ -18,19 +19,26 @@ class FormatTokenMessage(BaseModel):
     token: str
     value: str
 
+@scheme()
+class PlaceholderMessage(BaseModel):
+    cmd_id: int
+    token: str
+    value: Any
+
 @processor()
 def executemany(
     exec_msg: DF[ExecuteMessage],
     fmt_msg: DF[FormatTokenMessage],
+    plh_msg: DF[PlaceholderMessage],
     ctx: Context[Query]
 ) -> DFS:
     '''
-    Execute raw SQL commands on the database.
-    If your command utilizes placeholders, refer to `executemany` processor.
+    Execute raw SQL commands on the database with many values. Use this only if you need to run same commands with different parameters, since placeholder dataframe is mandatory.
+    If your command does not utilize placeholders, refer to `execute` processor
 
     ## Input:
 
-        Consists of two dataframes.
+        Consists of three dataframes.
 
         `exec_msg` (DF[ExecuteMessage]): A dataframe with columns:
             - `command` (str): command string.
@@ -38,6 +46,11 @@ def executemany(
         `fmt_msg` (DF[FormatTokenMessage]): A dataframe with format values for tokens in the commands:
             - `token` (str): token in the command.
             - `value` (str): substitute string.
+
+        `plh_msg` (DF[PlaceholderMessage]): A dataframe with placeholders for the commands to execute multiple statements:
+            - `cmd_id` (int): id of the command in `exec_msg` dataframe.
+            - `token` (str): name of the token to substitute with.
+            - `value`: value to substitute.
 
     ## Output:
 
@@ -54,7 +67,8 @@ def executemany(
 
     ## Notes:
 
-        IMPORTANT! Format tokens are needed for literals such as table names and column names.
+        IMPORTANT! Format tokens are needed for literals such as table names and column names. Placeholders are needed for
+        constants and help to execute a command multiple times. In order to use placeholders, mark the tokens in your SQL commands with `:`.
 
         E.g. for queries:
         ```sql
@@ -79,12 +93,22 @@ def executemany(
         | column_3 | price   |
         ----------------------
 
+        And placeholders can look like this:
+        --------------------------------
+        | cmd_id | token | value       |
+        --------------------------------
+        | 1      | name  | product_name|
+        | 1      | price |  200        |
+        --------------------------------
+
+
     -----
 
     Args:
 
         exec_msg (DF[ExecuteMessage]): dataframe with commands
         fmt_msg (DF[FormatTokenMessage]): dataframe with format tokens
+        plh_msg (DF[PlaceholerMessage]): dataframe with placeholders
 
     Returns:
 
@@ -107,7 +131,39 @@ def executemany(
                     for msg in fmt
                 }
                 # Selecting placeholders and validating the shape
-                ret = conn.execute(sql.text(command['command'].format(**kv_fmt)))
+                plh = plh_msg[plh_msg.cmd_id == id].drop(columns=['cmd_id'])
+                pattern = r':(.*?)'
+                tokens = re.findall(pattern, command['command'], flags=re.MULTILINE)
+                if not plh.empty:
+                    if len(tokens) == 0:
+                        raise ValueError('No placeholders found in the command. Use: `:placeholder` format to mark a token as a placeholder') # noqa:E501
+
+                    plh['row'] = plh.groupby(['token']).cumcount()
+                    plh = (
+                        plh
+                            .pivot(
+                                index=['row'],
+                                columns=['token'],
+                                values=['value'],
+                            )
+                            .reset_index(drop=True)
+                    )
+                    if plh.isnull().values.any():
+                        raise ValueError('Please make sure every placeholder needed is in the dataframe') # noqa:E501
+                    plh = plh.to_dict(orient='records')
+                    # NOTE: this is bad, but I have no idea
+                    # how to get rid of multi-column index better
+                    plh = [
+                            {
+                                key[1]: value
+                                for key, value in item.items()
+                            }
+                        for item in plh
+                    ]
+                else:
+                    plh = []
+                ret = conn.execute(sql.text(command['command'].format(**kv_fmt)),
+                                   parameters=plh)
                 if ret.returns_rows:
                     result.append(
                         pd.DataFrame(ret.all(), columns=ret.keys())
