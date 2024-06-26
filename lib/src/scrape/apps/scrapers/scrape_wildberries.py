@@ -1,17 +1,78 @@
+import os
 import re
+from hashlib import sha256
 
 import pandas as pd
 import scrapy
-from malevich.square import DF, Context, processor
+from malevich.square import APP_DIR, DF, Context, processor
+from selenium.common.exceptions import TimeoutException
+from selenium.webdriver import Chrome
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions
+from selenium.webdriver.support.ui import WebDriverWait
 
 from .models import ScrapeWildberries
 
+SCRIPT = """
+var expr = "//button[contains(@class, 'detail')]"
+var click_event = new Event("click", { bubbles: true, cancelable: false });
+var all_chars = document.evaluate(expr, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue
+var resp = all_chars.dispatchEvent(click_event)
+"""  # noqa: E501
 
 class Response:
     def __init__(self, text, url) -> None:
         self.text = text
         self.url = url
         self.encoding = 'utf-8'
+
+@processor()
+def get_page_wb(df: DF, ctx: Context):
+    """
+    Get Wildberries product page.
+
+    ## Intput
+        A single DataFrame with one column:
+            - `link` (str): Link to the WB product.
+
+    ## Output
+        A single DataFrame with two columns:
+            - `link` (str): Link to the WB product.'
+            - `filename (str): HTML File with product content.'
+    -----
+    """
+    driver: Chrome = ctx.common
+    wait = WebDriverWait(driver, 2)
+
+    outs = []
+
+    for link in df['link'].to_list():
+        driver.get(link)
+        try:
+            wait.until(
+                expected_conditions.presence_of_element_located(
+                    (By.XPATH, '//button[contains(@class, "detail")]')
+                )
+            )
+            driver.execute_script(
+                SCRIPT
+            )
+            wait.until(
+                expected_conditions.presence_of_element_located(
+                    (By.XPATH, '//div[contains(@class, "description")]')
+                )
+            )
+        except TimeoutException:
+            ...
+        path = sha256(link.encode()).hexdigest() + '.html'
+        with open(os.path.join(APP_DIR, path), 'w') as f:
+            f.write(driver.page_source)
+        ctx.share(path)
+        outs.append([link, path])
+    return pd.DataFrame(
+        outs,
+        columns=['link', 'filename']
+    )
 
 @processor()
 def scrape_wildberries(

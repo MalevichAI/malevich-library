@@ -7,7 +7,7 @@ import pandas as pd
 import requests
 import scrapy
 from fake_useragent import UserAgent
-from malevich.square import APP_DIR, DF, Context, processor, scheme
+from malevich.square import APP_DIR, DF, Context, init, processor, scheme
 from pydantic import BaseModel
 from selenium import webdriver
 from selenium.common.exceptions import (
@@ -58,8 +58,8 @@ class Response:
         self.url = url
         self.captcha = captcha
 
-
-def init_driver():
+@init(prepare=True)
+def init_driver(ctx: Context):
     options = webdriver.ChromeOptions()
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
@@ -67,7 +67,7 @@ def init_driver():
     options.add_argument("--headless")
     options.add_argument("--disable-blink-features=AutomationControlled")
     options.add_argument(f"--user-agent={UserAgent(browsers=['chrome']).random}")  # noqa: E501
-    return webdriver.Chrome(options)
+    ctx.common = webdriver.Chrome(options)
 
 
 def get_page_(link: str, sp_conf) -> str:
