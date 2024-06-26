@@ -19,7 +19,7 @@ class FormatTokenMessage(BaseModel):
     value: str
 
 @processor()
-def executemany(
+def execute(
     exec_msg: DF[ExecuteMessage],
     fmt_msg: DF[FormatTokenMessage],
     ctx: Context[Query]
