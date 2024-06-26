@@ -4,7 +4,7 @@ import pandas as pd
 from malevich.square import DF, Context, processor, scheme
 
 from ..lib.chat import exec_assistant
-from .models import AssistantCreation
+from .models import CreateAssistant
 
 
 @scheme()
@@ -17,7 +17,7 @@ class CreateAssistantMessage:
 @processor()
 async def create_assistant(
     initials: DF[CreateAssistantMessage],
-    ctx: Context[AssistantCreation]
+    ctx: Context[CreateAssistant]
 ):
     """Create an assistant with OpenAI Chat Assistant feature.
 
