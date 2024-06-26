@@ -28,16 +28,19 @@ class Response:
 
 @processor()
 def get_page_wb(df: DF, ctx: Context):
-    """Get Wildberries product page.
+    """
+    Get Wildberries product page.
 
-    ## Intput:
-        A single DataFrame with one column:
-            - `link` (str): Link to the WB product.
+    ## Input:
+
+    A single DataFrame with one column:
+        - `link` (str): Link to the WB product.
 
     ## Output:
-        A single DataFrame with two columns:
-            - `link` (str): Link to the WB product.
-            - `filename` (str): HTML File with product content.
+
+    A single DataFrame with two columns:
+        - `link` (str): Link to the WB product.
+        - `filename` (str): HTML File with product content.
     -----
     Args:
         df(DF): DF with products.
