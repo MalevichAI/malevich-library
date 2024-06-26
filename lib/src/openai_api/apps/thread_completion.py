@@ -2,7 +2,7 @@ import pandas as pd
 from malevich.square import DF, Context, processor, scheme
 
 from ..lib.chat import exec_run
-from .models import ThreadPromptCompletion
+from .models import ThreadCompletion
 
 
 @scheme()
@@ -15,7 +15,7 @@ class ThreadInputMessage:
 @processor()
 async def thread_completion(
     messages: DF[ThreadInputMessage],
-    ctx: Context[ThreadPromptCompletion]
+    ctx: Context[ThreadCompletion]
 ):
     """Use Chat Assistant feature from OpenAI with multiple threads.
 

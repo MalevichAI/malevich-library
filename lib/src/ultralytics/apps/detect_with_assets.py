@@ -1,5 +1,5 @@
 import os
-from typing import Any
+
 
 import cv2
 import pandas as pd
@@ -77,7 +77,8 @@ async def detect_with_asset(
     Returns:
         A collection of YOLO results
     """
-    def get_path(x) -> str | Any:
+
+    def get_path(x) -> str | None:
         path = context.get_share_path(x, not_exist_ok=True)
         if path is not None and os.path.exists(path):  # noqa: E501
             return path

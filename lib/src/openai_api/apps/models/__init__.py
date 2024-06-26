@@ -6,3 +6,5 @@ from .text_to_image_model import TextToImage
 from .structured_prompt_completion_model import StructuredPromptCompletion
 from .completion_with_vision_model import CompletionWithVision
 from .assistant_creation_model import AssistantCreation
+from .thread_completion_model import ThreadCompletion
+from .create_assistant_model import CreateAssistant
