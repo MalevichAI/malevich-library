@@ -14,7 +14,7 @@ openai:
     - title: Text completion with OpenAI LLMs
     - title: Text embeddings with OpenAI models
   icon: component/openai.png
-  repo_url: https://github.com/MalevichAI/malevich-library/tree/main/lib/src/openai_api
+  repo_url: https://github.com/MalevichAI/malevich-library/tree/dev/lib/src/openai_api
   app:
     container_ref: public.ecr.aws/o1z1g3t0/openai_api
     container_user: null
