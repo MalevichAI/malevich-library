@@ -18,7 +18,7 @@ class ScrapeBySelectors(BaseModel):
         [], description='A list of components with keys and Xpaths need to be found'
     )
     output_type: Optional[str] = Field(
-        'json', description='Output type of scraping results'
+        'single_table', description='Output type of scraping results'
     )
     output_delimeter: Optional[str] = Field(
         '\n',

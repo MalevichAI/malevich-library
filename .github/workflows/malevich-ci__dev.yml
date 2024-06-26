@@ -1,7 +1,8 @@
 name: Malevich Auto CI on dev
 on:
   push:
-    branches: dev
+    branches: 
+      - dev
 jobs:
   build_push:
     environment: dev

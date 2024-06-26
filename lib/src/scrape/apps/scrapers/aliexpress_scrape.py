@@ -2,73 +2,11 @@ import re
 
 import pandas as pd
 import scrapy
-from fake_useragent import UserAgent
-from malevich.square import DF, Context, init, processor, scheme
+from malevich.square import DF, Context, processor, scheme
 from pydantic import BaseModel
-from selenium import webdriver
-from selenium.webdriver.common.by import By
 
 from .models import ScrapeAliexpress
 
-
-@init()
-def init_driver(ctx: Context):
-    options = webdriver.ChromeOptions()
-    options.add_argument("--no-sandbox")
-    options.add_argument("--disable-dev-shm-usage")
-    options.add_argument("--ignore-certificate-errors")
-    options.add_argument("--headless")
-    options.add_argument("--disable-blink-features=AutomationControlled")
-    options.add_argument(f"--user-agent={UserAgent(browsers=['chrome']).random}")  # noqa: E501
-    ctx.common = webdriver.Chrome(options)
-
-def get_cards(driver: webdriver.Chrome):
-    chars_data = {}
-
-    chars = driver.find_elements(
-        By.XPATH,
-        "//div[contains(@exp_attribute, 'sku_attr')]/div[contains(@class, 'skuProp')]"
-    )
-
-    for i in range(len(chars)):
-        prop_name = driver.find_element(
-            By.XPATH,
-            "//div[contains(@exp_attribute, 'sku_attr')]/"
-            f"div[contains(@class, 'skuProp')][{i+1}]/div/span"
-        ).text.strip(':')
-
-        if prop_name not in chars_data.keys():
-            chars_data[prop_name] = []
-
-        variants = driver.find_elements(
-            By.XPATH,
-            "//div[contains(@exp_attribute, 'sku_attr')]"
-            f"/div[contains(@class, 'skuProp')][{i+1}]//ul/li/button"
-        )
-        for j in range(len(variants)):
-            driver.execute_script(
-                f"""
-                var click_event = new Event(
-                    "click",
-                    {{ bubbles: true, cancelable: false }}
-                )
-                var button = document.evaluate(
-                    "(//div[contains(@class, 'skuProp')])[{i+1}]//ul/li/button[@id = 'SkuPropertyValue-{j}']",
-                    document.body,
-                    null,
-                    XPathResult.FIRST_ORDERED_NODE_TYPE,
-                    null
-                ).singleNodeValue
-                button.dispatchEvent(click_event)
-                """  # noqa: E501
-            )
-            prop = driver.find_elements(
-                By.XPATH,
-                "(//div[contains(@exp_attribute, 'sku_attr')]"
-                f"/div[contains(@class, 'skuProp')])[{i+1}]/div/span"
-            )
-            chars_data[prop_name].append(prop[1].text)
-    return chars_data
 
 @scheme()
 class ScrapeLinksAli(BaseModel):
@@ -85,6 +23,7 @@ class Response:
     def __init__(self, text, url) -> None:
         self.text = text
         self.url = url
+        self.encoding = 'utf-8'
 
 @processor()
 def scrape_aliexpress(
@@ -101,7 +40,7 @@ def scrape_aliexpress(
     ## Output:
         Depends on the configuration, processor returns from 2 to 5 DataFrames.
 
-        By default, it returns 5 DataFrames: text, images, properties, cards and errors.
+        By default, it returns 3 DataFrames: text, images, properties.
 
         Each DataFrame has a `link` column. And depend on the DataFrame, it has its own columns.
         For example: Image DataFrame has two columns: `link` and `image`.
@@ -324,11 +263,9 @@ def scrape_aliexpress(
     """ # noqa: E501
     sp_conf = context.app_cfg.get('spider_cfg', {})
     max_results = context.app_cfg.get('max_results', None)
-    driver = context.common
 
     text_df = []
     image_df = []
-    card_df = []
     props_df = []
     for _, row in scrape_links.iterrows():
         link = row['link']
@@ -368,19 +305,6 @@ def scrape_aliexpress(
         for image in images[:max_results]:
             image_df.append([link, image])
 
-        if sel.xpath("//div[@data-spm = 'sku_floor']//ul").get() is not None:
-            try:
-                driver.get(f"file://{context.get_share_path(row['filename'])}")
-                cards = get_cards(driver)
-                cards_str = 'Variants:\n'
-                for key in cards.keys():
-                    cards_str += key + '\n'
-                    for val in cards[key]:
-                        cards_str += val + '\n'
-                        card_df.append([link, key, val])
-                text += cards_str
-            except Exception:
-                ...
         text_df.append([
             link,
             text
@@ -401,8 +325,7 @@ def scrape_aliexpress(
         return_df.extend([
             pd.DataFrame(text_df, columns=["link", "text"]),
             pd.DataFrame(image_df, columns=["link", "image"]),
-            pd.DataFrame(props_df, columns=["link", "name", "value"]),
-            pd.DataFrame(card_df, columns=["link", "name", "value"])
+            pd.DataFrame(props_df, columns=["link", "name", "value"])
         ])
 
     return return_df
