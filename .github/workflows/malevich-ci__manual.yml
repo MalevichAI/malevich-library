@@ -100,8 +100,6 @@ jobs:
             image_url=${{ secrets.REGISTRY_URL }}/${{ secrets.REGISTRY_ID }}
           fi
           dirs=$( echo $dirs | xargs )
-          echo "DIRS AFTER XARGS:"
-          echo $dirs
           for dir in $dirs
           do
             dir=lib/src/$dir

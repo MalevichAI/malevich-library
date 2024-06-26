@@ -5,3 +5,5 @@ from .scrape_google_search_model import ScrapeGoogleSearch
 from .scrape_text_model import ScrapeText
 from .scrape_web_model import ScrapeWeb
 from .scrape_yamarket_api_model import ScrapeYamarketApi
+from .scrape_wildberries_model import ScrapeWildberries
+from .scrape_yamarket_model import ScrapeYamarket
