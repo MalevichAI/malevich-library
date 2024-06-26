@@ -27,21 +27,29 @@ def upload_collection(
     ## Input:
 
         A dataframe consisting of columns:
-        - `name` (str): name of the collection.
-        - `vector_size` (str): JSON with names and sizes of vectors in the collection.
-        - `distance` (str): distance score metric (case insensitive).
-        Available metrics: `cosine`, `dot`, `manhattan`, `euclid`
+        - `vectors`: str
+            JSON string of the vectors.
+        - `payload`: str or None
+            JSON string of the payload.
+        - `id`: int or str or None
+            Distance score metric (case insensitive). Available metrics: `cosine`, `dot`, `manhattan`, `euclid`
 
     ## Output:
 
         A dataframe with column:
-        - `status` (bool): status of the operation. If `true`, collection was
-        successfully created.
+        - `status`: bool
+            Status of the operation. If True, collection was successfully created.
 
     ## Configuration:
 
-        - `url` (str): URL location of your Qdrant DB
-        - `api_key` (str | None): API key of your Qdrant DB
+        - `url`: str
+            URL location of your Qdrant DB
+        - `api_key`: str or None
+            API key of your Qdrant DB
+        - `timeout`: int or None
+            Connection timeout in seconds
+        - `https`: bool or None
+            Whether HTTPS connection is used
 
 
     ## Notes:
@@ -51,13 +59,12 @@ def upload_collection(
     -----
 
     Args:
-        messages (DF[CreateCollection]): A dataframe with names and parameters
-        of the collections.
-        ctx (Context[QdrantCreation]): context.
+        messages (DF[UploadCollectionMessage]): A dataframe with names and parameters of the collections.
+        ctx (Context[Update]): context.
 
     Returns:
         A dataframe of return statuses.
-    '''
+    ''' # noqa:E501
 
     client_url = ctx.app_cfg.url
     client_api_key = ctx.app_cfg.api_key
@@ -71,7 +78,7 @@ def upload_collection(
             https=client_https
         )
     except Exception as exc:
-        raise Exception(f'Qdrant at `{client_url}` requires an API key') from exc
+        raise Exception(f'Could not connect to `{client_url}`') from exc
 
     df = {
         'status': []
@@ -79,12 +86,11 @@ def upload_collection(
     collection_name = ctx.app_cfg.collection_name
     batch_size = ctx.app_cfg.batch_size
     parallel = ctx.app_cfg.parallel
-    print(messages)
     vectors = [
         json.loads(message)
         for message in messages['vectors'].to_list()
     ]
-    if {} in vectors or [] in vectors:
+    if not all(vectors):
         raise Exception('Please set at least one of the vectors to a correct value for every point') # noqa:E501
     payloads = [
         json.loads(message) if isinstance(message, str) else None

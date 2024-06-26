@@ -17,6 +17,7 @@ class SearchMessage:
 class SearchResponse:
     query_id: int
     point_id: str | int
+    score: float
     payload: str
     vectors: str
 
@@ -30,33 +31,57 @@ def search(
     ## Input:
 
         A dataframe consisting of columns:
-        - `vectors` (str): string representations of the vectors
-        - `filter` (str): Qdrant filters packed into dictionary
-        - `limit` (int): max responses returned
+        - `vectors`: str
+            String representations of the vectors
+        - `filter`: str
+			Qdrant filters packed into dictionary
+        - `limit`: int
+			Max responses returned
 
     ## Output:
 
         A dataframe with columns:
-        - `query_id` (int): index of the query in the input DF
-        - `point_id` (int): index of the point in Qdrant
-        - `payload` (str): JSOncolumns with payload keys.
-        Number of columns depends on the payload.
-        - `vectors` (str): columns with string representations of vectors.
-        Number of columns depends on the payload.
+        - `query_id`: int
+			Index of the query in the input DF
+        - `point_id`: int
+			Index of the point in Qdrant
+        - `score`: float
+            Score of the suggested point
+        - `payload`: str
+			JSON columns with payload keys.
+            Number of columns depends on the payload.
+        - `vectors`: str
+			Columns with string representations of vectors.
+            Number of columns depends on the payload.
 
     ## Configuration:
 
-        - `` ():
+        - `url`: str
+            URL location of your Qdrant DB
+        - `api_key`: str or None
+            API key of your Qdrant DB
+        - `timeout`: int or None
+            Connection timeout in seconds
+        - `https`: bool or None
+            Whether HTTPS connection is used
+        - `collection_name`: str or None
+            Name of the collection
+        - `with_vectors`: list[str] or bool
+            List of the vectors to choose.
+            If True, all vectors will be choose. If opposite, none will
+        - `with_payload`: list[str] or bool
+            List of the payload columns to choose.
+            If True, all vectors will be choose. If opposite, none will
 
-    ## Note:
+    ## Notes:
 
         No option for sort by and group by (yet).
 
     -----
 
     Args:
-        messages (DF[ScrollMessage]): A dataframe with filters and limits.
-        ctx (Context[Scroll]): context
+        messages (DF[SearchMessage]): A dataframe with filters and limits.
+        ctx (Context[Query]): context
 
     Returns:
         A dataframe with selected payloads and vectors.
@@ -74,7 +99,7 @@ def search(
             https=client_https
         )
     except Exception as exc:
-        raise Exception(f'Qdrant at `{client_url}` requires an API key') from exc
+        raise Exception(f'Could not connect to `{client_url}`') from exc
 
 
     collection_name = ctx.app_cfg.collection_name

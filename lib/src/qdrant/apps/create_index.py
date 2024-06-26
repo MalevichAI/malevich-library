@@ -27,33 +27,36 @@ def create_index(
     ## Input:
 
         A dataframe consisting of columns:
-        - `name` (str): name of the collection.
-        - `vector_size` (dict[str, int]): names and sizes of vectors in the collection.
-        - `distance` (str): distance score metric (case insensitive).
-        Available metrics: `cosine`, `dot`, `manhattan`, `euclid`
+        - `name`: str
+            Name of the collection.
+        - `field`: str
+            Name of the field.
+        - `schema`: str
+            JSON string with the schema of the index
 
     ## Output:
 
         A dataframe with column:
-        - `status` (bool): status of the operation. If `true`, collection was
-        successfully created.
+        - `status`: str
+            Status of the operation.
 
     ## Configuration:
 
-        - `url` (str): URL location of your Qdrant DB
-        - `api_key` (str | None): API key of your Qdrant DB
-
-    ## Notes:
-
-        IMPORTANT! We strongly insist on giving name to vectors.
-        It would be much easier to manage collections this way.
+        - `url`: str
+            URL location of your Qdrant DB
+        - `api_key`: str or None
+            API key of your Qdrant DB
+        - `timeout`: int or None
+            Connection timeout in seconds
+        - `https`: bool or None
+            Whether HTTPS connection is used
 
     -----
 
     Args:
-        messages (DF[CreateCollection]): A dataframe with names and parameters
+        messages (DF[CreateIndexMessage]): A dataframe with names and parameters
         of the collections.
-        ctx (Context[QdrantCreation]): context.
+        ctx (Context[Qdrant]): context.
 
     Returns:
         A dataframe of return statuses.
@@ -71,7 +74,7 @@ def create_index(
             https=client_https
         )
     except Exception as exc:
-        raise Exception(f'Qdrant at `{client_url}` requires an API key') from exc
+        raise Exception(f'Could not connect to `{client_url}`') from exc
 
 
     df = {
