@@ -74,5 +74,4 @@ def construct_placeholder(
             df['token'].extend([key] * len(val))
             df['value'].extend(val)
 
-    result = pd.DataFrame(df)
-    return result
+    return pd.DataFrame(data=df)

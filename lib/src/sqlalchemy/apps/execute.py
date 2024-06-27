@@ -13,31 +13,22 @@ from .models import Query
 class ExecuteMessage(BaseModel):
     command: str
 
-@scheme()
-class FormatTokenMessage(BaseModel):
-    token: str
-    value: str
 
 @processor()
 def execute(
     exec_msg: DF[ExecuteMessage],
-    fmt_msg: DF[FormatTokenMessage],
     ctx: Context[Query]
 ) -> DFS:
     '''
     Execute raw SQL commands on the database.
     If your command utilizes placeholders, refer to `executemany` processor.
 
+
     ## Input:
 
-        Consists of two dataframes.
-
-        `exec_msg` (DF[ExecuteMessage]): A dataframe with columns:
+        A dataframe with column:
             - `command` (str): command string.
 
-        `fmt_msg` (DF[FormatTokenMessage]): A dataframe with format values for tokens in the commands:
-            - `token` (str): token in the command.
-            - `value` (str): substitute string.
 
     ## Output:
 
@@ -48,8 +39,10 @@ def execute(
 
         - `url`: str.
             URL of the DB to connect to.
-        - `subsequent`: bool.
+        - `subsequent`: bool, default False.
             if True, each statement will be commited before the next one is executed.
+        - `format`: dict, default None.
+            Dictionary consisting of key-value pairs `token`:`value` that substitute tokens in the command.
 
 
     ## Notes:
@@ -66,14 +59,14 @@ def execute(
         ```
 
         The format tokens needed can look like this:
-        ----------------------
-        | token    | value   |
-        ----------------------
-        | table    | products|
-        | column_1 | id      |
-        | column_2 | name    |
-        | column_3 | price   |
-        ----------------------
+        ```
+        {
+            "table" : "products",
+            "column_1" : "id",
+            "column_2" : "name",
+            "column_3" : "price"
+        }
+        ```
 
     -----
 
@@ -88,6 +81,7 @@ def execute(
     ''' # noqa:E501
     session_url = ctx.app_cfg.url
     subsequent = ctx.app_cfg.subsequent
+    fmt = ctx.app_cfg.format
 
     with sql.create_engine(session_url).connect() as conn:
         try:
@@ -97,11 +91,16 @@ def execute(
                 # Selecting needed format values
                 pattern = r'\{(.*?)\}'
                 tokens = re.findall(pattern, command['command'], flags=re.MULTILINE)
-                fmt = fmt_msg[fmt_msg.token.isin(tokens)].to_dict(orient='records')
-                kv_fmt = {
-                    msg['token'] : msg['value']
-                    for msg in fmt
-                }
+                try:
+                    kv_fmt = {
+                        token : fmt[token]
+                        for token in tokens
+                    }
+                except KeyError as exc:
+                    raise Exception('One of the tokens was not provided in the context') from exc # noqa:E501
+                except TypeError as exc:
+                    raise Exception('Format tokens were not provided in the context') from exc # noqa:E501
+
                 # Selecting placeholders and validating the shape
                 ret = conn.execute(sql.text(command['command'].format(**kv_fmt)))
                 if ret.returns_rows:

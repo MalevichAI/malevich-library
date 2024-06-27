@@ -14,10 +14,6 @@ from .models import Query
 class ExecuteMessage(BaseModel):
     command: str
 
-@scheme()
-class FormatTokenMessage(BaseModel):
-    token: str
-    value: str
 
 @scheme()
 class PlaceholderMessage(BaseModel):
@@ -25,10 +21,10 @@ class PlaceholderMessage(BaseModel):
     token: str
     value: Any
 
+
 @processor()
 def executemany(
     exec_msg: DF[ExecuteMessage],
-    fmt_msg: DF[FormatTokenMessage],
     plh_msg: DF[PlaceholderMessage],
     ctx: Context[Query]
 ) -> DFS:
@@ -36,16 +32,13 @@ def executemany(
     Execute raw SQL commands on the database with many values. Use this only if you need to run same commands with different parameters, since placeholder dataframe is mandatory.
     If your command does not utilize placeholders, refer to `execute` processor
 
+
     ## Input:
 
-        Consists of three dataframes.
+        Consists of two dataframes.
 
-        `exec_msg` (DF[ExecuteMessage]): A dataframe with columns:
+        `exec_msg` (DF[ExecuteMessage]): A dataframe with column:
             - `command` (str): command string.
-
-        `fmt_msg` (DF[FormatTokenMessage]): A dataframe with format values for tokens in the commands:
-            - `token` (str): token in the command.
-            - `value` (str): substitute string.
 
         `plh_msg` (DF[PlaceholderMessage]): A dataframe with placeholders for the commands to execute multiple statements:
             - `cmd_id` (int): id of the command in `exec_msg` dataframe.
@@ -61,9 +54,10 @@ def executemany(
 
         - `url`: str.
             URL of the DB to connect to.
-        - `subsequent`: bool.
+        - `subsequent`: bool, default False.
             if True, each statement will be commited before the next one is executed.
-
+        - `format`: dict, default None.
+            Dictionary consisting of key-value pairs `token`:`value` that substitute tokens in the command.
 
     ## Notes:
 
@@ -84,14 +78,14 @@ def executemany(
         ```
 
         The format tokens needed can look like this:
-        ----------------------
-        | token    | value   |
-        ----------------------
-        | table    | products|
-        | column_1 | id      |
-        | column_2 | name    |
-        | column_3 | price   |
-        ----------------------
+        ```
+        {
+            "table" : "products",
+            "column_1" : "id",
+            "column_2" : "name",
+            "column_3" : "price"
+        }
+        ```
 
         And placeholders can look like this:
         --------------------------------
@@ -116,6 +110,7 @@ def executemany(
     ''' # noqa:E501
     session_url = ctx.app_cfg.url
     subsequent = ctx.app_cfg.subsequent
+    fmt = ctx.app_cfg.format
 
     with sql.create_engine(session_url).connect() as conn:
         try:
@@ -125,11 +120,16 @@ def executemany(
                 # Selecting needed format values
                 pattern = r'\{(.*?)\}'
                 tokens = re.findall(pattern, command['command'], flags=re.MULTILINE)
-                fmt = fmt_msg[fmt_msg.token.isin(tokens)].to_dict(orient='records')
-                kv_fmt = {
-                    msg['token'] : msg['value']
-                    for msg in fmt
-                }
+                try:
+                    kv_fmt = {
+                        token : fmt[token]
+                        for token in tokens
+                    }
+                except KeyError as exc:
+                    raise Exception('One of the tokens was not provided in the context') from exc # noqa:E501
+                except TypeError as exc:
+                    raise Exception('Format tokens were not provided in the context') from exc # noqa:E501
+
                 # Selecting placeholders and validating the shape
                 plh = plh_msg[plh_msg.cmd_id == id].drop(columns=['cmd_id'])
                 pattern = r':(.*?)'
