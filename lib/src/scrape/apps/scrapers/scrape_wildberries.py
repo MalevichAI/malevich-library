@@ -8,6 +8,7 @@ from malevich.square import APP_DIR, DF, Context, processor
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver import Chrome
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.ui import WebDriverWait
 
@@ -48,6 +49,8 @@ def get_page_wb(df: DF, ctx: Context):
         DF with files.
     """
     driver: Chrome = ctx.common
+    driver.get('chrome://settings/clearBrowserData')
+    driver.find_element(by=By.XPATH, value='//settings-ui').send_keys(Keys.ENTER)
     wait = WebDriverWait(driver, 2)
 
     outs = []
