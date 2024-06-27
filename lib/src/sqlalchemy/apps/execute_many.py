@@ -23,7 +23,7 @@ class PlaceholderMessage(BaseModel):
 
 
 @processor()
-def executemany(
+def execute_many(
     exec_msg: DF[ExecuteMessage],
     plh_msg: DF[PlaceholderMessage],
     ctx: Context[Query]
