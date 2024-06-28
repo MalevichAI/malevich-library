@@ -4,40 +4,32 @@ import pandas as pd
 from malevich.square import DF, Context, processor, scheme
 from qdrant_client import QdrantClient
 
-from .models import Filter, Query
+from .models import FilterQuery
 
-
-@scheme()
-class ScrollMessage:
-    filter: str
-    limit: int
 
 @scheme()
 class ScrollResponse:
-    query_id: int
     point_id: str | int
     payload: str
     vectors: str
 
+
 @processor()
 def scroll(
-    messages: DF[ScrollMessage],
-    ctx: Context[Query]
-) -> DF[ScrollResponse]:
-    '''Select points from a collection in Qdrant.
+    ctx: Context[FilterQuery]
+) -> DF:
+    '''Search points with a vector from a collection in Qdrant.
 
     ## Input:
 
-        A dataframe consisting of columns:
-        - `filter` (dict[str]): Qdrant filters packed into dictionary.
-        - `limit` (int): Max responses returned.
+        None.
 
     ## Output:
 
         A dataframe with columns:
-        - `query_id` (int): Index of the query in the input DF.
-        - `point_id` (str | int): Index of the point in Qdrant.
-        - `payload` (str): Columns with payload keys.
+        - `point_id` (int): Index of the point in Qdrant.
+        - `score` (float): Score of the suggested point.
+        - `payload` (str): JSON columns with payload keys.
             Number of columns depends on the payload.
         - `vectors` (str): Columns with string representations of vectors.
             Number of columns depends on the payload.
@@ -46,7 +38,7 @@ def scroll(
 
         - `url`: str.
             URL location of your Qdrant DB.
-        - `api_key`: str, default None.
+        - `api_key`: str, default None.String representations of the vectors
             API key of your Qdrant DB.
         - `timeout`: int, default None.
             Connection timeout in seconds.
@@ -57,9 +49,13 @@ def scroll(
         - `with_vectors`: list[str], default True.
             List of the vectors to choose.
             If True, all vectors will be choose. If opposite, none will.
-        - `with_payload`: list[str], default bool.
+        - `with_payload`: list[str], default True.
             List of the payload columns to choose.
             If True, all vectors will be choose. If opposite, none will.
+        - `filter`: dict.
+            Native Qdrant filter for searching.
+        - `limit`: int, default 10.
+            How many points should the search return.
 
     ## Notes:
 
@@ -68,7 +64,7 @@ def scroll(
     -----
 
     Args:
-        messages (DF[ScrollMessage]): A dataframe with filters and limits.
+        messages (DF[SearchMessage]): A dataframe with filters and limits.
         ctx (Context[Query]): context.
 
     Returns:
@@ -93,40 +89,38 @@ def scroll(
     collection_name = ctx.app_cfg.collection_name
     with_vectors = ctx.app_cfg.with_vectors
     with_payload = ctx.app_cfg.with_payload
+    query_filter = ctx.app_cfg.filter
+    limit = ctx.app_cfg.limit
 
     df = {
-        'query_id': [],
         'point_id': [],
+        'score': [],
         'payload': [],
         'vectors': []
     }
+    try:
+        results = qdrant_client.scroll(
+            collection_name=collection_name,
+            scroll_filter=query_filter,
+            limit=limit,
+            with_payload=with_payload,
+            with_vectors=with_vectors
+        )
+    except Exception:
+        raise ValueError(
+            '''`search` command failed!
+            Try fixing `filter` config or check `collection_name` in the config.
+            ''')
 
-    for query_id, message in enumerate(messages.to_dict(orient='records')):
-
-        try:
-            results = qdrant_client.scroll(
-                collection_name=collection_name,
-                scroll_filter=Filter(**json.loads(message['filter'])),
-                limit=message['limit'],
-                with_payload=with_payload,
-                with_vectors=with_vectors
-            )
-        except Exception:
-            raise ValueError(
-                '''`scroll` command failed!
-                Try fixing `filter` column or check the config.
-                ''')
-
-        for result in results[0]:
-            df['query_id'].append(query_id)
-            df['point_id'].append(result.id)
-            if result.payload:
-                df['payload'].append(json.dumps(result.payload))
-            else:
-                df['payload'].append(None)
-            if result.vector:
-                df['vectors'].append(json.dumps(result.vector))
-            else:
-                df['vectors'].append(None)
+    for result in results:
+        df['point_id'].append(result.id)
+        if result.payload:
+            df['payload'].append(json.dumps(result.payload))
+        else:
+            df['payload'].append(None)
+        if result.vector:
+            df['vectors'].append(json.dumps(result.vector))
+        else:
+            df['vectors'].append(None)
 
     return pd.DataFrame(df)

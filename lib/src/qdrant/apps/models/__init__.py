@@ -4,9 +4,13 @@ from qdrant_client.models import (
     TokenizerType,
     Filter,
     FieldCondition,
-    VectorsConfig,
+    VectorsConfig
 )
 from .qdrant import Qdrant
 from .query import Query
 from .update import Update
 from .delete import Delete
+from .filter_query import FilterQuery
+from .index import Index
+from .create import Create
+from .filter_delete import FilterDelete

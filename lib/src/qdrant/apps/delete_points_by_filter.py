@@ -4,32 +4,24 @@ import pandas as pd
 from malevich.square import DF, Context, processor, scheme
 from qdrant_client import QdrantClient
 
-from .models import Delete, Filter
+from .models import FilterDelete
 
 
 @scheme()
-class DeleteCollectionFilterMessage:
-    filter: str
-
-
-@scheme()
-class DeleteCollectionResponse:
+class DeletePointsResponse:
     status: str
 
 
 @processor()
 def delete_points_by_filter(
-    messages: DF[DeleteCollectionFilterMessage],
-    ctx: Context[Delete]
-) -> DF[DeleteCollectionResponse]:
+    ctx: Context[FilterDelete]
+) -> DF[DeletePointsResponse]:
     '''Create a collection in Qdrant.
 
 
     ## Input:
 
-        A dataframe consisting of columns:
-
-        - `filter` (str): JSON string of the filter for deletion.
+        None.
 
     ## Output:
 
@@ -42,6 +34,8 @@ def delete_points_by_filter(
 
         - `url`: str.
             URL location of your Qdrant DB.
+        - `filter`: dict.
+            Conditions for deletion.
         - `api_key`: str, default None.
             API key of your Qdrant DB.
         - `timeout`: int, default None.
@@ -83,19 +77,19 @@ def delete_points_by_filter(
     }
     collection_name = ctx.app_cfg.collection_name
     ordering = ctx.app_cfg.ordering
-    for message in messages.to_dict(orient='records'):
-        try:
-            df['status'].append(
-                str(
-                    qdrant_client.delete(
-                        collection_name=collection_name,
-                        points_selector=Filter(**json.loads(message['filter'])),
-                        ordering=ordering
-                    ).status
-                )
+    filter = ctx.app_cfg.filter
+    try:
+        df['status'].append(
+            str(
+                qdrant_client.delete(
+                    collection_name=collection_name,
+                    points_selector=filter,
+                    ordering=ordering
+                ).status
             )
-        except Exception as exc:
-            raise Exception(
-                'Failed to delete points.'
-            ) from exc
+        )
+    except Exception as exc:
+        raise Exception(
+            'Failed to delete points.'
+        ) from exc
     return pd.DataFrame(df)
