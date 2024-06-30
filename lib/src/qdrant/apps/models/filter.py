@@ -16,7 +16,7 @@ class Filter(BaseModel, extra="forbid"):
     should: Optional[list] = Field(
         default=None, description="At least one of those conditions should match"
     )
-    min_should: Optional["MinShould"] = Field(
+    min_should: Optional[MinShould] = Field(
         default=None, description="At least minimum amount of given conditions should match" # noqa:E501
     )
     must: Optional[list] = Field(default=None, description="All conditions must match")

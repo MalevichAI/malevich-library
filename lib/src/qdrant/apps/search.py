@@ -48,7 +48,7 @@ def search(
 
         - `url`: str.
             URL location of your Qdrant DB.
-        - `api_key`: str, default None.String representations of the vectors
+        - `api_key`: str, default None.
             API key of your Qdrant DB.
         - `timeout`: int, default None.
             Connection timeout in seconds.

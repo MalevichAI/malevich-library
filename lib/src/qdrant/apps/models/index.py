@@ -1,12 +1,10 @@
 from __future__ import annotations
 
-from enum import Enum
 from typing import Optional
 
 from malevich.square import scheme
 from pydantic import BaseModel, Field
 
-# from qdrant_client.models import IntegerIndexParams, SparseIndexParams, TextIndexParams
 from .qdrant import Qdrant
 
 
@@ -23,11 +21,11 @@ class SparseIndexParams(BaseModel, extra="forbid"):
 
     full_scan_threshold: Optional[int] = Field(
         default=None,
-        description="We prefer a full scan search upto (excluding) this number of vectors.  Note: this is number of vectors, not KiloBytes.",
+        description="We prefer a full scan search upto (excluding) this number of vectors.  Note: this is number of vectors, not KiloBytes.",  # noqa: E501
     )
     on_disk: Optional[bool] = Field(
         default=None,
-        description="Store index on disk. If set to false, the index will be stored in RAM. Default: false",
+        description="Store index on disk. If set to false, the index will be stored in RAM. Default: false",  # noqa: E501
     )
 
 class TextIndexParams(BaseModel, extra="forbid"):
@@ -35,7 +33,7 @@ class TextIndexParams(BaseModel, extra="forbid"):
     tokenizer: Optional[str] = Field(default=None, description="")
     min_token_len: Optional[int] = Field(default=None, description="")
     max_token_len: Optional[int] = Field(default=None, description="")
-    lowercase: Optional[bool] = Field(default=None, description="If true, lowercase all tokens. Default: true")
+    lowercase: Optional[bool] = Field(default=None, description="If true, lowercase all tokens. Default: true")  # noqa: E501
 
 
 @scheme()
