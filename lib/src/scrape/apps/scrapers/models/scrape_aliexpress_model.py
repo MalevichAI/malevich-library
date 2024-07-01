@@ -4,37 +4,18 @@
 from __future__ import annotations
 from malevich.square import scheme
 
-from typing import Any, Dict, List, Optional
+from typing import Optional
 
 from pydantic import BaseModel, Field
 
 
 @scheme()
 class ScrapeAliexpress(BaseModel):
-    allowed_domains: Optional[List[str]] = Field(
-        None, description='A list of allowed domains to scrape'
+    max_results: Optional[str] = Field(None, description='Max images to retrieve')
+    only_images: Optional[bool] = Field(False, description='Get only images DataFrame')
+    only_properties: Optional[bool] = Field(
+        False, description='Get only properties DataFrame'
     )
-    max_depth: Optional[int] = Field(
-        0, description='The maximum depth to traverse the web'
-    )
-    spider_cfg: Optional[Dict[str, Any]] = Field(
-        {}, description='A dictionary of configuration options for the spider'
-    )
-    max_results: Optional[int] = Field(
-        None, description='The maximum number of results to return'
-    )
-    timeout: Optional[int] = Field(
-        0,
-        description='The maximum number of seconds to wait for collecting responses from the spiders',
-    )
-    squash_results: Optional[bool] = Field(
-        False,
-        description='If set, the app will squash the results into a single string separated by the `squash_delimiter` option',
-    )
-    delimiter: Optional[str] = Field(
-        "'\n'",
-        description='The delimiter to use when squashing the results or when using independent crawl',
-    )
-    links_are_independent: Optional[bool] = Field(
-        False, description='If set, the app will crawl each link independently'
+    output_type: Optional[str] = Field(
+        'text', description="Format of text data. Either 'text' or 'json'"
     )
