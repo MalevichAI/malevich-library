@@ -1,17 +1,15 @@
-import json
 
 import pandas as pd
 from malevich.square import DF, Context, processor, scheme
 from qdrant_client import QdrantClient
 
-from .models import Qdrant
+from .models import Index
 
 
 @scheme()
 class CreateIndexMessage:
     name: str
     field: str
-    schema: str
 
 @scheme()
 class CreateIndexResponse:
@@ -20,7 +18,7 @@ class CreateIndexResponse:
 @processor()
 def create_index(
     messages: DF[CreateIndexMessage],
-    ctx: Context[Qdrant]
+    ctx: Context[Index]
 ) -> DF[CreateIndexResponse]:
     '''Create a collection in Qdrant.
 
@@ -81,6 +79,7 @@ def create_index(
     df = {
         'status': []
     }
+    schema = ctx.app_cfg.schema
     for message in messages.to_dict(orient='records'):
         try:
             df['status'].append(
@@ -88,7 +87,7 @@ def create_index(
                     qdrant_client.create_payload_index(
                         collection_name=message['name'],
                         field_name=message['field'],
-                        field_schema=json.loads(message['schema'])
+                        field_schema=schema
                     ).status
                 )
             )

@@ -4,41 +4,39 @@ import pandas as pd
 from malevich.square import DF, Context, processor, scheme
 from qdrant_client import QdrantClient
 
-from .models import Filter, Query
+from .models import FilterQuery
 
 
 @scheme()
-class SearchMessage:
-    vectors: str
-    filter: str
-    limit: int
+class SearchVectors:
+    name: str
+    vector: str
+
 
 @scheme()
 class SearchResponse:
-    query_id: int
     point_id: str | int
     score: float
     payload: str
     vectors: str
 
+
 @processor()
 def search(
-    messages: DF[SearchMessage],
-    ctx: Context[Query]
+    vectors: DF[SearchVectors],
+    ctx: Context[FilterQuery]
 ) -> DF:
     '''Search points with a vector from a collection in Qdrant.
 
     ## Input:
 
         A dataframe consisting of columns:
-        - `vectors` (str): String representations of the vectors.
-        - `filter` (str): Qdrant filters packed into dictionary.
-        - `limit` (int): Max responses returned.
+        - `name` (str): Name of the vector.
+        - `vector` (str): String representation of the vector.
 
     ## Output:
 
         A dataframe with columns:
-        - `query_id` (int): Index of the query in the input DF.
         - `point_id` (int): Index of the point in Qdrant.
         - `score` (float): Score of the suggested point.
         - `payload` (str): JSON columns with payload keys.
@@ -64,6 +62,10 @@ def search(
         - `with_payload`: list[str], default True.
             List of the payload columns to choose.
             If True, all vectors will be choose. If opposite, none will.
+        - `filter`: dict.
+            Native Qdrant filter for searching.
+        - `limit`: int, default 10.
+            How many points should the search return.
 
     ## Notes:
 
@@ -97,41 +99,47 @@ def search(
     collection_name = ctx.app_cfg.collection_name
     with_vectors = ctx.app_cfg.with_vectors
     with_payload = ctx.app_cfg.with_payload
+    query_filter = ctx.app_cfg.filter
+    limit = ctx.app_cfg.limit
     df = {
-        'query_id': [],
         'point_id': [],
         'score': [],
         'payload': [],
         'vectors': []
     }
+    if len(vectors) == 1 and vectors.name.iloc[0] == 'default':
+        vec_dict = eval(vectors.vector.iloc[0])
+    else:
+        vec_dict = {
+            vector['name'] : eval(vector['vector'])
+            for vector in vectors.to_dict(orient='records')
+        }
 
-    for query_id, message in enumerate(messages.to_dict(orient='records')):
-        try:
-            results = qdrant_client.search(
-                collection_name=collection_name,
-                query_vector=json.loads(message['vectors']),
-                query_filter=Filter(**json.loads(message['filter'])),
-                limit=message['limit'],
-                with_payload=with_payload,
-                with_vectors=with_vectors
-            )
-        except Exception:
-            raise ValueError(
-                '''`search` command failed!
-                Try fixing `filter` column or check `collection_name` in the config.
-                ''')
+    try:
+        results = qdrant_client.search(
+            collection_name=collection_name,
+            query_vector=vec_dict,
+            query_filter=query_filter.model_dump() if query_filter else None,
+            limit=limit,
+            with_payload=with_payload,
+            with_vectors=with_vectors
+        )
+    except Exception:
+        raise ValueError(
+            '''`search` command failed!
+            Try fixing `filter` config or check `collection_name` in the config.
+            ''')
 
-        for result in results:
-            df['query_id'].append(query_id)
-            df['point_id'].append(result.id)
-            df['score'].append(result.score)
-            if result.payload:
-                df['payload'].append(json.dumps(result.payload))
-            else:
-                df['payload'].append(None)
-            if result.vector:
-                df['vectors'].append(json.dumps(result.vector))
-            else:
-                df['vectors'].append(None)
+    for result in results:
+        df['point_id'].append(result.id)
+        df['score'].append(result.score)
+        if result.payload:
+            df['payload'].append(json.dumps(result.payload))
+        else:
+            df['payload'].append(None)
+        if result.vector:
+            df['vectors'].append(json.dumps(result.vector))
+        else:
+            df['vectors'].append(None)
 
     return pd.DataFrame(df)

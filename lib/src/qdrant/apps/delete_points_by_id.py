@@ -6,20 +6,20 @@ from .models import Delete
 
 
 @scheme()
-class DeleteCollectionPointsMessage:
+class DeletePointsIDMessage:
     id: str | int
 
 
 @scheme()
-class DeleteCollectionResponse:
+class DeletePointsResponse:
     status: str
 
 
 @processor()
 def delete_points_by_id(
-    messages: DF[DeleteCollectionPointsMessage],
+    messages: DF[DeletePointsIDMessage],
     ctx: Context[Delete]
-) -> DF[DeleteCollectionResponse]:
+) -> DF[DeletePointsResponse]:
     '''Create a collection in Qdrant.
 
     ## Input:

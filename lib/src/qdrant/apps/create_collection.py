@@ -1,44 +1,37 @@
-import json
 
 import pandas as pd
 from malevich.square import DF, Context, processor, scheme
 from qdrant_client import QdrantClient
 
-from .models import Distance, Qdrant, VectorParams
+from .models import Create
 
 
 @scheme()
 class CreateCollectionMessage:
     name: str
-    vector_size: str
-    distance: str
     on_disk: bool
-    hnsw_config: str | None
-    optimizer_config: str | None
-    wal_config: str | None
-    quantization_config: str | None
 
 
 @scheme()
 class CreateCollectionResponse:
     status: bool
 
+
 @processor()
 def create_collection(
     messages: DF[CreateCollectionMessage],
-    ctx: Context[Qdrant]
+    ctx: Context[Create]
 ) -> DF[CreateCollectionResponse]:
     '''Create a collection in Qdrant.
 
 
     ## Input:
 
-        A dataframe consisting of columns:
+        Consists of two dataframes:
 
+        `messages` (DF[CreateCollectionMessage]): A dataframe with columns.
         - `name` (str): Name of the collection.
-        - `vector_size` (str): JSON string of names and sizes of vectors in the collection.
-        - `distance` (str): Distance score metric (case insensitive).
-            Available metrics: `cosine`, `dot`, `manhattan`, `euclid`.
+        - `on_disk` (bool): Read from disk instead of storing in memory.
 
 
     ## Output:
@@ -52,12 +45,22 @@ def create_collection(
 
         - `url`: str.
             URL location of your Qdrant DB.
+        - `vectors`: dict.
+            Vector size parameters.
         - `api_key`: str, default None.
             API key of your Qdrant DB.
         - `timeout`: int, default None.
             Connection timeout in seconds.
         - `https`: bool, default None.
             Whether HTTPS connection is used.
+        - `hnsw_config`: dict, default None.
+            HNSW config.
+        - `optimizer_config`: dict, default None.
+            Optimizer config.
+        - `wal_config`: dict, default None.
+            WAL config.
+        - `quantization_config`: dict, default None.
+            Quantization config.
 
     ## Notes:
 
@@ -74,31 +77,6 @@ def create_collection(
     Returns:
         A dataframe of return statuses.
     '''  # noqa: E501
-
-    def json_or_none(x) -> dict | None:
-        """
-        Helper function for loading JSON string or returning None
-        """
-        return json.loads(x) if isinstance(x, str) else None
-
-    def get_enum(x: str) -> Distance:
-        """
-        Helper function for transforming strings into `Distance`
-        enum from `qdrant_client.models`
-        """
-        # Generate a dict where
-        # string representation is a key
-        # and Distance object is a value
-        keys = dict(
-            map(
-                lambda e: (str(e).lower(), e),
-                list(Distance)
-            )
-        )
-        if x.lower() not in keys:
-            raise KeyError(f'"{x.lower()}" is not a valid distance score')
-        return keys[x.lower()]
-
 
     client_url = ctx.app_cfg.url
     client_api_key = ctx.app_cfg.api_key
@@ -117,23 +95,24 @@ def create_collection(
     df = {
         'status': []
     }
+
+    vectors = ctx.app_cfg.vectors
+    hnsw_config = ctx.app_cfg.hnsw_config
+    optimizers_config = ctx.app_cfg.optimizers_config
+    wal_config = ctx.app_cfg.wal_config
+    quantization_config = ctx.app_cfg.quantization_config
+
     for message in messages.to_dict(orient='records'):
         try:
             df['status'].append(
                 qdrant_client.create_collection(
                     collection_name=message['name'],
-                    vectors_config={
-                        name : VectorParams(
-                                size=size,
-                                distance=get_enum(message['distance']),
-                                on_disk=message['on_disk']
-                            )
-                        for name, size in json.loads(message['vector_size']).items()
-                    },
-                    hnsw_config=json_or_none(message['hnsw_config']),
-                    optimizers_config=json_or_none(message['optimizer_config']),
-                    wal_config=json_or_none(message['wal_config']),
-                    quantization_config=json_or_none(message['quantization_config'])
+                    vectors_config=vectors,
+                    hnsw_config=hnsw_config,
+                    optimizers_config=optimizers_config,
+                    wal_config=wal_config,
+                    quantization_config=quantization_config,
+                    on_disk_payload=message['on_disk'],
                 )
             )
         except Exception as exc:

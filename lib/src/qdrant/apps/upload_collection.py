@@ -8,34 +8,44 @@ from .models import Update
 
 
 @scheme()
-class UploadCollectionMessage:
-    vectors: str
-    payload: str | None
+class UploadIds:
     id: int | str | None
+
+@scheme()
+class UploadVectors:
+    name: str
+    vector: str
+
+@scheme()
+class UploadPayloads:
+    payload: str
 
 @scheme()
 class UploadCollectionResponse:
     status: bool
 
+
 @processor()
 def upload_collection(
-    messages: DF[UploadCollectionMessage],
+    ids: DF[UploadIds],
+    vectors: DF[UploadVectors],
+    payloads: DF[UploadPayloads],
     ctx: Context[Update]
 ) -> DF[UploadCollectionResponse]:
-    '''Upload points in Qdrant.
+    '''
+    Upload points in Qdrant.
 
     ## Input:
 
-        A dataframe consisting of columns:
-        - `vectors` (str): JSON string of the vectors.
-        - `payload` (str | None): JSON string of the payload.
-        - `id` (int | str | None): Distance score metric (case insensitive).
-            Available metrics: `cosine`, `dot`, `manhattan`, `euclid`.
+        Consists of three dataframes:
+        `ids` (DF[UploadIds]): ids for each point.
+
 
     ## Output:
 
         A dataframe with column:
         - `status` (bool): Status of the operation. If True, collection was successfully created.
+
 
     ## Configuration:
 
@@ -47,11 +57,20 @@ def upload_collection(
             Connection timeout in seconds.
         - `https`: bool, default None.
             Whether HTTPS connection is used.
+        - `use_vector_names`: bool, default True.
+            Set to False to omit vector names. Only works if amount of vectors is equal to amount of payloads.
+        - `use_ids`: bool, default True.
+            Set to False to let Qdrant assign ids to payloads. Ignores the data in `ids` dataframe.
 
 
     ## Notes:
 
-        If any element in `ids` is None, no other values will be passed.
+        IMPORTANT: Make sure that lenghts of dataframes are matched correctly.
+        If `ids` and `payloads` have a length of <LENGTH>, then `vectors` should have a length of <NUM_VEC> * <LENGTH>, and each vector name should repeat exactly <LENGTH> times.
+
+        ALSO IMPORTANT: Please set payloads for every point you add, empty JSON string works as well.
+
+        If any element in `ids` is None, the dataframe will be ignored (same as `use_ids=False`).
 
     -----
 
@@ -62,6 +81,21 @@ def upload_collection(
     Returns:
         A dataframe of return statuses.
     ''' # noqa:E501
+
+    def validate_vectors(length: int, use_names: bool = True) -> None:
+        if use_names:
+            lens = vectors.groupby(by=['name']).count()
+            assert lens.nunique() == 1, "Vector names in the dataframe are mismatched!"
+            assert lens.iloc[0, 0] == length, "Length of vectors does not match the length of payloads!" # noqa:E501
+        else:
+            assert len(vectors) == length, "`vectors` dataframe length mismatch!"
+
+    def validate_ids(length: int, use_ids: bool = True) -> None:
+        if use_ids:
+            assert len(ids) == length, "`ids` dataframe length mismatch!"
+
+    def join_by(series, delim=',') -> str:
+        return delim.join(series)
 
     client_url = ctx.app_cfg.url
     client_api_key = ctx.app_cfg.api_key
@@ -83,38 +117,47 @@ def upload_collection(
     collection_name = ctx.app_cfg.collection_name
     batch_size = ctx.app_cfg.batch_size
     parallel = ctx.app_cfg.parallel
-    vectors = [
-        json.loads(message)
-        for message in messages['vectors'].to_list()
-    ]
-    if not all(vectors):
-        raise Exception('Please set at least one of the vectors to a correct value for every point') # noqa:E501
-    payloads = [
-        json.loads(message) if isinstance(message, str) else None
-        for message in messages['payload'].to_list()
-    ]
-    if payloads.count(None) > 0:
-        if payloads.count(None) == len(payloads):
-            payloads = None
-        else:
-            raise Exception('Please set all of the `payload` either to None or to a correct JSON string') # noqa:E501
-    ids = [
-        message if not isinstance(message, float) else None
-        for message in messages['id'].to_list()
-    ]
-    # If one of the ids is None, we should not pass any
-    # since it would break `upload_collection`
-    if ids.count(None) > 0:
-        if ids.count(None) == len(ids):
-            ids = None
-        else:
-            raise Exception('Please set all of the `id` either to None or to a correct id') # noqa:E501
+    # If there are any ids that are None, we just omit them
+    use_ids = ctx.app_cfg.use_ids and not ids.isna().any()
+    use_vector_names = ctx.app_cfg.use_vector_names
+
+    num_points = len(payloads)
+    # Validate dimensions before transforming the data into a readable format
+    validate_vectors(num_points, use_vector_names)
+    validate_ids(num_points, use_ids)
+    # Evil groupby magic, do not attempt at home
+    # FIXME: probably not very efficient either, waiting for JSON to happen
+    # Aggregate over the name,
+    if use_vector_names:
+        vec_grouped = vectors.groupby(
+            by=['name']
+        ).agg(
+        # concatenate vector strings,
+            lambda x: join_by(x, '|')
+        # transform to dict over by index
+        ).to_dict(orient='index')
+        # Split and evaluate vector strings
+        vec_grouped = {
+            name : list(map(eval, value['vector'].split('|')))
+            for name, value in vec_grouped.items()
+        }
+        # Reformat into subsequent vector items, suitable for `upload_collection()`
+        vecs = [
+            {
+                name : vector[i]
+                for name, vector in vec_grouped.items()
+            }
+            for i in range(num_points)
+        ]
+    else:
+        vecs = list(map(eval, vectors['vector'].to_list()))
+    # Transform payloads while we are at it
     try:
         qdrant_client.upload_collection(
             collection_name=collection_name,
-            vectors=vectors,
-            payload=payloads,
-            ids=ids,
+            vectors=vecs,
+            payload=list(map(json.loads, payloads['payload'].to_list())),
+            ids=ids if use_ids else None,
             batch_size=batch_size,
             parallel=parallel
         )

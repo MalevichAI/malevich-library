@@ -9,9 +9,11 @@ from .models import Qdrant
 class GetCollectionInfoMessage:
     name: str
 
+
 @scheme()
 class GetCollectionInfoResponse:
     info: str
+
 
 @processor()
 def get_collection_info(

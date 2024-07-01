@@ -9,9 +9,11 @@ from .models import Qdrant
 class DeleteCollectionMessage:
     name: str
 
+
 @scheme()
 class DeleteCollectionResponse:
     status: bool
+
 
 @processor()
 def delete_collection(
