@@ -107,15 +107,19 @@ def search(
         'payload': [],
         'vectors': []
     }
-    vec_dict = {
-        vector['name'] : eval(vector['vector'])
-        for vector in vectors.to_dict(orient='records')
-    }
+    if len(vectors) == 1 and vectors.name.iloc[0] == 'default':
+        vec_dict = eval(vectors.vector.iloc[0])
+    else:
+        vec_dict = {
+            vector['name'] : eval(vector['vector'])
+            for vector in vectors.to_dict(orient='records')
+        }
+
     try:
         results = qdrant_client.search(
             collection_name=collection_name,
             query_vector=vec_dict,
-            query_filter=query_filter,
+            query_filter=query_filter.model_dump() if query_filter else None,
             limit=limit,
             with_payload=with_payload,
             with_vectors=with_vectors

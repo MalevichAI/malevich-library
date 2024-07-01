@@ -94,14 +94,13 @@ def scroll(
 
     df = {
         'point_id': [],
-        'score': [],
         'payload': [],
         'vectors': []
     }
     try:
-        results = qdrant_client.scroll(
+        results, _ = qdrant_client.scroll(
             collection_name=collection_name,
-            scroll_filter=query_filter,
+            scroll_filter=query_filter.model_dump(),
             limit=limit,
             with_payload=with_payload,
             with_vectors=with_vectors
