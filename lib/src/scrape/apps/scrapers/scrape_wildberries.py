@@ -1,3 +1,4 @@
+import json
 import os
 import re
 from hashlib import sha256
@@ -117,9 +118,12 @@ def scrape_wildberries(
     ## Configuration:
         - max_results: int, default 3.
             The amount of images to retrieve.
+        - output_type: str, default 'text'.
+            Format of text data. Either 'text' or 'json'.
     -----
     """  # noqa: E501
     max_results = context.app_cfg.get('max_results', 3)
+    output_type = context.app_cfg.get('output_type', 'text')
     text_df = []
     image_df = []
     props_df = []
@@ -138,17 +142,22 @@ def scrape_wildberries(
                     props_df.append(
                         [link, kvs[i].strip('\n '), kvs[i+1].strip('\n ')]
                     )
-
+        json_dict = {}
         text = ""
         title = sel.xpath("//h1[contains(@class, 'title')]/text()").get()
-        if title:
-            text += f"Title:\n{title}\n\n"
+        json_dict['title'] = title
+        text += f"Title:\n{title}\n\n"
         desc= sel.xpath(
             '//section[contains(@class, "description")]/*[@class="option__text"]/text()'
         ).get()
-        if desc:
-            text += f"Description:\n{desc}"
-        text_df.append([link, text])
+        json_dict['description'] = desc
+        text += f"Description:\n{desc}"
+        text_df.append(
+            [
+                link,
+                text if output_type != 'json' else json.dumps(json_dict)
+            ]
+        )
 
         images = sel.xpath('//ul[contains(@class, "swiper")]//img[contains(@src, "https://")]/@src').getall()
         for i in range(0, min(max_results, len(images))):
