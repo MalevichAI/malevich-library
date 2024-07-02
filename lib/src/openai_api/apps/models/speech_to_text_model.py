@@ -2,10 +2,10 @@
 #   filename:  speech_to_text_model.json
 
 from __future__ import annotations
+from malevich.square import scheme
 
 from typing import Optional
 
-from malevich.square import scheme
 from pydantic import BaseModel, Field
 
 
