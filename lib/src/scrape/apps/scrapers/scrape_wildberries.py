@@ -50,7 +50,7 @@ def get_page_wb(df: DF, ctx: Context):
         DF with files.
     """
     driver: Chrome = ctx.common
-    driver.execute_cdp_cmd(cmd="Network.clearBrowserCache")
+    driver.execute_cdp_cmd(cmd="Network.clearBrowserCache", cmd_args={})
     wait = WebDriverWait(driver, 2)
 
     outs = []
