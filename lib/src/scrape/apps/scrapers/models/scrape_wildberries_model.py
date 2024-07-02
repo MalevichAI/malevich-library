@@ -14,3 +14,6 @@ class ScrapeWildberries(BaseModel):
     max_results: Optional[int] = Field(
         3, description='The amount of images to retrieve'
     )
+    output_type: Optional[str] = Field(
+        'text', description="Format of text data. Either 'text' or 'json'"
+    )

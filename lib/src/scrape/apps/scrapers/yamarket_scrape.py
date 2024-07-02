@@ -101,9 +101,12 @@ def scrape_yamarket(df: DF, ctx: Context[ScrapeYamarket]):
     ## Configuration:
         - max_results: int, default 3.
             The amount of images to retrieve.
+        - output_type: str, default 'text'.
+            Format of text data. Either 'text' or 'json'.
     -----
     """  # noqa: E501
     max_results = ctx.app_cfg.get('max_results', 3)
+    output_type = ctx.app_cfg.get('output_type', 'text')
     text_df = []
     image_df = []
     props_df = []
@@ -113,18 +116,24 @@ def scrape_yamarket(df: DF, ctx: Context[ScrapeYamarket]):
         page = open(ctx.get_share_path(row['filename'])).read()
         sel = scrapy.Selector(text=page)
         text = ""
+        json_dict = {}
 
         title = sel.xpath("//h1[@data-additional-zone='title']/text()").get()
-        if title:
-            text += f"Title:\n{title}\n\n"
+        text += f"Title:\n{title}\n\n"
+        json_dict['title'] = title
         desc = sel.xpath(
             'normalize-space(//div[contains(@data-zone-name, "ProductDescription")]'
             '//div[text()]/text())'
         ).get()
-        if desc:
-            text += f"Description:\n{desc}"
+        text += f"Description:\n{desc}"
+        json_dict['description'] = desc
 
-        text_df.append([link, text])
+        text_df.append(
+            [
+                link,
+                json.dumps(json_dict) if output_type == 'json' else text
+            ]
+        )
 
         alls = json.loads(
             sel.xpath(
@@ -134,8 +143,8 @@ def scrape_yamarket(df: DF, ctx: Context[ScrapeYamarket]):
         )
 
         try:
-            alls = alls['collections']['fullSpecs']
-            for k, v in alls.items():
+            alls: dict = alls['collections']['fullSpecs']
+            for v in alls.values():
                 if 'specItems' in v:
                     for item in v['specItems']:
                         props_df.append([link, item['name'], item['value']])
