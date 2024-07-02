@@ -50,8 +50,13 @@ def get_page_wb(df: DF, ctx: Context):
         DF with files.
     """
     driver: Chrome = ctx.common
-    driver.get('chrome://settings/clearBrowserData')
-    driver.find_element(by=By.XPATH, value='//settings-ui').send_keys(Keys.ENTER)
+    driver.execute(
+        driver_command='SEND_COMMAND',
+        params={
+            'cmd':'Network.clearBrowserCache',
+            'params':{}
+        }
+    )
     wait = WebDriverWait(driver, 2)
 
     outs = []
