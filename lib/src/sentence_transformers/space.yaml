@@ -1,0 +1,17 @@
+sentence_transformers:
+  name: SentenceTransformers
+  description: Use Transformer LLMs from HuggingFace
+  visibility:
+    - public
+  tags:
+    - LLM
+    - NLP
+    - Transformers
+    - Text Embeddings
+  designed_for_use_case:
+    - title: Encode text data
+  repo_url: https://github.com/MalevichAI/malevich-library/tree/dev/lib/src/sentence_transformers
+  app:
+    container_ref: public.ecr.aws/o1z1g3t0/scrape
+    container_user: null
+    container_token: null
