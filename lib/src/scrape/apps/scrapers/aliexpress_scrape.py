@@ -55,7 +55,7 @@ def scrape_aliexpress(
 
     ## Configuration:
 
-        - max_results: str, default None.
+        - max_results: int, default None.
             Max images to retrieve.
         - only_images: bool, default False.
             Get only images DataFrame.
