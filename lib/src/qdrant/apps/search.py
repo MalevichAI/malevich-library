@@ -4,7 +4,7 @@ import pandas as pd
 from malevich.square import DF, Context, processor, scheme
 from qdrant_client import QdrantClient
 
-from .models import FilterQuery
+from .models import SearchQuery
 
 
 @scheme()
@@ -24,7 +24,7 @@ class SearchResponse:
 @processor()
 def search(
     vectors: DF[SearchVectors],
-    ctx: Context[FilterQuery]
+    ctx: Context[SearchQuery]
 ) -> DF:
     '''Search points with a vector from a collection in Qdrant.
 
@@ -66,6 +66,8 @@ def search(
             Native Qdrant filter for searching.
         - `limit`: int, default 10.
             How many points should the search return.
+        - `score_threshold`: float, default 0.
+            Score threshold.
 
     ## Notes:
 
@@ -101,6 +103,8 @@ def search(
     with_payload = ctx.app_cfg.with_payload
     query_filter = ctx.app_cfg.filter
     limit = ctx.app_cfg.limit
+    score_threshold = ctx.app_cfg.score_threshold
+
     df = {
         'point_id': [],
         'score': [],
@@ -122,7 +126,8 @@ def search(
             query_filter=query_filter.model_dump() if query_filter else None,
             limit=limit,
             with_payload=with_payload,
-            with_vectors=with_vectors
+            with_vectors=with_vectors,
+            score_threshold=score_threshold
         )
     except Exception:
         raise ValueError(
