@@ -56,10 +56,8 @@ def get_page_wb(df: DF, ctx: Context):
     options.add_argument("--headless")
     options.add_argument("--disable-blink-features=AutomationControlled")
     options.add_argument(f"--user-agent={UserAgent(browsers=['chrome']).random}")  # noqa: E501
-    ctx.common = Chrome(options)
-    driver: Chrome = ctx.common
-    driver.get('chrome://settings/clearBrowserData')
-    driver.find_element(by=By.XPATH, value='//settings-ui').send_keys(Keys.ENTER)
+    driver = Chrome(options)
+    driver.execute_cdp_cmd(cmd="Network.clearBrowserCache", cmd_args={})
     wait = WebDriverWait(driver, 2)
 
     outs = []
