@@ -58,7 +58,6 @@ class Response:
         self.url = url
         self.captcha = captcha
 
-@init(prepare=True)
 def init_driver(ctx: Context):
     options = webdriver.ChromeOptions()
     options.add_argument("--no-sandbox")
