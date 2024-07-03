@@ -1,5 +1,3 @@
-from .models import ScrapeYamarket
-from .models import ScrapeYamarketApi
 import json
 
 import pandas as pd

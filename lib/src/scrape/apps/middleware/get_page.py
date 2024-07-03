@@ -7,7 +7,7 @@ import pandas as pd
 import requests
 import scrapy
 from fake_useragent import UserAgent
-from malevich.square import APP_DIR, DF, Context, init, processor, scheme
+from malevich.square import APP_DIR, DF, Context, processor, scheme
 from pydantic import BaseModel
 from selenium import webdriver
 from selenium.common.exceptions import (
