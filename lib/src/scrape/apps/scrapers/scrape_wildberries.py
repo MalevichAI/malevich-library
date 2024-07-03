@@ -5,11 +5,11 @@ from hashlib import sha256
 
 import pandas as pd
 import scrapy
+from fake_useragent import UserAgent
 from malevich.square import APP_DIR, DF, Context, processor
 from selenium.common.exceptions import TimeoutException
-from selenium.webdriver import Chrome
+from selenium.webdriver import Chrome, ChromeOptions
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.ui import WebDriverWait
 
@@ -49,9 +49,15 @@ def get_page_wb(df: DF, ctx: Context):
     Returns:
         DF with files.
     """
-    driver: Chrome = ctx.common
-    driver.get('chrome://settings/clearBrowserData')
-    driver.find_element(by=By.XPATH, value='//settings-ui').send_keys(Keys.ENTER)
+    options = ChromeOptions()
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--ignore-certificate-errors")
+    options.add_argument("--headless")
+    options.add_argument("--disable-blink-features=AutomationControlled")
+    options.add_argument(f"--user-agent={UserAgent(browsers=['chrome']).random}")  # noqa: E501
+    driver = Chrome(options)
+    driver.execute_cdp_cmd(cmd="Network.clearBrowserCache", cmd_args={})
     wait = WebDriverWait(driver, 2)
 
     outs = []

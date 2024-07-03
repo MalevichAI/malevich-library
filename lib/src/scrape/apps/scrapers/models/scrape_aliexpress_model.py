@@ -11,7 +11,7 @@ from pydantic import BaseModel, Field
 
 @scheme()
 class ScrapeAliexpress(BaseModel):
-    max_results: Optional[str] = Field(None, description='Max images to retrieve')
+    max_results: Optional[int] = Field(None, description='Max images to retrieve')
     only_images: Optional[bool] = Field(False, description='Get only images DataFrame')
     only_properties: Optional[bool] = Field(
         False, description='Get only properties DataFrame'
