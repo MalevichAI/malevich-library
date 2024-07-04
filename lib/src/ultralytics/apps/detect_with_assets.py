@@ -1,6 +1,5 @@
 import os
 
-
 import cv2
 import pandas as pd
 from malevich.square import APP_DIR, DF, Context, processor, scheme
