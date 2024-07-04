@@ -42,10 +42,19 @@ class XpathSpider(scrapy.Spider):
             count = cfg.get('count', None)
             if self.type == 'text' and self._include_keys:
                 data.append(cfg['key'])
-            try:
-                data.extend(selector.xpath(cfg['xpath']).getall()[:count])
-            except KeyError:
-                data.extend(selector.css(cfg['css']).getall()[:count])
+            if 'xpath' in cfg:
+                path = cfg['xpath']
+                if not isinstance(path, list):
+                    path = [path]
+                for p in path:
+                    data.extend(selector.xpath(p).getall()[:count])
+            else:
+                path = cfg['css']
+                if not isinstance(path, list):
+                    path = [path]
+                for p in path:
+                    data.extend(selector.css(p).getall()[:count])
+
             for i in range(len(data)):
                 if cfg.get('join_url', False):
                     if self._include_keys and i == 0:
