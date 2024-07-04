@@ -103,7 +103,7 @@ jobs:
             docker build -q -t $image_url/$name:$commit_sha -f $build_file $build_context || { echo "::warning::Failed to build ${name}" ; errors+=("${name}") ; continue ;}
             if [[ ${{ secrets.REGISTRY_TYPE}} == ecr* ]];
             then
-              echo "Finding/Creating AWS repository"
+              echo "Finding/Creating AWS repository for ${name}"
               if [[ ${{ secrets.REGISTRY_TYPE}} == "ecr" ]];
               then
                 aws ecr-public describe-repositories --repository-names $name > /dev/null || \
@@ -123,11 +123,9 @@ jobs:
               echo "::warning::${name} has no space.yaml"
             fi
 
-            echo -n "Testing ${name} "  
+            echo -n "Reporting ${name} "  
             if [[ ${{ secrets.IMAGE_USERNAME }} == "$(cat USERNAME)" ]] && [[ ${{ secrets.IMAGE_PASSWORD}} == "$(cat PASSWORD)" ]];
             then
-              echo "with credentials"
-              echo "::debug::Commit Message - $(git log --format=%B -1 $commit_sha)"
               space ci report ./$dir ${{ steps.extract_branch.outputs.branch }} \
               $commit_sha "$(git log --format=%B -1 $commit_sha)" done \
               $image_url/$name:$commit_sha \
@@ -135,8 +133,6 @@ jobs:
               --space-username=${{ secrets.SPACE_USERNAME }} --space-password=${{ secrets.SPACE_PASSWORD }} --space-org=${{ secrets.ORG_ID }} \
               ${{ secrets.API_URL }} || { echo "::warning::Failed to report" ; errors+=("${name}") ;}
             else
-              echo "without credentials"
-              echo "::debug::Commit Message - $(git log --format=%B -1 $commit_sha)"
               space ci report ./$dir ${{ steps.extract_branch.outputs.branch }} \
               $commit_sha "$(git log --format=%B -1 $commit_sha)" done \
               $image_url/$name:$commit_sha \
