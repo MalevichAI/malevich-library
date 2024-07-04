@@ -101,7 +101,6 @@ jobs:
           for dir in $dirs
           do
             dir=lib/src/$dir
-            echo $dir
             name=$(basename $dir)
             if [[ "$dir" != *.* ]] && [[ -e "$dir" ]] && [[ -f "$dir/Dockerfile" ]]; 
             then
