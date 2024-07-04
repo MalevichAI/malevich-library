@@ -57,7 +57,7 @@ class XpathSpider(scrapy.Spider):
 
             for i in range(len(data)):
                 if cfg.get('join_url', False):
-                    if self._include_keys and i == 0:
+                    if self.type == 'text' and self._include_keys and i == 0:
                         continue
                     data[i] = urljoin(response.url, data[i])
                 else:
