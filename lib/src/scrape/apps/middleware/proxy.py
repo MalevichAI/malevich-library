@@ -15,8 +15,7 @@ CRAWLBASE_CFG = {
     'ajax_wait': 2000
 }
 SCRAPE_CFG = {
-    'render': 'true',
-    'device_type': 'desktop'
+    'render': 'true'
 }
 
 @scheme()
