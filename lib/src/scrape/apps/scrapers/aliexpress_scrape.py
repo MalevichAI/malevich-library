@@ -86,7 +86,7 @@ def scrape_aliexpress(
         file = open(context.get_share_path(row['filename'])).read()
         sel = scrapy.Selector(Response(file, link))
 
-        title = ' '.join(sel.xpath('//h1/text()').get())
+        title = sel.xpath('//h1/text()').get()
         description = "" + sel.xpath(
             "normalize-space(string(//div[@id = 'content_anchor']))"
         ).get()
