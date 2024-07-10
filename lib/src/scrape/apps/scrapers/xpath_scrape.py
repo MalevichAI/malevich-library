@@ -290,11 +290,11 @@ def scrape_by_selectors(
 
     procs, ids = run_spider(scrape_links, context)
     results = []
+    disjoint = {}
     timeout = context.app_cfg.get('timeout', 15)
 
-    if output_type == 'disjoint':
-        disjoint = {}
-        for component in components:
+    for component in components:
+        if component.get('disjoint', False) or context.app_cfg.get('output_type') == 'disjoint':
             disjoint[component['key']] = []
 
     for proc_, _id in zip(procs, ids):
@@ -313,42 +313,32 @@ def scrape_by_selectors(
             if max_results == 0:
                 max_results = len(df)
 
-            if output_type == 'disjoint':
-                for item in islice(df, max_results):
-                    data = json.loads(item['text'])
-                    link = item['url']
-                    for key, val in data.items():
-                        for v in val:
+            for item in islice(df, max_results):
+                data = json.loads(item['text'])
+                link = item['url']
+                for i, (key, val) in enumerate(data.items()):
+                    for v in val:
+                        if key in disjoint:
                             disjoint[key].append(
                                 [
                                     link,
                                     v
                                 ]
                             )
-
-            elif output_type == 'single_table':
-                for item in islice(df, max_results):
-                    data = json.loads(item['text'])
-                    link = item['url']
-                    for i, (key, val) in enumerate(data.items()):
-                        for v in val:
+                        else:
                             results.append([i, link, key, v])
 
-            else:
-                for item in islice(df, max_results):
-                    results.append([item['url'], item['text']])
+    if results:
+        res_df = pd.DataFrame(
+            results,
+            columns=['idx', 'link', 'key', 'value']
+            if output_type == 'single_table' else ['link', 'result']
+        )
 
-    if output_type == 'disjoint':
-        ret = [
-            pd.DataFrame(
-                val,
-                columns=['link', key]
-            ) for key, val in disjoint.items()
+        return [res_df] + [
+            pd.DataFrame(v, columns=['link', k]) for k, v in disjoint.items()
         ]
-        return ret
-
-    return pd.DataFrame(
-        results,
-        columns=['idx', 'link', 'key', 'value']
-        if output_type == 'single_table' else ['link', 'result']
-    )
+    else:
+        return [
+            pd.DataFrame(v, columns=['link', k]) for k, v in disjoint.items()
+        ]
