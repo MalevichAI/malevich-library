@@ -1,4 +1,3 @@
-import json
 import os
 import re
 from hashlib import sha256
@@ -75,7 +74,7 @@ def get_page_wb(df: DF, ctx: Context):
             )
             wait.until(
                 expected_conditions.presence_of_element_located(
-                    (By.XPATH, '//div[contains(@class, "description")]')
+                    (By.XPATH, '//section[contains(@class, "product-details__description")]')  # noqa: E501
                 )
             )
         except TimeoutException:
@@ -129,8 +128,6 @@ def scrape_wildberries(
     -----
     """  # noqa: E501
     max_results = context.app_cfg.get('max_results', 3)
-    output_type = context.app_cfg.get('output_type', 'text')
-    text_df = []
     image_df = []
     props_df = []
 
@@ -138,6 +135,51 @@ def scrape_wildberries(
         link = row['link']
         page = open(context.get_share_path(row['filename'])).read()
         sel = scrapy.Selector(text=page)
+        props_df.append(
+            [
+                link,
+                'title',
+                sel.xpath("//h1[contains(@class, 'title')]/text()").get()
+            ]
+        )
+        props_df.append(
+            [
+                link,
+                'description',
+                sel.xpath(
+                    '//section[contains(@class, "description")]'
+                    '/*[@class="option__text"]/text()'
+                ).get()
+            ]
+        )
+        props_df.append(
+            [
+                link,
+                'internal_pim_id',
+                sel.xpath(
+                    '//div[@class="product-page"]//table//td[1]/span/text()'
+                ).get()
+            ]
+        )
+        props_df.append(
+            [
+                link,
+                'brand',
+                sel.xpath(
+                    "//div[@class='product-page__header']/a/text()"
+                ).get()
+            ]
+        )
+        props_df.append(
+            [
+                link,
+                'price',
+                sel.xpath(
+                    "//div[contains(@class, 'aside')]"
+                    "//span[contains(@class, 'price')]/ins/text()"
+                ).get().strip()
+            ]
+        )
         prop_row = sel.xpath('//tbody').getall()
         for pr in prop_row:
             props = scrapy.Selector(text=pr).xpath('string(//tbody)').get()
@@ -148,29 +190,12 @@ def scrape_wildberries(
                     props_df.append(
                         [link, kvs[i].strip('\n '), kvs[i+1].strip('\n ')]
                     )
-        json_dict = {}
-        text = ""
-        title = sel.xpath("//h1[contains(@class, 'title')]/text()").get()
-        json_dict['title'] = title
-        text += f"Title:\n{title}\n\n"
-        desc= sel.xpath(
-            '//section[contains(@class, "description")]/*[@class="option__text"]/text()'
-        ).get()
-        json_dict['description'] = desc
-        text += f"Description:\n{desc}"
-        text_df.append(
-            [
-                link,
-                text if output_type != 'json' else json.dumps(json_dict)
-            ]
-        )
 
         images = sel.xpath('//ul[contains(@class, "swiper")]//img[contains(@src, "https://")]/@src').getall()
         for i in range(0, min(max_results, len(images))):
             image_df.append([link, images[i]])
 
-    return (
-        pd.DataFrame(text_df, columns=['link', 'text']),
+    return [
         pd.DataFrame(image_df, columns=['link', 'image']),
         pd.DataFrame(props_df, columns=['link', 'key', 'value'])
-    )
+    ]
