@@ -294,7 +294,7 @@ def scrape_by_selectors(
     timeout = context.app_cfg.get('timeout', 15)
 
     for component in components:
-        if component.get('disjoint', False) or context.app_cfg.get('output_type') == 'disjoint':
+        if component.get('disjoint', False) or context.app_cfg.get('output_type') == 'disjoint':  # noqa: E501
             disjoint[component['key']] = []
 
     for proc_, _id in zip(procs, ids):
