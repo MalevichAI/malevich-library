@@ -155,7 +155,7 @@ def scrape_yamarket(df: DF, ctx: Context[ScrapeYamarket]):
                 'brand',
                 sel.xpath(
                     "//nav[@itemscope]/div[last()]//span/text()"
-                )
+                ).get()
             ]
         )
         alls = json.loads(
