@@ -74,7 +74,7 @@ def get_page_wb(df: DF, ctx: Context):
             )
             wait.until(
                 expected_conditions.presence_of_element_located(
-                    (By.XPATH, '//section[contains(@class, "product-details__description")]')  # noqa: E501
+                    (By.XPATH, '//p[@class = "option__text"]')  # noqa: E501
                 )
             )
         except TimeoutException:
@@ -147,8 +147,7 @@ def scrape_wildberries(
                 link,
                 'description',
                 sel.xpath(
-                    '//section[contains(@class, "description")]'
-                    '/*[@class="option__text"]/text()'
+                    '//p[@class = "option__text"]/text()'
                 ).get()
             ]
         )
