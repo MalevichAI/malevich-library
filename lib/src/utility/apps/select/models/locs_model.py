@@ -18,6 +18,10 @@ class Locs(BaseModel):
     columns: Optional[List[str]] = Field(
         None, description='The columns to be extracted'
     )
+    columns_expr: Optional[List[str]] = Field(
+        None,
+        description='The list of expressions to retrieve columns. Each expression is in form `start:(end):(skip)`. Examples: 0:, :10, 0:10, 0::2, 0:10:2.',
+    )
     column_idx: Optional[int] = Field(
         None, description='The column index to be extracted'
     )
@@ -29,6 +33,10 @@ class Locs(BaseModel):
     row_idx: Optional[int] = Field(None, description='The row index to be extracted')
     row_idxs: Optional[List[int]] = Field(
         None, description='The row indexes to be extracted'
+    )
+    rows_expr: Optional[List[str]] = Field(
+        None,
+        description='The list of expressions to retrieve rows. Each expression is in form `start:(end):(skip)`. Examples: 0:, :10, 0:10, 0::2, 0:10:2.',
     )
     unique: Optional[bool] = Field(
         False,
