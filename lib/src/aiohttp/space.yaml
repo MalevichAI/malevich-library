@@ -1,0 +1,16 @@
+aiohttp:
+  name: aiohttp
+  description: |
+    Asynchronous HTTP requests
+  visibility:
+    - public
+  tags:
+    - Backend
+  designed_for_use_case:
+    - title: HTTP requests
+  icon: null
+  repo_url: https://github.com/MalevichAI/malevich-library/tree/dev/lib/src/aiohttp
+  app:
+    container_ref: public.ecr.aws/o1z1g3t0/aiohttp
+    container_user: null
+    container_token: null
