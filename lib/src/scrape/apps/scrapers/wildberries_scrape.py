@@ -4,9 +4,10 @@ from hashlib import sha256
 
 import pandas as pd
 import scrapy
+from fake_useragent import UserAgent
 from malevich.square import APP_DIR, DF, Context, processor
 from selenium.common.exceptions import TimeoutException
-from selenium.webdriver import Chrome
+from selenium.webdriver import Chrome, ChromeOptions
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.ui import WebDriverWait
@@ -47,7 +48,15 @@ def get_page_wb(df: DF, ctx: Context):
     Returns:
         DF with files.
     """
-    driver: Chrome = ctx.common
+    options = ChromeOptions()
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--ignore-certificate-errors")
+    options.add_argument("--headless")
+    options.add_argument("--disable-blink-features=AutomationControlled")
+    options.add_argument(f"--user-agent={UserAgent(browsers=['chrome']).random}")  # noqa: E501
+    driver = Chrome(options)
+    driver.execute_cdp_cmd(cmd="Network.clearBrowserCache", cmd_args={})
     wait = WebDriverWait(driver, 2)
 
     outs = []
@@ -65,7 +74,7 @@ def get_page_wb(df: DF, ctx: Context):
             )
             wait.until(
                 expected_conditions.presence_of_element_located(
-                    (By.XPATH, '//div[contains(@class, "description")]')
+                    (By.XPATH, '//p[@class = "option__text"]')  # noqa: E501
                 )
             )
         except TimeoutException:
@@ -114,10 +123,11 @@ def scrape_wildberries(
     ## Configuration:
         - max_results: int, default 3.
             The amount of images to retrieve.
+        - output_type: str, default 'text'.
+            Format of text data. Either 'text' or 'json'.
     -----
     """  # noqa: E501
     max_results = context.app_cfg.get('max_results', 3)
-    text_df = []
     image_df = []
     props_df = []
 
@@ -125,6 +135,50 @@ def scrape_wildberries(
         link = row['link']
         page = open(context.get_share_path(row['filename'])).read()
         sel = scrapy.Selector(text=page)
+        props_df.append(
+            [
+                link,
+                'title',
+                sel.xpath("//h1[contains(@class, 'title')]/text()").get()
+            ]
+        )
+        props_df.append(
+            [
+                link,
+                'description',
+                sel.xpath(
+                    '//p[@class = "option__text"]/text()'
+                ).get()
+            ]
+        )
+        props_df.append(
+            [
+                link,
+                'internal_pim_id',
+                sel.xpath(
+                    '//div[@class="product-page"]//table//td[1]/span/text()'
+                ).get()
+            ]
+        )
+        props_df.append(
+            [
+                link,
+                'brand',
+                sel.xpath(
+                    "//div[@class='product-page__header']/a/text()"
+                ).get()
+            ]
+        )
+        props_df.append(
+            [
+                link,
+                'price',
+                sel.xpath(
+                    "//div[contains(@class, 'aside')]"
+                    "//span[contains(@class, 'price')]/ins/text()"
+                ).get().strip()
+            ]
+        )
         prop_row = sel.xpath('//tbody').getall()
         for pr in prop_row:
             props = scrapy.Selector(text=pr).xpath('string(//tbody)').get()
@@ -136,23 +190,11 @@ def scrape_wildberries(
                         [link, kvs[i].strip('\n '), kvs[i+1].strip('\n ')]
                     )
 
-        text = ""
-        title = sel.xpath("//h1[contains(@class, 'title')]/text()").get()
-        if title:
-            text += f"Title:\n{title}\n\n"
-        desc= sel.xpath(
-            '//section[contains(@class, "description")]/*[@class="option__text"]/text()'
-        ).get()
-        if desc:
-            text += f"Description:\n{desc}"
-        text_df.append([link, text])
-
         images = sel.xpath('//ul[contains(@class, "swiper")]//img[contains(@src, "https://")]/@src').getall()
         for i in range(0, min(max_results, len(images))):
             image_df.append([link, images[i]])
 
-    return (
-        pd.DataFrame(text_df, columns=['link', 'text']),
+    return [
         pd.DataFrame(image_df, columns=['link', 'image']),
         pd.DataFrame(props_df, columns=['link', 'key', 'value'])
-    )
+    ]

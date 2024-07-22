@@ -101,10 +101,11 @@ def scrape_yamarket(df: DF, ctx: Context[ScrapeYamarket]):
     ## Configuration:
         - max_results: int, default 3.
             The amount of images to retrieve.
+        - output_type: str, default 'text'.
+            Format of text data. Either 'text' or 'json'.
     -----
     """  # noqa: E501
     max_results = ctx.app_cfg.get('max_results', 3)
-    text_df = []
     image_df = []
     props_df = []
 
@@ -112,20 +113,51 @@ def scrape_yamarket(df: DF, ctx: Context[ScrapeYamarket]):
         link = row['link']
         page = open(ctx.get_share_path(row['filename'])).read()
         sel = scrapy.Selector(text=page)
-        text = ""
 
-        title = sel.xpath("//h1[@data-additional-zone='title']/text()").get()
-        if title:
-            text += f"Title:\n{title}\n\n"
-        desc = sel.xpath(
-            'normalize-space(//div[contains(@data-zone-name, "ProductDescription")]'
-            '//div[text()]/text())'
-        ).get()
-        if desc:
-            text += f"Description:\n{desc}"
-
-        text_df.append([link, text])
-
+        props_df.append(
+            [
+                link,
+                'title',
+                sel.xpath("//h1[@data-additional-zone='title']/text()").get()
+            ]
+        )
+        props_df.append(
+            [
+                link,
+                'description',
+                sel.xpath(
+                    'normalize-space(//div[contains(@data-zone-name, "ProductDescription")]'  # noqa: E501
+                    '//div[text()]/text())'
+                ).get()
+            ]
+        )
+        props_df.append(
+            [
+                link,
+                'price',
+                sel.xpath(
+                    '//h3[@data-auto]/text()'
+                ).get()
+            ]
+        )
+        props_df.append(
+            [
+                link,
+                'internal_pim_id',
+                sel.xpath(
+                    "//div[@data-auto='specs-list-minimal']//button/following-sibling::span/text()"
+                ).get()
+            ]
+        )
+        props_df.append(
+            [
+                link,
+                'brand',
+                sel.xpath(
+                    "//nav[@itemscope]/div[last()]//span/text()"
+                ).get()
+            ]
+        )
         alls = json.loads(
             sel.xpath(
                 '//div[contains(@data-apiary-widget-name, "SpecsList")]'
@@ -134,8 +166,8 @@ def scrape_yamarket(df: DF, ctx: Context[ScrapeYamarket]):
         )
 
         try:
-            alls = alls['collections']['fullSpecs']
-            for k, v in alls.items():
+            alls: dict = alls['collections']['fullSpecs']
+            for v in alls.values():
                 if 'specItems' in v:
                     for item in v['specItems']:
                         props_df.append([link, item['name'], item['value']])
@@ -152,8 +184,7 @@ def scrape_yamarket(df: DF, ctx: Context[ScrapeYamarket]):
         for i in range(min(max_results, len(images))):
             image_df.append([link, images[i]])
 
-    return (
-        pd.DataFrame(text_df, columns=['link', 'text']),
+    return [
         pd.DataFrame(image_df, columns=['link', 'image']),
         pd.DataFrame(props_df, columns=['link', 'key', 'value'])
-    )
+    ]

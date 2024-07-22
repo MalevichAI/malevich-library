@@ -36,7 +36,7 @@ def create_embeddings(
         - `model`: str, default 'all-MiniLM-L6-v2'.
             Transformer model to use.
         - `mode`: str, default 'sentence_embedding'.
-            Type of embedding. Values: 'sentence_embedding', 'token_embedding'
+            Type of embedding. Values: 'sentence_embedding', 'token_embedding'.
 
     -----
 

@@ -14,3 +14,4 @@ from .filter_query import FilterQuery
 from .index import Index
 from .create import Create
 from .filter_delete import FilterDelete
+from .search_query import SearchQuery
