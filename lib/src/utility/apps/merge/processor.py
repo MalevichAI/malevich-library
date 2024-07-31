@@ -1,7 +1,7 @@
 from typing import Any, List
 
 import pandas as pd
-from malevich.square import DF, Context, Sink, processor
+from malevich.square import DF, Context, Doc, Docs, Sink, processor
 
 from .models import Merge
 
@@ -106,3 +106,10 @@ def merge(dfs: Sink[Any], context: Context[Merge]):
         The merged dataframe
     """  # noqa: E501
     return merge_dfs(list(iter(dfs)), context)
+
+
+@processor()
+def merge_docs(docs: Sink[Doc]) -> Docs:
+    """Combines multiple documents into a list"""
+    return list(iter(docs))
+
