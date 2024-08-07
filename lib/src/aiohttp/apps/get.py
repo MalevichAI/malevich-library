@@ -7,7 +7,7 @@ from ..models import Connection, RequestScheme, ResponseScheme, Requests
 
 @processor()
 async def get(
-    requests: Doc[RequestScheme | Requests],
+    requests: Doc[RequestScheme],
     session_headers: Doc,
     context: Context[Connection]
 ) -> Doc[ResponseScheme]:
