@@ -1,5 +1,5 @@
 import aiohttp
-from malevich.square import Doc, Context, processor, scheme
+from malevich.square import Doc, Docs, Context, processor, scheme
 from pydantic import BaseModel
 import asyncio
 from ..models import Connection, RequestScheme, ResponseScheme, Requests
@@ -7,7 +7,7 @@ from ..models import Connection, RequestScheme, ResponseScheme, Requests
 
 @processor()
 async def patch(
-    requests: Doc[RequestScheme],
+    requests: Docs[RequestScheme],
     session_headers: Doc,
     context: Context[Connection]
 ) -> Doc[ResponseScheme]:
@@ -18,30 +18,18 @@ async def patch(
         headers=session_headers.parse(), 
         conn_timeout=cfg.timeout
     ) as session:
-        rq = requests.parse()
-        if isinstance(rq, RequestScheme):
+        rq = requests.parse(recurse=True)
+        for r in rq:
             async with session.patch(
-                rq.request.format(**rq.path_kwargs) if rq.path_kwargs else rq.request, 
-                json=rq.body, 
-                params=rq.query, 
-                headers=rq.headers
+                r.request.format(**r.path_kwargs) if r.path_kwargs else r.request, 
+                json=r.body, 
+                params=r.query, 
+                headers=r.headers
             ) as resp:
                 result = await resp.json()
                 if resp.status != 200:
                     raise Exception(f'Status code: {resp.status}, response: {resp.reason}')
                 results.append(result)
-        else:
-            for r in rq.requests:
-                async with session.patch(
-                    r.request.format(**r.path_kwargs) if r.path_kwargs else r.request, 
-                    json=rq.body, 
-                    params=rq.query, 
-                    headers=rq.headers
-                ) as resp:
-                    result = await resp.json()
-                    if resp.status != 200:
-                        raise Exception(f'Status code: {resp.status}, response: {resp.reason}')
-                    results.append(result)
-                if cfg.interval:
-                    await asyncio.sleep(cfg.interval)
+            if cfg.interval:
+                await asyncio.sleep(cfg.interval)
     return ResponseScheme(responses=results) if len(results) > 1 else ResponseScheme(responses=results[0])
