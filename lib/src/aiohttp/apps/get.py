@@ -18,7 +18,7 @@ async def get(
         headers=session_headers.parse(), 
         conn_timeout=cfg.timeout
     ) as session:
-        rq = requests.parse(recurse=True)
+        rq = requests.parse(recursive=True)
         for r in rq:
             async with session.get(
                 r.request.format(**r.path_kwargs) if r.path_kwargs else r.request, 

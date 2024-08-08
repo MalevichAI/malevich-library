@@ -6,10 +6,10 @@ from typing import Optional
 @scheme()
 class RequestScheme(BaseModel):
     request: str
-    path_kwargs: dict | None
-    body: dict | None
-    query: dict | None
-    headers: dict | None
+    path_kwargs: dict | None = None
+    body: dict | None = None
+    query: dict | None = None
+    headers: dict | None = None
 
 @scheme()
 class Requests(BaseModel):
