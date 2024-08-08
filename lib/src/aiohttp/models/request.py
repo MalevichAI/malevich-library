@@ -7,7 +7,7 @@ from typing import Optional
 class RequestScheme(BaseModel):
     request: str
     path_kwargs: dict | None = None
-    body: dict | None = None
+    body: list[dict] | dict | None = None
     query: dict | None = None
     headers: dict | None = None
 
