@@ -38,29 +38,30 @@ def run(func: OBJ, data: Docs, context: Context) -> Docs:
         for d in final_data:
             local_safe_run(fn, d, data_param)
             outputs.append(local_safe_run(fn, d, data_param, context, config_param))
-    else:
-        outputs = local_safe_run(fn, final_data, data_param, context, config_param)
 
-    for i in range(len(outputs)):
-        if not isinstance(outputs[i], dict):
-            context.logger.warn(
-                f"Function {fn.__name__} returned a non-dict type. "
-                "The processor expects a dict as output."
-            )
-            if map_to_dict:
-                try:
-                    context.logger.warn("Trying to map the output to a dict.")
-                    outputs[i] = outputs[i].__dict__
-                except Exception:
-                    raise ValueError(
-                        f"Function {fn.__name__} returned a non-dict type and could "
-                        "not be mapped to a dict."
-                    )
-            else:
-                raise ValueError(
+        for i in range(len(outputs)):
+            if not isinstance(outputs[i], dict):
+                context.logger.warn(
                     f"Function {fn.__name__} returned a non-dict type. "
                     "The processor expects a dict as output."
                 )
+                if map_to_dict:
+                    try:
+                        context.logger.warn("Trying to map the output to a dict.")
+                        outputs[i] = outputs[i].__dict__
+                    except Exception:
+                        raise ValueError(
+                            f"Function {fn.__name__} returned a non-dict type and could "
+                            "not be mapped to a dict."
+                        )
+                else:
+                    raise ValueError(
+                        f"Function {fn.__name__} returned a non-dict type. "
+                        "The processor expects a dict as output."
+                    )
+    else:
+        outputs = local_safe_run(fn, final_data, data_param, context, config_param)
 
+    print(type(outputs), len(outputs))
     return outputs
 
