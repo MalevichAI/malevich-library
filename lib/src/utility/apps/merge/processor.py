@@ -1,7 +1,7 @@
 from typing import Any, List
 
 import pandas as pd
-from malevich.square import DF, Context, Sink, processor
+from malevich.square import DF, Context, Docs, Sink, processor
 
 from .models import Merge
 
@@ -106,3 +106,34 @@ def merge(dfs: Sink[Any], context: Context[Merge]):
         The merged dataframe
     """  # noqa: E501
     return merge_dfs(list(iter(dfs)), context)
+
+
+@processor()
+def merge_doc(single_docs: Sink) -> Docs:
+    """Combines multiple documents into a list
+
+    ## Input:
+        An arbitrary number of documents to be merged.
+
+    ## Output:
+        A list of documents containing all the input documents.
+
+    ## Notes:
+        The documents are merged in the order they are received.
+        Conflicts in keys will raise an error.
+
+    ## Configuration:
+        No configuration is available for this processor.
+    -----
+    """
+    merged = {}
+    for doc_list in single_docs:
+        for doc in doc_list:
+            for key, value in doc.items():
+                if key in merged:
+                    if merged[key] != value:
+                        raise ValueError(f"Conflict in merging documents. Key: {key}")
+                else:
+                    merged[key] = value
+    return merged
+
