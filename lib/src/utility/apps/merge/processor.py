@@ -129,7 +129,7 @@ def merge_doc(single_docs: Sink) -> Docs:
     merged = {}
     for doc_list in single_docs:
         for doc in doc_list:
-            for key, value in doc.items():
+            for key, value in doc.dict().items():
                 if key in merged:
                     if merged[key] != value:
                         raise ValueError(f"Conflict in merging documents. Key: {key}")
