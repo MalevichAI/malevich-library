@@ -72,4 +72,4 @@ def subset(dfs: DFS[M[Any]], context: Context[Subset]):
     if len(result) == 1:
         return result[0]
 
-    return result
+    return tuple(*result)
