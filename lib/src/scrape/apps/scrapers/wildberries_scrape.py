@@ -194,7 +194,7 @@ def scrape_wildberries(
         for i in range(0, min(max_results, len(images))):
             image_df.append([link, images[i]])
 
-    return [
+    return (
         pd.DataFrame(image_df, columns=['link', 'image']),
         pd.DataFrame(props_df, columns=['link', 'key', 'value'])
-    ]
+    )
