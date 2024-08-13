@@ -1,8 +1,10 @@
-import aiohttp
-from malevich.square import Doc, Docs, Context, processor, scheme
-from pydantic import BaseModel
 import asyncio
-from ..models import Connection, RequestScheme, ResponseScheme, Requests
+
+from malevich.square import Context, Doc, Docs, processor
+
+import aiohttp
+
+from ..models import Connection, RequestScheme, ResponseScheme
 
 
 @processor()
@@ -27,9 +29,19 @@ async def patch(
                 headers=r.headers
             ) as resp:
                 result = await resp.json()
-                if resp.status != 200:
-                    raise Exception(f'Status code: {resp.status}, response: {resp.reason}')
+                if not resp.ok:
+                    if cfg.raise_on_error:
+                        raise Exception(
+                            f'Status code: {resp.status}, response: {resp.reason}'
+                        )
+                    else:
+                        context.logger.error(
+                            f'Status code: {resp.status}, response: {resp.reason}'
+                        )
                 results.append(result)
             if cfg.interval:
                 await asyncio.sleep(cfg.interval)
-    return ResponseScheme(responses=results) if len(results) > 1 else ResponseScheme(responses=results[0])
+
+    return ResponseScheme(
+        responses=results[0]
+    ) if len(results) == 1 else ResponseScheme(responses=results)
