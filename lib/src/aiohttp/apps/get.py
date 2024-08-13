@@ -32,5 +32,5 @@ async def get(
                 results.append(result)
             if cfg.interval:
                 await asyncio.sleep(cfg.interval)
-    return ResponseScheme(responses=results) if len(results) > 1 else ResponseScheme(responses=results[0])
+    return ResponseScheme(responses=results) if len(results) != 1 else ResponseScheme(responses=results[0])
 

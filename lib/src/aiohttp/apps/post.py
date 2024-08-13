@@ -13,9 +13,10 @@ async def post(
 ) -> Doc[ResponseScheme]:
     cfg = context.app_cfg
     results = []
+    headers = session_headers.parse()
     async with aiohttp.ClientSession(
         cfg.base_url,
-        headers=session_headers.parse(), 
+        headers=headers if headers else None, 
         conn_timeout=cfg.timeout
     ) as session:
         rq = requests.parse(recursive=True)
@@ -32,4 +33,4 @@ async def post(
                 results.append(result)
             if cfg.interval:
                 await asyncio.sleep(cfg.interval)
-    return ResponseScheme(responses=results) if len(results) > 1 else ResponseScheme(responses=results[0])
+    return ResponseScheme(responses=results) if len(results) != 1 else ResponseScheme(responses=results[0])
