@@ -1,6 +1,7 @@
+import copy
 from typing import Any
 
-from malevich.square import DF, Context, processor
+from malevich.square import Doc, DF, Context, processor
 
 
 @processor()
@@ -42,3 +43,23 @@ def rename(df: DF[Any], context: Context):
         DataFrame with renamed columns.
     """
     return df.rename(columns=context.app_cfg)
+
+
+@processor()
+def rename_doc(doc: Doc, context: Context) -> Doc:
+    doc = doc.dict()
+    patch = {}
+    for old, new in context.app_cfg.items():
+        if old in doc:
+            patch[new] = copy.copy(doc[old])
+        elif not old.startswith('__'):
+            context.logger.warn(f"Column {old} not found in the document.")
+
+    for old, new in context.app_cfg.items():
+        if old in doc:
+            del doc[old]
+
+    return {
+        **doc,
+        **patch
+    }

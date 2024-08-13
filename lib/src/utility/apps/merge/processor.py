@@ -1,7 +1,7 @@
 from typing import Any, List
 
 import pandas as pd
-from malevich.square import DF, Context, Docs, Sink, processor
+from malevich.square import DF, Context, Docs, Doc, Sink, processor, scheme
 
 from .models import Merge
 
@@ -136,4 +136,16 @@ def merge_doc(single_docs: Sink) -> Docs:
                 else:
                     merged[key] = value
     return merged
+
+
+@scheme()
+class DocsKey:
+    key: str
+
+@processor()
+def label_docs(docs: Docs, context: Context[DocsKey]) -> Doc:
+    """Converts a list of documents to a dictionary with a single key"""
+    return {
+        context.app_cfg.key: [doc.dict() for doc in docs]
+    }
 
