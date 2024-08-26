@@ -19,7 +19,7 @@ def search(document: Doc, context: Context[JMESPathExpression]) -> Docs:
         A document containing results of queries. See Configuration.
 
     ## Configuration:
-        - `expression`: str, required.
+        - `expression`: string.
             A JMESPath expression to extract data from the document.
             See https://jmespath.org/tutorial.html
 
@@ -83,7 +83,7 @@ def insert(source: Doc, target: Docs, context: Context) -> Docs:
         substited with a result of the query.
 
     ## Configuration:
-        - `query_marker`: str, default "::".
+        - `query_marker`: string, default "::".
             A marker that denotes a query.
 
     -----

@@ -27,9 +27,11 @@ def reorient_one(document: Doc, context: Context[Reorient]) -> Doc:
         A document with a different orientation.
 
     ## Configuration:
-        - `orientation`: str, required.
+        - `orientation`: string.
             The orientation of the document.
             Possible values: "column_index", "columns", "index".
+
+    -----
     """
     return pd.DataFrame(document.dict()).to_dict(context.app_cfg.orientation)
 
@@ -50,9 +52,11 @@ def reorient_many(documents: Docs, context: Context[Reorient]) -> Docs:
         A list of documents with a different orientation.
 
     ## Configuration:
-        - `orientation`: str, required.
+        - `orientation`: string.
             The orientation of the document.
             Possible values: "column_index", "columns", "index".
+
+    -----
     """
     return [
         pd.DataFrame(document.dict()).to_dict(context.app_cfg.orientation)
@@ -76,7 +80,7 @@ def reorient_records(records: Docs, context: Context[Reorient]) -> Doc:
         A document with a different orientation.
 
     ## Configuration:
-        - `orientation`: str, required.
+        - `orientation`: string.
             The orientation of the document.
             Possible values: "column_index", "columns", "index".
 
