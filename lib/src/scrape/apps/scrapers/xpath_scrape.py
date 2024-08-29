@@ -1,8 +1,13 @@
 import json
 import os
 from itertools import islice
+from urllib.parse import urljoin
 
 import pandas as pd
+import requests
+import scrapy
+import scrapy.http
+
 from apps.scrape_web import run_spider
 from malevich.square import DF, Context, processor, scheme
 from pydantic import BaseModel
@@ -333,6 +338,108 @@ def scrape_by_selectors(
             results,
             columns=['idx', 'link', 'key', 'value']
             if output_type == 'single_table' else ['link', 'result']
+        )
+
+        return [res_df] + [
+            pd.DataFrame(v, columns=['link', k]) for k, v in disjoint.items()
+        ]
+    else:
+        return [
+            pd.DataFrame(v, columns=['link', k]) for k, v in disjoint.items()
+        ]
+
+@processor()
+def scrape_by_selectors_no_spider(
+    scrape_links: DF[ScrapeLinksXpath],
+    context: Context[ScrapeBySelectors]
+):
+    '''
+    ## Input:
+
+    ## Output:
+
+    -----
+    '''
+    components: list[dict] = context.app_cfg.get('components', [])
+    type_ = context.app_cfg.get('output_type', 'json')
+    include_keys = context.app_cfg.get('include_keys', False)
+    output_delim = context.app_cfg.get('output_delim', ' ')
+
+    results = []
+    disjoint = {}
+
+    for component in components:
+            if component.get('disjoint', False) or context.app_cfg.get('output_type') == 'disjoint':  # noqa: E501
+                disjoint[component['key']] = []
+
+    for link in scrape_links['link'].to_list():
+        selector = scrapy.Selector(text=requests.get(link).content.decode())
+        outputs = {} if type_ != 'text' else []
+
+        for cfg in components:
+            data = []
+            count = cfg.get('count', None)
+            if type_ == 'text' and include_keys:
+                data.append(cfg['key'])
+            if 'xpath' in cfg:
+                path = cfg['xpath']
+                if not isinstance(path, list):
+                    path = [path]
+                for p in path:
+                    data.extend(selector.xpath(p).getall()[:count])
+            else:
+                path = cfg['css']
+                if not isinstance(path, list):
+                    path = [path]
+                for p in path:
+                    data.extend(selector.css(p).getall()[:count])
+
+            for i in range(len(data)):
+                if cfg.get('join_url', False):
+                    if type_ == 'text' and include_keys and i == 0:
+                        continue
+                    data[i] = urljoin(link, data[i])
+                else:
+                    data[i] = data[i].replace('\n', '\\n')
+                    data[i] = data[i].replace('\t', '\\t')
+
+            if type_ != 'text':
+                outputs[cfg['key']] = data
+            else:
+                if include_keys:
+                    outputs.append(
+                        f'{data[0]}\n' +
+                        f'{output_delim}'.join(data[1:])
+                    )
+                else:
+                    outputs.append(
+                        f'{output_delim}'.join(data)
+                    )
+        if type_ != 'text':
+            data = outputs
+        else:
+            data = {'text': '\n\n'.join(outputs), 'url': link}
+
+        if type_ == 'single_table':
+            for i, (key, val) in enumerate(data.items()):
+                for v in val:
+                    if key in disjoint:
+                        disjoint[key].append(
+                            [
+                                link,
+                                v
+                            ]
+                        )
+                    else:
+                        results.append([i, link, key, v])
+        else:
+            results.append([link, data['text']])
+
+    if results:
+        res_df = pd.DataFrame(
+            results,
+            columns=['idx', 'link', 'key', 'value']
+            if type_ == 'single_table' else ['link', 'result']
         )
 
         return [res_df] + [
