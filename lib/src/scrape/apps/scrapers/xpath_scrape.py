@@ -380,6 +380,8 @@ def scrape_by_selectors_no_spider(
             data = []
             count = cfg.get('count', None)
             offset = cfg.get('offset', 0)
+            if count is not None:
+                count = count + offset
             template = cfg.get('template', None)
             if type_ == 'text' and include_keys:
                 data.append(cfg['key'])
