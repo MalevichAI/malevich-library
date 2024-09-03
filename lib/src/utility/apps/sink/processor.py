@@ -1,6 +1,6 @@
 from typing import Any
 
-from malevich.square import DF
+from malevich.square import DF, DFS, Context, M, Sink, processor
 
 
 #@processor()
@@ -87,3 +87,12 @@ def sink_five(_d1: DF[Any], _d2: DF[Any], _d3: DF[Any], _d4: DF[Any], _d5: DF[An
         A collection of dataframes.
     """
     return _d1, _d2, _d3, _d4, _d5
+
+@processor()
+def sink(dfs: Sink[DFS[M[Any]]], context: Context):
+    res = []
+    for m in dfs:
+        for df_s in m:
+            for df in df_s:
+                res.append(df)
+    return res
