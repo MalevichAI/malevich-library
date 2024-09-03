@@ -379,6 +379,8 @@ def scrape_by_selectors_no_spider(
         for cfg in components:
             data = []
             count = cfg.get('count', None)
+            offset = cfg.get('offset', 0)
+            template = cfg.get('template', None)
             if type_ == 'text' and include_keys:
                 data.append(cfg['key'])
             if 'xpath' in cfg:
@@ -386,13 +388,21 @@ def scrape_by_selectors_no_spider(
                 if not isinstance(path, list):
                     path = [path]
                 for p in path:
-                    data.extend(selector.xpath(p).getall()[:count])
+                    if template is not None:
+                        for t in cfg['template']:
+                            data.extend(selector.xpath(p.format(TEMPLATE=t)).getall()[offset:count])
+                    else:
+                        data.extend(selector.xpath(p).getall()[offset:count])
             else:
                 path = cfg['css']
                 if not isinstance(path, list):
                     path = [path]
                 for p in path:
-                    data.extend(selector.css(p).getall()[:count])
+                    if template is not None:
+                        for t in cfg['template']:
+                            data.extend(selector.xpath(p.format(TEMPLATE=t)).getall()[offset:count])
+                    else:
+                        data.extend(selector.css(p).getall()[offset:count])
 
             for i in range(len(data)):
                 if cfg.get('join_url', False):
@@ -416,12 +426,12 @@ def scrape_by_selectors_no_spider(
                         f'{output_delim}'.join(data)
                     )
         if type_ != 'text':
-            data = outputs
+            data_df = outputs
         else:
-            data = {'text': '\n\n'.join(outputs), 'url': link}
+            data_df = {'text': '\n\n'.join(outputs), 'url': link}
 
         if type_ == 'single_table':
-            for i, (key, val) in enumerate(data.items()):
+            for i, (key, val) in enumerate(data_df.items()):
                 for v in val:
                     if key in disjoint:
                         disjoint[key].append(
@@ -433,7 +443,7 @@ def scrape_by_selectors_no_spider(
                     else:
                         results.append([i, link, key, v])
         else:
-            results.append([link, data['text']])
+            results.append([link, data_df['text']])
 
     if results:
         res_df = pd.DataFrame(
