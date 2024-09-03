@@ -1,7 +1,7 @@
 from typing import Any, List
 
 import pandas as pd
-from malevich.square import DF, Context, Docs, Doc, Sink, processor, scheme
+from malevich.square import DF, Context, Doc, Docs, M, Sink, processor, scheme
 
 from .models import Merge
 
@@ -46,7 +46,7 @@ def merge_dfs(dfs: List[DF[Any]], context: Context):
 
 
 @processor()
-def merge(dfs: Sink[Any], context: Context[Merge]):
+def merge(dfs: Sink[M[Any]], context: Context[Merge]):
     """Merges multiple dataframes into one
 
     ## Input:
@@ -105,7 +105,14 @@ def merge(dfs: Sink[Any], context: Context[Merge]):
     Returns:
         The merged dataframe
     """  # noqa: E501
-    return merge_dfs(list(iter(dfs)), context)
+    col = []
+    for df in dfs:
+        try:
+            col += list(iter(df))
+        except TypeError:
+            print(type(df), 'is not iterable')
+            col.append(df)
+    return merge_dfs(col, context)
 
 
 @processor()

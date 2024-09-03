@@ -89,7 +89,7 @@ def sink_five(_d1: DF[Any], _d2: DF[Any], _d3: DF[Any], _d4: DF[Any], _d5: DF[An
     return _d1, _d2, _d3, _d4, _d5
 
 @processor()
-def sink(dfs: Sink[M[Any]], context: Context):
+def sink(dfs: Sink[DFS[M[Any]]], context: Context):
     res = []
     for m in dfs:
         for df_s in m:
