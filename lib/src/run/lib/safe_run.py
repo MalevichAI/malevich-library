@@ -11,13 +11,20 @@ def local_safe_run(
     config: Context | None = None,
     config_param: inspect.Parameter | None = None
 ):
+    deps = config.app_cfg.get('dependencies', None)
     locals_ = {
         'data': data,
         'config': config,
     }
-    globals_ = {
-        'func': func,
-    }
+    if isinstance(deps, dict):
+        globals_ = {
+            'func': func,
+            **deps
+        }
+    else:
+        globals_ = {
+            'func': func
+        }
     if data_param.kind == inspect.Parameter.POSITIONAL_ONLY:
         if config_param is not None:
             return eval(f'func(data, {config_param.name}=config)', globals_, locals_)

@@ -49,7 +49,6 @@ def validate_output(output: Any, batched: bool):
                     f" the output at index {i} was {type(o)}, but expected dict or pd.DataFrame."  # noqa: E501
                 )
 
-
 @processor()
 def run(func: OBJ, data: Docs, context: Context) -> Docs:
     """Executes a local function on the provided data
@@ -83,6 +82,8 @@ def run(func: OBJ, data: Docs, context: Context) -> Docs:
         - `run_data_param`: str, default None.
             The name of the data parameter in the function.
             If None, the first parameter without a default value will be used.
+        - `dependencies`: list, default None
+            List of modules to import.
 
     -----
     Args:
