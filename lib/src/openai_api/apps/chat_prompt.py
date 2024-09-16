@@ -1,5 +1,5 @@
 import asyncio
-from typing import Any
+from typing import Any, Dict
 
 import pandas as pd
 from malevich.square import DF, Context, processor
@@ -106,10 +106,20 @@ async def prompt_completion(variables: DF[Any], ctx: Context[PromptCompletion]):
     system_prompt = ctx.app_cfg.get("system_prompt", "")
     user_prompt = ctx.app_cfg["user_prompt"]
 
+    def _get_user_prompt(variables: Dict[str, Any]) -> str:
+        if '$user_prompt' in variables and isinstance(variables['$user_prompt'], str) and variables['$user_prompt']:
+            return variables['$user_prompt'].format(**variables)
+        return user_prompt.format(**variables)
+
+    def _get_system_prompt(variables: Dict[str, Any]) -> str:
+        if '$system_prompt' in variables and isinstance(variables['$system_prompt'], str) and variables['$system_prompt']:
+            return variables['$system_prompt'].format(**variables)
+        return system_prompt.format(**variables)
+
     messages = [
         [
-            {"role": "system", "content": system_prompt.format(**_vars)},
-            {"role": "user", "content": user_prompt.format(**_vars)},
+            {"role": "system", "content": _get_system_prompt(_vars)},
+            {"role": "user", "content": _get_user_prompt(_vars)},
         ]
         for _vars in variables.to_dict(orient="records")
     ]
