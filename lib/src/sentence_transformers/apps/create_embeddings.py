@@ -17,7 +17,7 @@ def create_embeddings(
     texts: DF[CreateEmbeddingMessage],
     ctx: Context[Embedding]
 ):
-    """Create an assistant with OpenAI Chat Assistant feature.
+    """Create embeddings for text using SentenceTransformers.
 
     ## Input:
 
@@ -63,7 +63,7 @@ def create_embeddings(
         device=device
     )
 
-    inputs: list[str] = [var['text'] for var in texts.to_dict(orient='records')]
+    inputs: list[str] = texts.text.to_list()
     try:
         embeds: list[np.ndarray] = transformer.encode(
             sentences=inputs,
@@ -71,9 +71,7 @@ def create_embeddings(
             batch_size=batch_size
         )
     except Exception as exc:
-        print(exc)
-        embeds = []
-
+        raise Exception("Tranformer model failed to create embeddings") from exc
     for _response in embeds:
         df["embedding"].append(repr(_response.tolist()))
 

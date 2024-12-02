@@ -12,6 +12,6 @@ sentence_transformers:
     - title: Encode text data
   repo_url: https://github.com/MalevichAI/malevich-library/tree/dev/lib/src/sentence_transformers
   app:
-    container_ref: public.ecr.aws/o1z1g3t0/scrape
+    container_ref: public.ecr.aws/o1z1g3t0/sentence_transformers
     container_user: null
     container_token: null
